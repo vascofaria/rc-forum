@@ -2,7 +2,7 @@
  * »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
  * IST - RC 2019/2020
  *
- * file-manager.h
+ * question.h
  *
  * -------------------------------------------------------------------------------
  *
@@ -11,15 +11,28 @@
  * «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
  */
 
-#ifndef FILE_MANAGER_H
-#define FILE_MANAGER_H
+#ifndef QUESTION_H
+#define QUESTION_H
 
-// #include "../question.h"
+#define MAX_TITLE   10
+#define MAX_ANSWERS 10
 
-char **list_directory(char* path);
+typedef struct question {
+	char title[NAME];
+	char **answers;
+} question_t;
 
-char **get_topics();
-char **get_questions(char *topic_name);
-// question_t *get_question(char *topic_name, char *question_title);
+
+question_t* new_question(char title[MAX_TITLE], ) {
+	question_t *q = (question_t*) malloc(sizeof(question_t));
+	q->title = title;
+	q->answers = (char**) malloc(sizeof(char[MAX_TITLE]) * MAX_ANSWERS);
+	return q;
+}
+
+void delete_question(question_t* question) {
+	free(question_ptr->answers);
+	free(question_ptr);
+}
 
 #endif
