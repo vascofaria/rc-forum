@@ -18,46 +18,11 @@
 #define MAX_ARGS_N	 3
 #define MAX_ARGS_L   20
 
-/*
-void execute_command(char *line) {
-
-	char args[MAX_ARGS_N][MAX_ARGS_L];
-	int  num_tokens = sscanf(line, "%s %s %s %s %s", args[0], args[1], args[2], args[3], args[4]);
-
-	if (strcmp(args[0], "register") == 0 || strcmp(args[0], "reg") == 0) {
-		
-	}
-	else if (strcmp(args[0], "topic_list") == 0 || strcmp(args[0], "tl") == 0) {
-		
-	}
-	else if (strcmp(args[0], "topic_select") == 0 || strcmp(args[0], "ts") == 0) {
-		
-	}
-	else if (strcmp(args[0], "topic_propose") == 0 || strcmp(args[0], "tp") == 0) {
-		
-	}
-	else if (strcmp(args[0], "question_list") == 0 || strcmp(args[0], "ql") == 0) {
-		
-	}
-	else if (strcmp(args[0], "question_get") == 0 || strcmp(args[0], "qg") == 0) {
-		
-	}
-	else if (strcmp(args[0], "question_submit") == 0 || strcmp(args[0], "qs") == 0) {
-		
-	}
-	else if (strcmp(args[0], "answer_submit") == 0 || strcmp(args[0], "as") == 0) {
-		
-	}
-	else {
-		
-	}
-}*/
-
 int main(int argc, char const *argv[])
 {
 	int              		server_sock_udp, server_sock_tcp, client_sock_tcp, error_code, max_fd;
 	pid_t            		pid; 
-	struct addrinfo 	   *res, hints;
+	struct addrinfo 	   *res_tcp, *res_udp, hints;
 	char             		buffer[BUFFER_SIZE], *buffer_ptr;
 	socklen_t 		 		addrlen_udp, addrlen_tcp;
 	struct sockaddr_in      addr_udp, addr_tcp;
@@ -72,7 +37,7 @@ int main(int argc, char const *argv[])
 	hints.ai_flags    = AI_PASSIVE | AI_NUMERICSERV;
 	/*									                */
 
-	error_code = getaddrinfo(NULL, SERV, &hints, &res);
+	error_code = getaddrinfo(NULL, SERV, &hints, &res_udp);
 
 	if (error_code != 0) {
 		fprintf(stderr, "getaddrinfo failed: %s\n", gai_strerror(error_code));
@@ -80,7 +45,7 @@ int main(int argc, char const *argv[])
 	}
 
 	/* Socket UDP creation */
-	server_sock_udp = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+	server_sock_udp = socket(res_udp->ai_family, res_udp->ai_socktype, res_udp->ai_protocol);
 
 	if (server_sock_udp == -1) {
 		fprintf(stderr, "socket creation failed: %s\n", strerror(errno));
@@ -89,7 +54,7 @@ int main(int argc, char const *argv[])
 	/*			           */
 
 	/* Socket UDP bind */
-	error_code = bind(server_sock_udp, res->ai_addr, res->ai_addrlen);
+	error_code = bind(server_sock_udp, res_udp->ai_addr, res_udp->ai_addrlen);
 
 	if (error_code == -1) {
 		fprintf(stderr, "socket bind failed: %s\n", strerror(errno));
@@ -97,13 +62,11 @@ int main(int argc, char const *argv[])
 	}
 	/*                 */
 
-	freeaddrinfo(res);
-
 	/* Initialization of hints structure for socket TCP */
 	hints.ai_socktype = SOCK_STREAM;
 	/*                                                  */
 		
-	error_code = getaddrinfo(NULL, SERV, &hints, &res);
+	error_code = getaddrinfo(NULL, SERV, &hints, &res_tcp);
 
 	if (error_code != 0) {
 		fprintf(stderr, "getaddrinfo failed: %s\n", gai_strerror(error_code));
@@ -111,7 +74,7 @@ int main(int argc, char const *argv[])
 	}
 
 	/* Socket TCP creation */
-	server_sock_tcp = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+	server_sock_tcp = socket(res_tcp->ai_family, res_tcp->ai_socktype, res_tcp->ai_protocol);
 
 	if (server_sock_tcp == -1) {
 		fprintf(stderr, "socket creation failed: %s\n", strerror(errno));
@@ -120,7 +83,7 @@ int main(int argc, char const *argv[])
 	/*			           */
 
 	/* Socket TCP bind */
-	error_code = bind(server_sock_tcp, res->ai_addr, res->ai_addrlen);
+	error_code = bind(server_sock_tcp, res_tcp->ai_addr, res_tcp->ai_addrlen);
 
 	if (error_code == -1) {
 		fprintf(stderr, "socket bind failed: %s\n", strerror(errno));
@@ -136,8 +99,6 @@ int main(int argc, char const *argv[])
 		exit(EXIT_FAILURE);
 	}
 	/*                   */
-
-	freeaddrinfo(res);
 
 	max_fd = MAX(server_sock_udp, server_sock_tcp);
 
@@ -218,6 +179,7 @@ int main(int argc, char const *argv[])
 			/*                   */
 			write(1, "received: ", 10);
 			write(1, buffer, n);
+			write(1, "ola\n", 4);
 			/* write on client */
 			n = sendto(server_sock_udp, buffer, n, 0, (struct sockaddr *) &addr_udp, addrlen_udp);
 			if (n == -1) {
