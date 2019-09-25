@@ -107,7 +107,10 @@ int main(int argc, char const *argv[])
 		FD_SET(server_sock_tcp, &read_fds);
 		FD_SET(server_sock_udp, &read_fds);
 
-		error_code = select(max_fd + 1, &read_fds, (fd_set *) NULL, (fd_set *) NULL, (struct timeval *) NULL);
+		do {
+			error_code = select(max_fd + 1, &read_fds, (fd_set *) NULL, (fd_set *) NULL, (struct timeval *) NULL);
+		}
+		while (error_code == -1 && errno == EINTR);
 
 		if (error_code == -1) {
 			fprintf(stderr, "select failed: %s\n", strerror(errno));
@@ -118,13 +121,15 @@ int main(int argc, char const *argv[])
 		if (FD_ISSET(server_sock_tcp, &read_fds)) {
 			addrlen_tcp = sizeof(addr_tcp);
 
-			client_sock_tcp = accept(server_sock_tcp, (struct sockaddr *) &addr_tcp, &addrlen_tcp);
+			do {
+				client_sock_tcp = accept(server_sock_tcp, (struct sockaddr *) &addr_tcp, &addrlen_tcp);
+			} 
+			while (client_sock_tcp == -1 && errno == EINTR);
 
 			if (client_sock_tcp == -1) {
 				fprintf(stderr, "accept failed: %s\n", strerror(errno));
 				exit(EXIT_FAILURE);
 			}
-
 			pid = fork();
 
 			if (pid == -1) {
@@ -133,8 +138,17 @@ int main(int argc, char const *argv[])
 			}
 
 			else if (pid == 0) {
-				close(server_sock_tcp);
-				close(server_sock_udp);
+				error_code = close(server_sock_tcp);
+				if (error_code == -1) {
+					fprintf(stderr, "close failed: %s\n", strerror(errno));
+					exit(EXIT_FAILURE);
+				}
+
+				error_code = close(server_sock_udp);
+				if (error_code == -1) {
+					fprintf(stderr, "close failed: %s\n", strerror(errno));
+					exit(EXIT_FAILURE);
+				}
 
 				/* read from client */
 				n = read(client_sock_tcp, buffer, BUFFER_SIZE);
@@ -143,7 +157,7 @@ int main(int argc, char const *argv[])
 					exit(EXIT_FAILURE);
 				}
 				/*                  */
-
+				printf("%s\n", buffer);
 				/**
 				 * TODO: implement menu
 				 */
@@ -160,16 +174,34 @@ int main(int argc, char const *argv[])
 					buffer_ptr += n_write;
 				}
 				/*                 */
+
+				error_code = close(client_sock_tcp);
+				if (error_code == -1) {
+					fprintf(stderr, "close failed: %s\n", strerror(errno));
+					exit(EXIT_FAILURE);
+				}
+
+				exit(EXIT_FAILURE);
 			}
 
 			else {
+				do {
+					error_code = close(client_sock_tcp);
+				} 
+				while (error_code == -1 && errno == EINTR);
 
+				if (error_code == -1) {
+					fprintf(stderr, "close failed: %s\n", strerror(errno));
+					exit(EXIT_FAILURE);
+				}
 			}
 		}
 		/*                          */
 
 		/* Comunication by UDP socket */
 		if (FD_ISSET(server_sock_udp, &read_fds)) {
+			addrlen_udp = sizeof(addr_udp);
+
 			/* read from clients */
 			n = recvfrom(server_sock_udp, buffer, BUFFER_SIZE, 0, (struct sockaddr *) &addr_udp, &addrlen_udp);
 			if (n == -1) {
@@ -179,7 +211,6 @@ int main(int argc, char const *argv[])
 			/*                   */
 			write(1, "received: ", 10);
 			write(1, buffer, n);
-			write(1, "ola\n", 4);
 			/* write on client */
 			n = sendto(server_sock_udp, buffer, n, 0, (struct sockaddr *) &addr_udp, addrlen_udp);
 			if (n == -1) {

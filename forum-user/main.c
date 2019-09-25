@@ -62,7 +62,11 @@ static void executes_tcp_command(char *buffer, struct addrinfo *res_tcp) {
 	/* Read from server socket */
 	read(server_sock_tcp, buffer, BUFFER_SIZE);
 
-	close(server_sock_tcp);
+	error_code = close(server_sock_tcp);
+	if (error_code == -1) {
+		fprintf(stderr, "close failed: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
 }
 
 int main(int argc, char const *argv[])
@@ -108,9 +112,10 @@ int main(int argc, char const *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	printf("Enter command (? for help) : ");
 
 	while (1) {
+		printf("Enter command (? for help) : ");
+
 		/* reads from terminal */
 		buffer_ptr = fgets(buffer, BUFFER_SIZE, stdin);
 		if (buffer_ptr == NULL) {
@@ -124,69 +129,118 @@ int main(int argc, char const *argv[])
 
 		if (!strcmp(args[0], "register")             || 
 			!strcmp(args[0], "reg")) {
-				concatenate_args(buffer, "REG", args, num_tokens);
-				sendto(server_sock_udp, buffer, strlen(buffer), 0, (struct sockaddr *) res_udp->ai_addr, res_udp->ai_addrlen);
+				if (num_tokens == 2) {
+					concatenate_args(buffer, "REG", args, num_tokens);
+					sendto(server_sock_udp, buffer, strlen(buffer), 0, (struct sockaddr *) res_udp->ai_addr, res_udp->ai_addrlen);
+				}
+				else {
+					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
+				}
 		}
 		else if (!strcmp(args[0], "topic_list")      || 
 			     !strcmp(args[0], "tl")) {
-				concatenate_args(buffer, "LTP", args, num_tokens);
-				sendto(server_sock_udp, buffer, strlen(buffer), 0, (struct sockaddr *) res_udp->ai_addr, res_udp->ai_addrlen);
-			
+				if (num_tokens == 1) {
+					concatenate_args(buffer, "LTP", args, num_tokens);
+					sendto(server_sock_udp, buffer, strlen(buffer), 0, (struct sockaddr *) res_udp->ai_addr, res_udp->ai_addrlen);
+				}
+				else {
+					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
+				}
 		}
 		else if (!strcmp(args[0], "topic_select")    || 
 			     !strcmp(args[0], "ts")) {
-				concatenate_args(buffer, "LT", args, num_tokens);
-				sendto(server_sock_udp, buffer, strlen(buffer), 0, (struct sockaddr *) res_udp->ai_addr, res_udp->ai_addrlen);
-			
+				 /* this option dont comunicate with server */
+				if (num_tokens != 1) {
+					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
+				} 
 		}
 		else if (!strcmp(args[0], "topic_propose")   || 
 			     !strcmp(args[0], "tp")) {
-				concatenate_args(buffer, "PTP", args, num_tokens);
-				sendto(server_sock_udp, buffer, strlen(buffer), 0, (struct sockaddr *) res_udp->ai_addr, res_udp->ai_addrlen);
-
+				if (num_tokens == 2) {
+					concatenate_args(buffer, "PTP", args, num_tokens);
+					sendto(server_sock_udp, buffer, strlen(buffer), 0, (struct sockaddr *) res_udp->ai_addr, res_udp->ai_addrlen);
+				}
+				else {
+					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
+				}
 		}
 		else if (!strcmp(args[0], "question_list")   || 
 			     !strcmp(args[0], "ql")) {
-				concatenate_args(buffer, "LQU", args, num_tokens);
-				sendto(server_sock_udp, buffer, strlen(buffer), 0, (struct sockaddr *) res_udp->ai_addr, res_udp->ai_addrlen);
-			
+				if (num_tokens == 1) {
+					concatenate_args(buffer, "LQU", args, num_tokens);
+					sendto(server_sock_udp, buffer, strlen(buffer), 0, (struct sockaddr *) res_udp->ai_addr, res_udp->ai_addrlen);
+				}
+				else {
+					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
+				}
 		}
 		else if (!strcmp(args[0], "question_get")    || 
 			     !strcmp(args[0], "qg")) {
-				concatenate_args(buffer, "GQU", args, num_tokens);
-				executes_tcp_command(buffer, res_tcp);
-				
+				if (num_tokens == 2) {
+					concatenate_args(buffer, "GQU", args, num_tokens);
+					executes_tcp_command(buffer, res_tcp);
+				}
+				else {
+					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
+				}
 		}
 		else if (!strcmp(args[0], "question_submit") || 
 			     !strcmp(args[0], "qs")) {
-				concatenate_args(buffer, "QUS", args, num_tokens);
-			
+				if (num_tokens == 3 || num_tokens == 4) {
+					concatenate_args(buffer, "QUS", args, num_tokens);
+					executes_tcp_command(buffer, res_tcp);
+				}
+				else {
+					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
+				}
 		}
 		else if (!strcmp(args[0], "answer_submit")   || 
 			     !strcmp(args[0], "as")) {
-				concatenate_args(buffer, "ANS", args, num_tokens);
-				
+				if (num_tokens == 2 || num_tokens == 3) {	
+					concatenate_args(buffer, "ANS", args, num_tokens);
+					executes_tcp_command(buffer, res_tcp);
+				}
+				else {
+					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
+				}
 		}
 		else if (!strcmp(args[0], "exit")) {
-				break;
+				if (num_tokens == 1) {
+					break;
+				}
+				else {
+					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
+				}
+
 		}
 		else if (!strcmp(args[0], "?")) {
-				printf("register/reg <userId>\n" 
-						"topic_list/tl\n"
-						"topic_select <topic name>\n"
-						"ts <topic number>\n"
-						"topic_propose/tp <topic>\n"
-						"question_list/ql\n"
-						"question_get <question name>\n"
-						"qg <question_number>\n"
-						"answer_submit/as <text_file [image_file]>\n"
-						"question_submit/qs <text_file [image_file]>\n"
-						"exit\n");
+				if (num_tokens == 1) {
+					printf( "\tregister\t/reg\t<userId>\n" 
+							"\ttopic_list\t/tl\n"
+							"\ttopic_select\t\t<topic name>\n"
+							"\tts\t\t\t<topic number>\n"
+							"\ttopic_propose\t/tp\t<topic>\n"
+							"\tquestion_list\t/ql\n"
+							"\tquestion_get\t\t<question name>\n"
+							"\tqg\t\t\t<question_number>\n"
+							"\tanswer_submit\t/as\t<text_file [image_file]>\n"
+							"\tquestion_submit\t/qs\t<text_file [image_file]>\n"
+							"\texit\n");
+				}
+				else {
+					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
+				}
 		}
 		else {
 				fprintf(stdout, "Invalid command!\n");
 		}
 		/*                  */
+	}
+
+	error_code = close(server_sock_udp);
+	if (error_code == -1) {
+		fprintf(stderr, "close failed: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
 	}
 
 	return 0;
