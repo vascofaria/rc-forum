@@ -68,6 +68,8 @@ char **list_directory(char* path) {
 	d = opendir(path);
 
 	char **dir_list = (char**) malloc(sizeof(char*) * MAX_TOPICS);
+	if (dir_list)
+		for (i=0;i<MAX_TOPICS;i++) dir_list[i]=(char*)NULL;
 
 	if (d) {
 		while ((dir = readdir(d)) != NULL) {
@@ -131,7 +133,7 @@ int get_answers(char *topic_name, char *question_name, char ***answers_list) {
 
 int post_topic(char *topic_name, char *user_id) {
 
-	int errorcode;
+	int error_code;
 	char p[MAX_PATH] = TOPICS_PATH;
 	char user_id_path[MAX_PATH] = "\0";
 	strcat(p, topic_name);
@@ -146,10 +148,10 @@ int post_topic(char *topic_name, char *user_id) {
 		return TOPIC_ALREADY_EXISTS;
 
 	/* Create Topic directory */
-	errorcode = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-	if (errorcode) {
+	error_code = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	if (error_code) {
 		fprintf(stderr, "ERROR: Unable to create directory: %s: %s, %d\n", p, strerror(errno), errno);
-		exit(errorcode);
+		exit(error_code);
 	}
 
 	/* Create topic user_id file */
@@ -159,10 +161,10 @@ int post_topic(char *topic_name, char *user_id) {
 
 	/* Create topic questions directory */
 	strcat(p, QUESTIONS_PATH);
-	errorcode = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-	if (errorcode) {
+	error_code = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	if (error_code) {
 		fprintf(stderr, "ERROR: Unable to create directory: %s: %s\n", p, strerror(errno));
-		exit(errorcode);
+		exit(error_code);
 	}
 	return SUCCESS_CODE;
 }
@@ -170,7 +172,7 @@ int post_topic(char *topic_name, char *user_id) {
 int post_question(char *topic_name, char *question_name, char *user_id) {
 
 	FILE *fd;
-	int errorcode;
+	int error_code;
 	char p[MAX_PATH] = TOPICS_PATH;
 	char user_id_path[MAX_PATH] = "\0";
 	strcat(p, topic_name);
@@ -191,10 +193,10 @@ int post_question(char *topic_name, char *question_name, char *user_id) {
 	strcat(user_id_path, "_uid.txt\0");
 
 	/* Create Question directory */
-	errorcode = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-	if (errorcode) {
+	error_code = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	if (error_code) {
 		fprintf(stderr, "ERROR: Unable to create directory: %s: %s, %d\n", p, strerror(errno), errno);
-		exit(errorcode);
+		exit(error_code);
 	}
 
 	/* Create topic user_id file */
@@ -204,10 +206,10 @@ int post_question(char *topic_name, char *question_name, char *user_id) {
 
 	/* Create topic questions directory */
 	strcat(p, ANSWERS_PATH);
-	errorcode = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-	if (errorcode) {
+	error_code = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	if (error_code) {
 		fprintf(stderr, "ERROR: Unable to create directory: %s: %s\n", p, strerror(errno));
-		exit(errorcode);
+		exit(error_code);
 	}
 	return SUCCESS_CODE;
 }
@@ -219,7 +221,7 @@ int post_question(char *topic_name, char *question_name, char *user_id) {
 
 int main(int argc, char const *argv[]) {
 	
-	int i, errorcode = 0;
+	int i, error_code = 0;
 	char topic_name[MAX_FILENAME] = "Topic07\0";
 	char question_name[MAX_FILENAME] = "Question02\0";
 	char **topics_list = NULL;
@@ -227,37 +229,37 @@ int main(int argc, char const *argv[]) {
 	char **answers_list = NULL;
 
 	/* TEST POST TOPIC */
-	// errorcode = post_topic(topic_name, "89559\0");
-	if (errorcode == TOPIC_ALREADY_EXISTS) {
+	// error_code = post_topic(topic_name, "89559\0");
+	if (error_code == TOPIC_ALREADY_EXISTS) {
 		fprintf(stderr, "Topic %s already exists\n", topic_name);
 		exit(TOPIC_ALREADY_EXISTS);
 	}
 
 	/* TEST POST QUESTION */
-	// errorcode = post_question(topic_name, question_name, "89559\0");
-	if (errorcode == TOPIC_DOESNT_EXIST) {
+	// error_code = post_question(topic_name, question_name, "89559\0");
+	if (error_code == TOPIC_DOESNT_EXIST) {
 		fprintf(stderr, "Topic %s doesnt exist\n", topic_name);
 		exit(TOPIC_DOESNT_EXIST);
-	} else if (errorcode == QUESTION_ALREADY_EXISTS) {
+	} else if (error_code == QUESTION_ALREADY_EXISTS) {
 		fprintf(stderr, "Question %s already exists\n", question_name);
 		exit(QUESTION_ALREADY_EXISTS);
 	}
 
 	/* TEST GET TOPICS */
-	errorcode = get_topics(&topics_list);
+	error_code = get_topics(&topics_list);
 
 	/* TEST GET QUESTIONS */
-	errorcode = get_questions(topic_name, &questions_list);
-	if (errorcode == TOPIC_DOESNT_EXIST) {
+	error_code = get_questions(topic_name, &questions_list);
+	if (error_code == TOPIC_DOESNT_EXIST) {
 		fprintf(stderr, "ERROR: TOPIC_DOESNT_EXIST\n");
 		exit(TOPIC_DOESNT_EXIST);
 	}
 
-	errorcode = get_answers(topic_name, question_name, &answers_list);
-	if (errorcode == TOPIC_DOESNT_EXIST) {
+	error_code = get_answers(topic_name, question_name, &answers_list);
+	if (error_code == TOPIC_DOESNT_EXIST) {
 		fprintf(stderr, "ERROR: TOPIC_DOESNT_EXIST\n");
 		exit(TOPIC_DOESNT_EXIST);
-	} else if (errorcode == QUESTION_DOESNT_EXIST) {
+	} else if (error_code == QUESTION_DOESNT_EXIST) {
 		fprintf(stderr, "ERROR: QUESTION_DOESNT_EXIST\n");
 		exit(QUESTION_DOESNT_EXIST);
 	}
