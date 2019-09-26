@@ -11,8 +11,8 @@
  * «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
  */
 
-#ifndef  FILE_MANAGER_H
-#define  FILE_MANAGER_H
+#ifndef  __FILE_MANAGER_H__
+#define  __FILE_MANAGER_H__
 
 #include "../exceptions.h"
 
