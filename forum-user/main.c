@@ -21,7 +21,7 @@ enum param_types {
 };
 
 static void set_default_params(char main_params[ASCII_LIMIT][BUFFER_SIZE]) {
-	strcpy(main_params[PARAM_FSIP],   "xsy");
+	strcpy(main_params[PARAM_FSIP],   "fedux");
 	strcpy(main_params[PARAM_FSPORT], "58000");
 }
 
