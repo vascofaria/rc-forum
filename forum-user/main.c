@@ -30,7 +30,7 @@ static void concatenate_args(char *buffer, char* msg, char args[MAX_ARGS_N][MAX_
 	buffer[0] = '\0';
 	strcpy(buffer, msg);
 	for (i = 0; i < num_tokens - 1; i++) {
-		strcat(buffer, " ");
+		strcat(buffer, " \0");
 		strcat(buffer, args[i + 1]);
 	}
 	strcat(buffer, "\n\0");

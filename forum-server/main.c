@@ -10,6 +10,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include "protocol-manager/udp-manager.h"
+
 #define MAX(A, B) (((A) >= (B)) ? (A) : (B))
 
 #define SERV 		 "58000"
@@ -20,14 +22,14 @@
 
 int main(int argc, char const *argv[])
 {
-	int              		server_sock_udp, server_sock_tcp, client_sock_tcp, error_code, max_fd;
-	pid_t            		pid; 
-	struct addrinfo 	   *res_tcp, *res_udp, hints;
-	char             		buffer[BUFFER_SIZE], *buffer_ptr;
-	socklen_t 		 		addrlen_udp, addrlen_tcp;
+	int              				server_sock_udp, server_sock_tcp, client_sock_tcp, error_code, max_fd;
+	pid_t            			  pid; 
+	struct addrinfo 	   	 *res_tcp, *res_udp, hints;
+	char             				buffer[BUFFER_SIZE], *buffer_ptr;
+	socklen_t 		 					addrlen_udp, addrlen_tcp;
 	struct sockaddr_in      addr_udp, addr_tcp;
 	ssize_t                 n, n_write;
-	fd_set 					read_fds;
+	fd_set 									read_fds;
 
 
 	/* Initialization of hints structure for socket UDP */
@@ -196,30 +198,27 @@ int main(int argc, char const *argv[])
 				}
 			}
 		}
-		/*                          */
 
 		/* Comunication by UDP socket */
 		if (FD_ISSET(server_sock_udp, &read_fds)) {
 			addrlen_udp = sizeof(addr_udp);
 
-			/* read from clients */
+			/* read from clients */	
 			n = recvfrom(server_sock_udp, buffer, BUFFER_SIZE, 0, (struct sockaddr *) &addr_udp, &addrlen_udp);
 			if (n == -1) {
 				fprintf(stderr, "recvfrom failed: %s\n", strerror(errno));
 				exit(EXIT_FAILURE);
 			}
-			/*                   */
-			write(1, "received: ", 10);
-			write(1, buffer, n);
+			buffer[n] = '\0';
+			udp_manager(buffer);
+
 			/* write on client */
 			n = sendto(server_sock_udp, buffer, n, 0, (struct sockaddr *) &addr_udp, addrlen_udp);
 			if (n == -1) {
 				fprintf(stderr, "sendto failed: %s\n", strerror(errno));
 				exit(EXIT_FAILURE);
 			}
-			/*                 */
 		}
-		/*                            */
 	}
 
 	return 0;

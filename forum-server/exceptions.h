@@ -21,6 +21,6 @@ enum exceptions {
 	TOPIC_ALREADY_EXISTS,
 	QUESTION_DOESNT_EXIST,
 	QUESTION_ALREADY_EXISTS
-}
+};
 
 #endif

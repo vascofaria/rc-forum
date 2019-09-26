@@ -25,7 +25,7 @@ typedef struct question {
 } question_t;
 
 
-question_t *new_question(char title[MAX_TITLE], char data[MAX_TXT_SIZE], char image[MAX_IMG_SIZE], answer_t **answers) {
+question_t *new_question(char title[MAX_TITLE], int data_size, char data[MAX_TXT_SIZE], int image_size, char image[MAX_IMG_SIZE], answer_t **answers) {
 	int i;
 	question_t *q = (question_t*) malloc(sizeof(question_t));
 
