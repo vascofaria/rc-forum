@@ -98,7 +98,7 @@ int get_topics(char ***topics_list) {
 	char p[MAX_PATH] = TOPICS_PATH;
 
 	*topics_list = list_directory(p);
-	return SUCCESS_CODE;
+	return SUCCESS;
 }
 
 int get_questions(char *topic_name, char ***questions_list) {
@@ -111,7 +111,7 @@ int get_questions(char *topic_name, char ***questions_list) {
 
 	strcat(p, QUESTIONS_PATH);
 	*questions_list = list_directory(p);
-	return SUCCESS_CODE;
+	return SUCCESS;
 }
 
 int get_answers(char *topic_name, char *question_name, char ***answers_list) {
@@ -128,7 +128,7 @@ int get_answers(char *topic_name, char *question_name, char ***answers_list) {
 
 	strcat(p, ANSWERS_PATH);
 	*answers_list = list_directory(p);
-	return SUCCESS_CODE;
+	return SUCCESS;
 }
 
 int post_topic(char *topic_name, char *user_id) {
@@ -166,7 +166,7 @@ int post_topic(char *topic_name, char *user_id) {
 		fprintf(stderr, "ERROR: Unable to create directory: %s: %s\n", p, strerror(errno));
 		exit(error_code);
 	}
-	return SUCCESS_CODE;
+	return SUCCESS;
 }
 
 int post_question(char *topic_name, char *question_name, char *user_id) {
@@ -211,7 +211,7 @@ int post_question(char *topic_name, char *question_name, char *user_id) {
 		fprintf(stderr, "ERROR: Unable to create directory: %s: %s\n", p, strerror(errno));
 		exit(error_code);
 	}
-	return SUCCESS_CODE;
+	return SUCCESS;
 }
 
 /*------------------------------------------------------*/

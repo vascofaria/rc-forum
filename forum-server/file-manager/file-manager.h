@@ -11,15 +11,10 @@
  * «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
  */
 
-#ifndef FILE_MANAGER_H
-#define FILE_MANAGER_H
+#ifndef  FILE_MANAGER_H
+#define  FILE_MANAGER_H
 
-#define SUCCESS_CODE            0
-#define TOPIC_DOESNT_EXIST      1
-#define TOPIC_ALREADY_EXISTS    2
-#define QUESTION_DOESNT_EXIST   3
-#define QUESTION_ALREADY_EXISTS 4
-
+#include "../exceptions.h"
 
 /* ===============================================================================
  * int topic_exists(char *topic_path);
@@ -63,7 +58,7 @@ char **list_directory(char* path);
  * -------------------------------------------------------------------------------
  * 
  * -------------------------------------------------------------------------------
- * RETURN SUCCESS_CODE if success
+ * RETURN SUCCESS if success
  * ===============================================================================
 */
 int get_topics(char ***topics_list);
@@ -73,7 +68,7 @@ int get_topics(char ***topics_list);
  * -------------------------------------------------------------------------------
  * 
  * -------------------------------------------------------------------------------
- * RETURN SUCCESS_CODE if success
+ * RETURN SUCCESS if success
  * RETURN TOPIC_DOESNT_EXIST if question doesnt exist
  * ===============================================================================
 */
@@ -84,7 +79,7 @@ int get_questions(char *topic_name, char ***questions_list);
  * -------------------------------------------------------------------------------
  * 
  * -------------------------------------------------------------------------------
- * RETURN SUCCESS_CODE if success
+ * RETURN SUCCESS if success
  * RETURN TOPIC_DOESNT_EXIST if question doesnt exist
  * RETURN QUESTION_DOESNT_EXIST if question already exist
  * ===============================================================================
@@ -97,7 +92,7 @@ int get_answers(char *topic_name, char *question_name, char ***answers_list);
  * -------------------------------------------------------------------------------
  * 
  * -------------------------------------------------------------------------------
- * RETURN SUCCESS_CODE if success
+ * RETURN SUCCESS if success
  * RETURN TOPIC_ALREADY_EXISTS if topic already exist
  * ===============================================================================
 */
