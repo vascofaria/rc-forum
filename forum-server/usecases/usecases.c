@@ -2,7 +2,7 @@
  * »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
  * IST - RC 2019/2020
  *
- * answer.h
+ * usecases.c
  *
  * -------------------------------------------------------------------------------
  *
@@ -11,36 +11,26 @@
  * «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
  */
 
-#ifndef __ANSWER_H__
-#define __ANSWER_H__
-
-#include <stdlib.h>
 #include <string.h>
-#include "../constants.h"
+#include "usecases.h"
+#include "../exceptions.h"
+#include "../protocol-manager/protocol.h"
+#include "../file-manager/file-manager.h"
 
-
-typedef struct answer {
-	char title[MAX_TITLE];
-	char data[MAX_TXT_SIZE];
-	char image[MAX_IMG_SIZE];
-} answer_t;
-
-answer_t *new_answer(char title[MAX_TITLE], char data[MAX_TXT_SIZE], char image[MAX_IMG_SIZE]) {
-	
-	answer_t *a = (answer_t*) malloc(sizeof(answer_t));
-
-	strcpy(a->title, title);
-	strcpy(a->data, data);
-	if (image) {
-		strcpy(a->image, image);
-	}
-
-	return a;
+char *parse_output_RGR(int error_code) {
+    if (error_code == SUCCESS) {
+        printf(strcat(RGR, " OK\n"));
+    }
+    else if (error_code == BAD_INPUT) {
+        return strcat(RGR, NOK);
+    }
 }
 
-void free_answer(answer_t *answer_ptr) {
-	free(answer_ptr);
-	answer_ptr = NULL;
+char *parse_output_LTR(int error_code) {
+    if (error_code == BAD_INPUT) {
+        return ERR;
+    }
+    else if (error_code == SUCCESS) {
+        return strcat(LTR, "N");
+    }
 }
-
-#endif

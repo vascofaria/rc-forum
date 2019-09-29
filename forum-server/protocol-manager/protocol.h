@@ -17,7 +17,7 @@
 #define PROTOCOL_SIZE 3
 
 #define REG "REG\0"
-#define RGR "RGR\0"
+#define RGR "RGR"
 
 #define LTP "LTP\0"
 #define LTR "LTR\0"
@@ -37,7 +37,9 @@
 #define ANS "ANS\0"
 #define ANR "ANR\0"
 
-#define OK  "OK\0"
-#define NOK "NOK\0"
+#define OK  " OK\0"
+#define NOK " NOK\0"
+
+#define ERR "ERR\0"
 
 #endif

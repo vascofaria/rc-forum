@@ -1,6 +1,7 @@
 #include "udp-manager.h"
 #include "protocol.h"
 #include "../exceptions.h"
+#include "../usecases/usecases.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -106,18 +107,19 @@ char* udp_manager(char *request) {
 
 	if (!strcmp(protocol, REG)) {
 		error_code = parse_input_REG(request, user_id);
-		if (error_code) {
-			printf("ERROR on REG\n");
-		}
-		printf("OK\n");
+		// if (error_code) {
+		// 	printf("ERROR on REG\n");
+		// }
+		// printf("OK\n");
 		// usecase
-		// return parse_output_RGR();
+		return parse_output_RGR(error_code);
 	} else if (!strcmp(protocol, LTP)) {
 		error_code = parse_input_LTP(request);
-		if (error_code) {
-			printf("ERROR on LTP\n");
-		}
-		printf("OK\n");
+		// if (error_code) {
+		// 	printf("ERROR on LTP\n");
+		// }
+		// printf("OK\n");
+		return parse_output_LTR(error_code);
 	} else if (!strcmp(protocol, PTP)) {
 		error_code = parse_input_PTP(request, user_id, topic);
 		if (error_code) {
