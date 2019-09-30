@@ -261,7 +261,7 @@ int main(int argc, char const *argv[])
 			buffer[n] = '\0';
 			/*                   */
 
-			udp_manager(buffer);
+			/*udp_manager(buffer);*/
 
 			/* write on client */
 			n = sendto(server_sock_udp, buffer, n, 0, (struct sockaddr *) &addr_udp, addrlen_udp);

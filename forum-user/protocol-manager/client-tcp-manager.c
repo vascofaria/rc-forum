@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include "client-tcp-manager.h"
+#include "../error-messages/input-error-messages.h"
 #include "../file-manager/file-manager.h"
 
 static char* make_new_GQU_request(char *protocol, char *topic, char *question) {
@@ -23,11 +24,12 @@ static char* make_new_GQU_request(char *protocol, char *topic, char *question) {
 }
 
 static char* make_new_QUS_request(char *protocol, char* user_id, char *topic, char *question, char *qsize, char *qdata, char *qimg, char *iext, char *isize, char *idata) {
+	int   img_size, i = 0, j;
 	char *request;
-	
+
 	request = (char *) malloc (sizeof(char) * (
 			strlen(protocol) + strlen(user_id) + strlen(topic) + strlen(question) + strlen(qsize) +
-			strlen(qdata)    + strlen(qimg)    + strlen(iext)  + strlen(isize)    + strlen(idata) +
+			strlen(qdata)    + strlen(qimg)    + strlen(iext)  + strlen(isize)    + atoi(isize)   +
 			+ (9 * strlen(" ")) + strlen("\n") + strlen("\0")));
 	if (request != NULL) {
 		request[0] = '\0';
@@ -43,12 +45,15 @@ static char* make_new_QUS_request(char *protocol, char* user_id, char *topic, ch
 		strcat(request, " ");
 		strcat(request, qimg);
 		if (!strcmp(qimg, "1")) {
+			img_size = atoi(isize);
 			strcat(request, " ");
 			strcat(request, iext);
 			strcat(request, " ");
 			strcat(request, isize);
 			strcat(request, " ");
-			strcat(request, idata);
+			for (i = strlen(request), j = 0; j < img_size; i++, j++) {
+				request[i] = idata[j];
+			}
 		}
 		strcat(request, "\n\0");
 	}
@@ -56,11 +61,12 @@ static char* make_new_QUS_request(char *protocol, char* user_id, char *topic, ch
 }
 
 static char* make_new_ANS_request(char *protocol, char* user_id, char *topic, char *question, char *asize, char *adata, char *aimg, char *iext, char *isize, char *idata) {
+	int   img_size, i = 0, j;
 	char *request;
 	
 	request = (char *) malloc (sizeof(char) * (
 			strlen(protocol) + strlen(user_id) + strlen(topic) + strlen(question) + strlen(asize) +
-			strlen(adata)    + strlen(aimg)    + strlen(iext)  + strlen(isize)    + strlen(idata) +
+			strlen(adata)    + strlen(aimg)    + strlen(iext)  + strlen(isize)    + atoi(isize)   +
 			+ (9 * strlen(" ")) + strlen("\n") + strlen("\0")));
 	if (request != NULL) {
 		request[0] = '\0';
@@ -76,12 +82,15 @@ static char* make_new_ANS_request(char *protocol, char* user_id, char *topic, ch
 		strcat(request, " ");
 		strcat(request, aimg);
 		if (!strcmp(aimg, "1")) {
+			img_size = atoi(isize);
 			strcat(request, " ");
 			strcat(request, iext);
 			strcat(request, " ");
 			strcat(request, isize);
 			strcat(request, " ");
-			strcat(request, idata);
+			for (i = strlen(request), j = 0; j < img_size; i++, j++) {
+				request[i] = idata[j];
+			}
 		}
 		strcat(request, "\n\0");
 	}
@@ -140,11 +149,14 @@ client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_
 				request = NULL;
 			}
 		}
+		else {
+			printf("%s\n", TOPIC_IS_NOT_SELECTED);
+		}
 	}	
 
 	else if (!strcmp(protocol, "QUS")) {
 		if (get_user_id(user)) {
-			if (get_user_id(user) && get_user_topic(user)) {	
+			if (get_user_topic(user)) {	
 				size = get_file_size(args[2], "r");
 				data = get_file_data(args[2], "r");
 				if (num_args == 3) {
@@ -171,12 +183,14 @@ client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_
 						idata = NULL;
 					}
 				}
-
-				free(size);
-				size = NULL;
-				free(data);
-				data = NULL;
-
+				if (size) {
+					free(size);
+					size = NULL;
+				}
+				if (data) {
+					free(data);
+					data = NULL;
+				}
 				if (request) {
 					printf("%s %ld\n", request, strlen(request));
 					executes_tcp_command(request, get_user_tcp_addrinfo(user));
@@ -184,49 +198,71 @@ client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_
 					request = NULL;
 				}
 			}
+			else {
+				printf("%s\n", TOPIC_IS_NOT_SELECTED);
+			}
+		}
+		else {
+			printf("%s\n", USER_IS_NOT_REGISTERED);
 		}
 	}
 
 	else {
-		if (get_user_id(user) && get_user_topic(user) && get_user_question(user)) {	
-			size = get_file_size(args[2], "r");
-			data = get_file_size(args[2], "r");
-			if (num_args == 2) {
-				request = make_new_ANS_request(protocol, get_user_id(user), get_user_topic(user), get_user_question(user), size, data, "0", "", "", "");
+		if (get_user_id(user)) {
+			if (get_user_topic(user)) {
+				if (get_user_question(user)) {	
+					size = get_file_size(args[2], "r");
+					data = get_file_size(args[2], "r");
+					if (num_args == 2) {
+						request = make_new_ANS_request(protocol, get_user_id(user), get_user_topic(user), get_user_question(user), size, data, "0", "", "", "");
+					}
+					else {
+						isize = get_file_size(args[2], "rb");
+						idata = get_file_data(args[2], "rb");
+						iext  = get_file_ext(args[2]);
+						if (isize && idata) {
+							request = make_new_ANS_request(protocol, get_user_id(user), get_user_topic(user), get_user_question(user), size, data, "1", iext, isize, idata);
+						}
+						if (iext) {
+							free(iext);
+							iext = NULL;
+						}
+
+						if (isize) {
+							free(isize);
+							isize = NULL;
+						}
+						if (idata) {
+							free(idata);
+							idata = NULL;
+						}
+					}
+
+					if (size) {
+						free(size);
+						size = NULL;
+					}
+					if (data) {
+						free(data);
+						data = NULL;
+					}
+					if (request) {
+						printf("%s %ld\n", request, strlen(request));
+						executes_tcp_command(request, get_user_tcp_addrinfo(user));
+						free(request);
+						request = NULL;
+					}
+				}
+				else {
+					printf("%s\n", QUESTION_IS_NOT_SELECTED);
+				}
 			}
 			else {
-				isize = get_file_size(args[2], "rb");
-				idata = get_file_data(args[2], "rb");
-				iext  = get_file_ext(args[2]);
-				if (isize && idata) {
-					request = make_new_ANS_request(protocol, get_user_id(user), get_user_topic(user), get_user_question(user), size, data, "1", iext, isize, idata);
-				}
-				if (iext) {
-					free(iext);
-					iext = NULL;
-				}
-
-				if (isize) {
-					free(isize);
-					isize = NULL;
-				}
-				if (idata) {
-					free(idata);
-					idata = NULL;
-				}
+				printf("%s\n", TOPIC_IS_NOT_SELECTED);
 			}
-
-			free(size);
-			size = NULL;
-			free(data);
-			data = NULL;
-
-			if (request) {
-				printf("%s %ld\n", request, strlen(request));
-				executes_tcp_command(request, get_user_tcp_addrinfo(user));
-				free(request);
-				request = NULL;
-			}
+		}
+		else {
+			printf("%s\n", USER_IS_NOT_REGISTERED);
 		}
 	}
 }

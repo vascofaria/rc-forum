@@ -5,6 +5,7 @@
 
 #include "../user/user.h"
 #include "client-udp-manager.h"
+#include "../error-messages/input-error-messages.h"
 
 static char* make_new_REG_request(char *protocol, char *user_id) {
 	char* request = (char *) malloc (sizeof(char) * (strlen(protocol) + strlen(user_id) + strlen(" ") + strlen("\n") + 1));
@@ -88,6 +89,9 @@ client_udp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_
 				request = NULL;			
 			}
 		}
+		else {
+			printf("%s\n", USER_IS_NOT_REGISTERED);
+		}
 	}
 
 	else {
@@ -99,6 +103,9 @@ client_udp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_
 				free(request);
 				request = NULL;
 			}
+		}
+		else {
+			printf("%s\n", TOPIC_IS_NOT_SELECTED);
 		}
 	}
 }

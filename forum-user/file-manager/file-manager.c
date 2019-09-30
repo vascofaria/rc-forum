@@ -44,7 +44,8 @@ get_file_data(const char* file_name, const char* mode) {
 			data = (char*) malloc (sizeof(char) * (size + 1));
 
 			if (data != NULL) {
-				fread(data, sizeof(char), size + 1 ,fp);
+				fread(data, sizeof(char), size, fp);
+				data[size + 1] = '\0';
 				fclose(fp);
 				return data;
 			}
