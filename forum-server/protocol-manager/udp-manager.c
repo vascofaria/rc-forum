@@ -7,7 +7,7 @@
 
 #define PROTOCOL_SIZE 3
 #define USER_ID_SIZE  5
-#define TOPIC_SIZE    10
+#define TOPIC_SIZE    
 
 static int parse_input_REG(char* request, char* user_id) {
 	int i, j;

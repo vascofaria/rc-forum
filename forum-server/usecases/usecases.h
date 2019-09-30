@@ -14,6 +14,8 @@
 #ifndef __USECASES_H__
 #define __USECASES_H__
 
-char *parse_output_RGR(int status);
+char *parse_output_RGR(int);
+char *parse_output_LTR(int);
+char *parse_output_PTR(char*, char*);
 
 #endif

@@ -42,4 +42,7 @@
 
 #define ERR "ERR\0"
 
+#define DUP "DUP\0"
+#define FUL "FUL\0"
+
 #endif
