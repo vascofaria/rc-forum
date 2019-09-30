@@ -1,13 +1,11 @@
 #include "udp-manager.h"
 #include "protocol.h"
 #include "../exceptions.h"
+#include "../constants.h"
 #include "../usecases/usecases.h"
 #include <stdio.h>
 #include <string.h>
 
-#define PROTOCOL_SIZE 3
-#define USER_ID_SIZE  5
-#define TOPIC_SIZE    10
 
 static int parse_input_REG(char* request, char* user_id) {
 	int i, j;
@@ -37,7 +35,9 @@ static int parse_input_REG(char* request, char* user_id) {
 }
 
 static char *parse_output_RGR() {
-	return NULL;
+	char res[MAX_STATUS_RESPONSE];
+	strcpy(res, RGR);
+	return strcat(res, OK);
 }
 
 static int parse_input_LTP(char* request) {
@@ -49,8 +49,22 @@ static int parse_input_LTP(char* request) {
 	return SUCCESS;
 }
 
-static char *parse_output_LTR() {
-	return NULL;
+static char *parse_output_LTR(char **topics_list) {
+	int  num;
+	char topics[MAX_TOPIC_LIST_RESPONSE];
+	char response[MAX_TOPIC_LIST_RESPONSE + 6];
+
+	for(num = 0; num < MAX_TOPIC_LIST_RESPONSE && topics_list[num] != NULL; num++){
+	    strcat(topics, " ");
+	    strcat(topics, topics_list[num]);
+	}
+
+	strcat(response, LTR);
+	strcat(response, " ");
+	strcat(response, num);
+	strcat(response, " ");
+	strcat(response, topics);
+	return response;
 }
 
 static int parse_input_PTP(char* request, char* user_id, char* topic) {
@@ -84,7 +98,12 @@ static int parse_input_PTP(char* request, char* user_id, char* topic) {
 }
 
 static char *parse_output_PTR() {
-	return NULL;
+
+	char response[MAX_STATUS_RESPONSE];
+	strcat(response, PTR);
+	strcat(response, OK);
+
+	return response;
 }
 
 static int parse_input_LQU(char* request, char* topic) {
@@ -105,8 +124,22 @@ static int parse_input_LQU(char* request, char* topic) {
 	return SUCCESS;
 }
 
-static char *parse_output_LQR() {
-	return NULL;
+static char *parse_output_LQR(char* topic, char **questions_list){
+	int num = 0;
+	    
+	char questions[MAX_TOPIC_LIST_RESPONSE];
+	char response[MAX_TOPIC_LIST_RESPONSE + 6];
+	
+	for(num = 0; num < MAX_TOPIC_LIST_RESPONSE && questions_list[num] != NULL; num++){
+		strcat(questions, " ");
+		strcat(questions, questions_list[num]);
+	}
+	
+	strcat(response, LQR);
+	strcat(response, " ");
+	strcat(response, num);
+	strcat(response, questions);
+	return response;
 }
 
 /*
@@ -135,6 +168,9 @@ char* udp_manager(char *request) {
 	char user_id[USER_ID_SIZE + 1];
 	char topic[TOPIC_SIZE + 1];
 
+	char **topics_list;
+	char **questions_list;
+
 	for (i = 0; i < PROTOCOL_SIZE && request[i] != '\0' && request[i] != '\n';  i++) {
 		protocol[i] = request[i];
 	}
@@ -142,36 +178,62 @@ char* udp_manager(char *request) {
 	protocol[i] = '\0';
 
 	if (!strcmp(protocol, REG)) {
+
 		error_code = parse_input_REG(request, user_id);
-		// if (error_code) {
-		// 	printf("ERROR on REG\n");
-		// }
-		// printf("OK\n");
-		// usecase
+		if (error_code) {
+			return parse_output_ERROR(error_code);
+		}
+
+		error_code = register_user(user_id);
+		if (error_code) {
+			return parse_output_ERROR(error_code);
+		}
+
 		return parse_output_RGR();
+
 	} else if (!strcmp(protocol, LTP)) {
+
 		error_code = parse_input_LTP(request);
-		// if (error_code) {
-		// 	printf("ERROR on LTP\n");
-		// }
-		// printf("OK\n");
-		return parse_output_LTR();
+		if (error_code) {
+			return parse_output_ERROR(error_code);
+		}
+
+		error_code = topic_list(&topics_list);
+		if (error_code) {
+			return parse_output_ERROR(error_code);
+		}
+
+		return parse_output_LTR(topics_list);
+
 	} else if (!strcmp(protocol, PTP)) {
+
 		error_code = parse_input_PTP(request, user_id, topic);
 		if (error_code) {
-			printf("ERROR on PTP\n");
+			return parse_output_ERROR(error_code);
 		}
-		printf("OK\n");
+
+		error_code = propose_topic(user_id, topic);
+		if (error_code) {
+			return parse_output_ERROR(error_code);
+		}
+
+		return parse_output_PTR();
+
 	} else if (!strcmp(protocol, LQU)) {
+
 		error_code = parse_input_LQU(request, topic);
 		if (error_code) {
-			printf("ERROR on LQU\n");
+			return parse_output_ERROR(error_code);
 		}
-		printf("OK\n");
-	} else {
-		printf("ERROR on protocol\n");
-	}
-	return NULL;
 
-	/* TO DO: acabar o resto para os restantes protocolos*/
+		error_code = list_questions(topic, &questions_list);
+		if (error_code) {
+			return parse_output_ERROR(error_code);
+		}
+
+		return parse_output_LQR(topic, questions_list);
+	}
+	// no protocol
+	// parse_output_ERROR();
+	return NULL;
 }

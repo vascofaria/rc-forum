@@ -72,10 +72,11 @@ char **list_directory(char* path) {
 		for (i=0;i<MAX_TOPICS;i++) dir_list[i]=(char*)NULL;
 
 	if (d) {
+		printf("HEY\n");
 		while ((dir = readdir(d)) != NULL) {
 			if (dir->d_name[0] != '.') {
-				// printf("%s:%d\n", dir->d_name, dir->d_ino);
 				dir_name = (char*) malloc(sizeof(char) * MAX_FILENAME);
+				printf("%s:%ld\n", dir->d_name, dir->d_ino);
 				strcpy(dir_name, dir->d_name);
 				dir_list[i++] = dir_name;
 			}
@@ -151,20 +152,24 @@ int post_topic(char *topic_name, char *user_id) {
 	error_code = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if (error_code) {
 		fprintf(stderr, "ERROR: Unable to create directory: %s: %s, %d\n", p, strerror(errno), errno);
-		exit(error_code);
-	}
+		// exit(error_code);
+		return FAILURE;
+	} //VASCO- AQUI DEVIA DEVOLVER SE ALGO P usecases escreverem NOK 
 
 	/* Create topic user_id file */
 	fd = fopen(user_id_path, "ab+");
 	fprintf(fd, "%s", user_id);
 	fclose(fd);
 
+	//VASCO - falta dares erro FUL
+
 	/* Create topic questions directory */
 	strcat(p, QUESTIONS_PATH);
 	error_code = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if (error_code) {
 		fprintf(stderr, "ERROR: Unable to create directory: %s: %s\n", p, strerror(errno));
-		exit(error_code);
+		// exit(error_code);
+		return FAILURE;
 	}
 	return SUCCESS;
 }
@@ -230,48 +235,55 @@ int main(int argc, char const *argv[]) {
 
 	/* TEST POST TOPIC */
 	// error_code = post_topic(topic_name, "89559\0");
-	if (error_code == TOPIC_ALREADY_EXISTS) {
-		fprintf(stderr, "Topic %s already exists\n", topic_name);
-		exit(TOPIC_ALREADY_EXISTS);
-	}
+	// if (error_code == TOPIC_ALREADY_EXISTS) {
+	// 	fprintf(stderr, "Topic %s already exists\n", topic_name);
+	// 	exit(TOPIC_ALREADY_EXISTS);
+	// }
 
 	/* TEST POST QUESTION */
 	// error_code = post_question(topic_name, question_name, "89559\0");
-	if (error_code == TOPIC_DOESNT_EXIST) {
-		fprintf(stderr, "Topic %s doesnt exist\n", topic_name);
-		exit(TOPIC_DOESNT_EXIST);
-	} else if (error_code == QUESTION_ALREADY_EXISTS) {
-		fprintf(stderr, "Question %s already exists\n", question_name);
-		exit(QUESTION_ALREADY_EXISTS);
-	}
+	// if (error_code == TOPIC_DOESNT_EXIST) {
+	// 	fprintf(stderr, "Topic %s doesnt exist\n", topic_name);
+	// 	exit(TOPIC_DOESNT_EXIST);
+	// } else if (error_code == QUESTION_ALREADY_EXISTS) {
+	// 	fprintf(stderr, "Question %s already exists\n", question_name);
+	// 	exit(QUESTION_ALREADY_EXISTS);
+	// }
 
 	/* TEST GET TOPICS */
 	error_code = get_topics(&topics_list);
+	int j;
+	for(j=0; j < MAX_TOPICS; j++) {
+		printf("%s", topics_list[j]);
+		printf("\n");
+	}
+
+	
 
 	/* TEST GET QUESTIONS */
-	error_code = get_questions(topic_name, &questions_list);
-	if (error_code == TOPIC_DOESNT_EXIST) {
-		fprintf(stderr, "ERROR: TOPIC_DOESNT_EXIST\n");
-		exit(TOPIC_DOESNT_EXIST);
-	}
+	// error_code = get_questions(topic_name, &questions_list);
+	// if (error_code == TOPIC_DOESNT_EXIST) {
+	// 	fprintf(stderr, "ERROR: TOPIC_DOESNT_EXIST\n");
+	// 	exit(TOPIC_DOESNT_EXIST);
+	// }
 
-	error_code = get_answers(topic_name, question_name, &answers_list);
-	if (error_code == TOPIC_DOESNT_EXIST) {
-		fprintf(stderr, "ERROR: TOPIC_DOESNT_EXIST\n");
-		exit(TOPIC_DOESNT_EXIST);
-	} else if (error_code == QUESTION_DOESNT_EXIST) {
-		fprintf(stderr, "ERROR: QUESTION_DOESNT_EXIST\n");
-		exit(QUESTION_DOESNT_EXIST);
-	}
+	// error_code = get_answers(topic_name, question_name, &answers_list);
+	// if (error_code == TOPIC_DOESNT_EXIST) {
+	// 	fprintf(stderr, "ERROR: TOPIC_DOESNT_EXIST\n");
+	// 	exit(TOPIC_DOESNT_EXIST);
+	// } else if (error_code == QUESTION_DOESNT_EXIST) {
+	// 	fprintf(stderr, "ERROR: QUESTION_DOESNT_EXIST\n");
+	// 	exit(QUESTION_DOESNT_EXIST);
+	// }
 
-	for (i = 0; i< MAX_TOPICS && topics_list[i] != NULL; i++)
-		printf("%s\n", topics_list[i]);
+	// for (i = 0; i< MAX_TOPICS && topics_list[i] != NULL; i++)
+	// 	printf("%s\n", topics_list[i]);
 
-	for (i=0; i < MAX_TOPICS && questions_list[i] != NULL; i++)
-		printf("%s\n", questions_list[i]);
+	// for (i=0; i < MAX_TOPICS && questions_list[i] != NULL; i++)
+	// 	printf("%s\n", questions_list[i]);
 
-	for (i=0; i < MAX_TOPICS && answers_list[i] != NULL; i++)
-		printf("%s\n", answers_list[i]);
+	// for (i=0; i < MAX_TOPICS && answers_list[i] != NULL; i++)
+	// 	printf("%s\n", answers_list[i]);
 
 	free_list(topics_list);
 	free_list(questions_list);
