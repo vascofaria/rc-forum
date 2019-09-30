@@ -36,6 +36,10 @@ static int parse_input_REG(char* request, char* user_id) {
 	return SUCCESS;
 }
 
+static char *parse_output_RGR() {
+	return NULL;
+}
+
 static int parse_input_LTP(char* request) {
 
 	if (request[PROTOCOL_SIZE] != '\n' || request[PROTOCOL_SIZE+1] != '\0') {
@@ -43,6 +47,10 @@ static int parse_input_LTP(char* request) {
 	}
 
 	return SUCCESS;
+}
+
+static char *parse_output_LTR() {
+	return NULL;
 }
 
 static int parse_input_PTP(char* request, char* user_id, char* topic) {
@@ -75,6 +83,10 @@ static int parse_input_PTP(char* request, char* user_id, char* topic) {
 	return SUCCESS;
 }
 
+static char *parse_output_PTR() {
+	return NULL;
+}
+
 static int parse_input_LQU(char* request, char* topic) {
 	int i, j;
 
@@ -91,6 +103,30 @@ static int parse_input_LQU(char* request, char* topic) {
 	topic[j] = '\0';
 
 	return SUCCESS;
+}
+
+static char *parse_output_LQR() {
+	return NULL;
+}
+
+/*
+ * ERROR PROTOCOL
+*/
+static char *parse_output_ERROR(int error_code) {
+	// check wich error and turn it into the respective protocol error
+	if (error_code == BAD_INPUT) {
+		return "BAD_INPUT\0";
+	} else if (error_code == TOPIC_DOESNT_EXIST) {
+		return "TOPIC_DOESNT_EXIST\0";
+	} else if (error_code == TOPIC_ALREADY_EXISTS) {
+		return "TOPIC_ALREADY_EXISTS\0";
+	} else if (error_code == QUESTION_DOESNT_EXIST) {
+		return "QUESTION_DOESNT_EXIST\0";
+	} else if (error_code == QUESTION_ALREADY_EXISTS) {
+		return "QUESTION_ALREADY_EXISTS\0";
+	}
+
+	return NULL;
 }
 
 char* udp_manager(char *request) {
@@ -112,14 +148,14 @@ char* udp_manager(char *request) {
 		// }
 		// printf("OK\n");
 		// usecase
-		return parse_output_RGR(error_code);
+		return parse_output_RGR();
 	} else if (!strcmp(protocol, LTP)) {
 		error_code = parse_input_LTP(request);
 		// if (error_code) {
 		// 	printf("ERROR on LTP\n");
 		// }
 		// printf("OK\n");
-		return parse_output_LTR(error_code);
+		return parse_output_LTR();
 	} else if (!strcmp(protocol, PTP)) {
 		error_code = parse_input_PTP(request, user_id, topic);
 		if (error_code) {

@@ -14,6 +14,4 @@
 #ifndef __USECASES_H__
 #define __USECASES_H__
 
-char *parse_output_RGR(int status);
-
 #endif

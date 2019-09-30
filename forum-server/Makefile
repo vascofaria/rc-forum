@@ -13,7 +13,7 @@
 # FLAGS= ANSI
 NAME= server
 Object= main.o protocol-manager/udp-manager.o protocol-manager/tcp-manager.o file-manager.o usecases.o
-CC= gcc -pedantic
+CC= gcc
 
 all: $(Object)
 
@@ -34,7 +34,7 @@ main.o: main.c protocol-manager/udp-manager.h protocol-manager/tcp-manager.h con
 
 
 clean:
-	rm file-manager/*.o
-	rm protocol-manager/*.o
-	rm *.o
-	rm server
+	(rm file-manager/*.o)
+	(rm protocol-manager/*.o)
+	(rm *.o)
+	(rm server)

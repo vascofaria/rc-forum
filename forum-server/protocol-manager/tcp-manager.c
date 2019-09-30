@@ -4,51 +4,8 @@
 #include "protocol.h"
 #include "../entities/question.h"
 #include "../exceptions.h"
-
+#include <stdio.h>
 #include <stdbool.h>
-
-char *tcp_manager(char *request) {
-	int  i, error_code;
-	char protocol[PROTOCOL_SIZE + 1];
-	char topic[TOPIC_SIZE + 1];
-	char question_title[QUESTION_SIZE + 1];
-	question_t *question;
-	answer_t *answer;
-
-
-	for (i = 0; i < PROTOCOL_SIZE && request[i] != '\0' && request[i] != '\n';  i++) {
-		protocol[i] = request[i];
-	}
-	protocol[i] = '\0';
-
-	if (!strcmp(protocol, GQU)) {
-		error_code = parse_input_GQU(request, topic, question_title);
-		if (error_code) {
-			printf("ERROR on GQU\n");
-			return parse_output_ERROR(error_code);
-		}
-		// get_question(topic, question_title, &question);
-		return parse_output_QGR(question); -> free_question
-	} else if (!strcmp(protocol, QUS)) {
-		error_code = parse_input_QUS(request, topic, &question);
-		if (error_code) {
-			printf("ERROR on QUS\n");
-			return parse_output_ERROR(error);
-		}
-		// question_submit(topic, question) -> free_question()
-		return parse_output_QUR()
-	} else if (!strcmp(protocol, ANS)) {
-		error_code = parse_input_ANS(request, topic, question_title, &answer);
-		if (error_code) {
-			printf("ERROR on ANS\n");
-			return parse_output_ERROR(error_code);
-		}
-		// answer_submit(topic, question_title, answer) -> free_answer()
-		return parse_output_ANR()
-	}
-
-	return parse_output_ERROR(BAD_INPUT);
-}
 
 /*
  * QUESTION GET
@@ -241,6 +198,7 @@ static int parse_input_ANS(char *request, char *topic, char *question_title, ans
 	char answer_data[ANSWER_SIZE+1];
 	bool has_answer_img;
 	int  answer_img_size = 0;
+	char question_user_id[USER_ID_SIZE];
 	char answer_img_ext[IMAGE_EXT_SIZE+1];
 	char answer_img_data[IMAGE_SIZE+1];
 
@@ -351,7 +309,7 @@ static int parse_input_ANS(char *request, char *topic, char *question_title, ans
 			return BAD_INPUT;
 		}
 
-		*answer = new_answer(answer_title, answer_size, answer_data, answer_img_size, answer_img_data, NULL);
+		*answer = new_answer(answer_title, answer_size, answer_data, answer_img_size, answer_img_data);
 		return SUCCESS;
 
 	} else if (request[i++] == '0') {
@@ -359,7 +317,7 @@ static int parse_input_ANS(char *request, char *topic, char *question_title, ans
 			return BAD_INPUT;
 		}
 
-		*answer = new_answer(answer_title, answer_size, answer_data, 0, NULL, NULL);
+		*answer = new_answer(answer_title, answer_size, answer_data, 0, NULL);
 		return SUCCESS;
 	}
 
@@ -376,5 +334,61 @@ static char *parse_output_ANR() {
 */
 static char *parse_output_ERROR(int error_code) {
 	// check wich error and turn it into the respective protocol error
+	if (error_code == BAD_INPUT) {
+		return "BAD_INPUT\0";
+	} else if (error_code == TOPIC_DOESNT_EXIST) {
+		return "TOPIC_DOESNT_EXIST\0";
+	} else if (error_code == TOPIC_ALREADY_EXISTS) {
+		return "TOPIC_ALREADY_EXISTS\0";
+	} else if (error_code == QUESTION_DOESNT_EXIST) {
+		return "QUESTION_DOESNT_EXIST\0";
+	} else if (error_code == QUESTION_ALREADY_EXISTS) {
+		return "QUESTION_ALREADY_EXISTS\0";
+	}
+
 	return NULL;
+}
+
+
+char *tcp_manager(char *request) {
+	int  i, error_code;
+	char protocol[PROTOCOL_SIZE + 1];
+	char topic[TOPIC_SIZE + 1];
+	char question_title[QUESTION_SIZE + 1];
+	question_t *question;
+	answer_t *answer;
+
+
+	for (i = 0; i < PROTOCOL_SIZE && request[i] != '\0' && request[i] != '\n';  i++) {
+		protocol[i] = request[i];
+	}
+	protocol[i] = '\0';
+
+	if (!strcmp(protocol, GQU)) {
+		error_code = parse_input_GQU(request, topic, question_title);
+		if (error_code) {
+			printf("ERROR on GQU\n");
+			return parse_output_ERROR(error_code);
+		}
+		// get_question(topic, question_title, &question);
+		return parse_output_QGR(question); // -> free_question
+	} else if (!strcmp(protocol, QUS)) {
+		error_code = parse_input_QUS(request, topic, &question);
+		if (error_code) {
+			printf("ERROR on QUS\n");
+			return parse_output_ERROR(error_code);
+		}
+		// question_submit(topic, question) -> free_question()
+		return parse_output_QUR();
+	} else if (!strcmp(protocol, ANS)) {
+		error_code = parse_input_ANS(request, topic, question_title, &answer);
+		if (error_code) {
+			printf("ERROR on ANS\n");
+			return parse_output_ERROR(error_code);
+		}
+		// answer_submit(topic, question_title, answer) -> free_answer()
+		return parse_output_ANR();
+	}
+
+	return parse_output_ERROR(BAD_INPUT);
 }

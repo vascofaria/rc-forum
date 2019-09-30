@@ -20,6 +20,17 @@
 #define MAX_TXT_SIZE 256
 #define MAX_IMG_SIZE 256
 
+#define TOPIC_SIZE    99
 
+#define QUESTION_TITLE_SIZE 99
+#define QUESTION_SIZE 200
+
+#define IMAGE_EXT_SIZE 3
+#define IMAGE_SIZE 256
+
+#define USER_ID_SIZE 5
+
+#define ANSWER_TITLE_SIZE 10
+#define ANSWER_SIZE 256
 
 #endif
