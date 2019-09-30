@@ -35,9 +35,10 @@ static int parse_input_REG(char* request, char* user_id) {
 }
 
 static char *parse_output_RGR() {
-	char res[MAX_STATUS_RESPONSE];
-	strcpy(res, RGR);
-	return strcat(res, OK);
+	char *response = (char*) malloc(sizeof(char) * (MAX_STATUS_RESPONSE+1));
+	strcpy(response, RGR);
+	strcat(response, OK);
+	return response;
 }
 
 static int parse_input_LTP(char* request) {
@@ -51,19 +52,24 @@ static int parse_input_LTP(char* request) {
 
 static char *parse_output_LTR(char **topics_list) {
 	int  num;
-	char topics[MAX_TOPIC_LIST_RESPONSE];
-	char response[MAX_TOPIC_LIST_RESPONSE + 6];
+	char num_str[3];
+	char topics[MAX_TOPIC_LIST_RESPONSE] = "\0";
+	char *response = (char*) malloc(sizeof(char)*(MAX_TOPIC_LIST_RESPONSE + PROTOCOL_SIZE + 3));
 
-	for(num = 0; num < MAX_TOPIC_LIST_RESPONSE && topics_list[num] != NULL; num++){
+	for(num = 0; num < MAX_TOPIC_LIST_RESPONSE && topics_list[num] != NULL; num++) {
 	    strcat(topics, " ");
 	    strcat(topics, topics_list[num]);
 	}
 
+	sprintf(num_str, "%d", num);
+
 	strcat(response, LTR);
 	strcat(response, " ");
-	strcat(response, num);
-	strcat(response, " ");
-	strcat(response, topics);
+	strcat(response, num_str);
+
+	if (num == 0) strcat(response, '\n');
+	else strcat(response, topics);
+	
 	return response;
 }
 
@@ -99,7 +105,7 @@ static int parse_input_PTP(char* request, char* user_id, char* topic) {
 
 static char *parse_output_PTR() {
 
-	char response[MAX_STATUS_RESPONSE];
+	char *response = (char*) malloc(sizeof(char)*(MAX_STATUS_RESPONSE+1));
 	strcat(response, PTR);
 	strcat(response, OK);
 
@@ -128,7 +134,7 @@ static char *parse_output_LQR(char* topic, char **questions_list){
 	int num = 0;
 	
 	char questions[MAX_TOPIC_LIST_RESPONSE];
-	char response[MAX_TOPIC_LIST_RESPONSE + 6];
+	char *response = (char*) malloc(sizeof(char)*(MAX_TOPIC_LIST_RESPONSE + 6));
 	
 	for(num = 0; num < MAX_TOPIC_LIST_RESPONSE && questions_list[num] != NULL; num++){
 		strcat(questions, " ");
@@ -146,17 +152,23 @@ static char *parse_output_LQR(char* topic, char **questions_list){
  * ERROR PROTOCOL
 */
 static char *parse_output_ERROR(int error_code) {
-	// check wich error and turn it into the respective protocol error
+	
+	char* response = (char*) malloc(sizeof(char)*(MAX_STATUS_RESPONSE+1));
 	if (error_code == BAD_INPUT) {
-		return "BAD_INPUT\0";
+		strcpy(response, "BAD_INPUT\0");
+		return response;
 	} else if (error_code == TOPIC_DOESNT_EXIST) {
-		return "TOPIC_DOESNT_EXIST\0";
+		strcpy(response, "TOPIC_DOESNT_EXIST\0");
+		return response;
 	} else if (error_code == TOPIC_ALREADY_EXISTS) {
-		return "TOPIC_ALREADY_EXISTS\0";
+		strcpy(response, "TOPIC_ALREADY_EXISTS\0");
+		return response;
 	} else if (error_code == QUESTION_DOESNT_EXIST) {
-		return "QUESTION_DOESNT_EXIST\0";
+		strcpy(response, "QUESTION_DOESNT_EXIST\0");
+		return response;
 	} else if (error_code == QUESTION_ALREADY_EXISTS) {
-		return "QUESTION_ALREADY_EXISTS\0";
+		strcpy(response, "QUESTION_ALREADY_EXISTS\0");
+		return response;
 	}
 
 	return NULL;

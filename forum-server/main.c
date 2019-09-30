@@ -78,6 +78,7 @@ int main(int argc, char const *argv[])
 	struct sockaddr_in      		addr_udp, addr_tcp;
 	ssize_t                	 		n, n_write;
 	fd_set 							read_fds;
+	char *response;
 
 	parse_args (argc, (char** const) argv, main_params);
 
@@ -261,7 +262,8 @@ int main(int argc, char const *argv[])
 			buffer[n] = '\0';
 			/*                   */
 
-			/*udp_manager(buffer);*/
+			response = udp_manager(buffer);
+			printf("%s\n", response);
 
 			/* write on client */
 			n = sendto(server_sock_udp, buffer, n, 0, (struct sockaddr *) &addr_udp, addrlen_udp);
@@ -269,6 +271,7 @@ int main(int argc, char const *argv[])
 				fprintf(stderr, "sendto failed: %s\n", strerror(errno));
 				exit(EXIT_FAILURE);
 			}
+			free(response);
 			/*                 */
 		}
 		/*                            */
