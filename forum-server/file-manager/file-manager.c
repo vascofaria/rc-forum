@@ -224,70 +224,70 @@ int post_question(char *topic_name, char *question_name, char *user_id) {
 /*      gcc file-manager.c file-manager.h -o run        */
 /*------------------------------------------------------*/
 
-int main(int argc, char const *argv[]) {
-	
-	int i, error_code = 0;
-	char topic_name[MAX_FILENAME] = "Topic07\0";
-	char question_name[MAX_FILENAME] = "Question02\0";
-	char **topics_list = NULL;
-	char **questions_list = NULL;
-	char **answers_list = NULL;
-
-	/* TEST POST TOPIC */
-	// error_code = post_topic(topic_name, "89559\0");
-	// if (error_code == TOPIC_ALREADY_EXISTS) {
-	// 	fprintf(stderr, "Topic %s already exists\n", topic_name);
-	// 	exit(TOPIC_ALREADY_EXISTS);
-	// }
-
-	/* TEST POST QUESTION */
-	// error_code = post_question(topic_name, question_name, "89559\0");
-	// if (error_code == TOPIC_DOESNT_EXIST) {
-	// 	fprintf(stderr, "Topic %s doesnt exist\n", topic_name);
-	// 	exit(TOPIC_DOESNT_EXIST);
-	// } else if (error_code == QUESTION_ALREADY_EXISTS) {
-	// 	fprintf(stderr, "Question %s already exists\n", question_name);
-	// 	exit(QUESTION_ALREADY_EXISTS);
-	// }
-
-	/* TEST GET TOPICS */
-	error_code = get_topics(&topics_list);
-	int j;
-	for(j=0; j < MAX_TOPICS; j++) {
-		printf("%s", topics_list[j]);
-		printf("\n");
-	}
-
-	
-
-	/* TEST GET QUESTIONS */
-	// error_code = get_questions(topic_name, &questions_list);
-	// if (error_code == TOPIC_DOESNT_EXIST) {
-	// 	fprintf(stderr, "ERROR: TOPIC_DOESNT_EXIST\n");
-	// 	exit(TOPIC_DOESNT_EXIST);
-	// }
-
-	// error_code = get_answers(topic_name, question_name, &answers_list);
-	// if (error_code == TOPIC_DOESNT_EXIST) {
-	// 	fprintf(stderr, "ERROR: TOPIC_DOESNT_EXIST\n");
-	// 	exit(TOPIC_DOESNT_EXIST);
-	// } else if (error_code == QUESTION_DOESNT_EXIST) {
-	// 	fprintf(stderr, "ERROR: QUESTION_DOESNT_EXIST\n");
-	// 	exit(QUESTION_DOESNT_EXIST);
-	// }
-
-	// for (i = 0; i< MAX_TOPICS && topics_list[i] != NULL; i++)
-	// 	printf("%s\n", topics_list[i]);
-
-	// for (i=0; i < MAX_TOPICS && questions_list[i] != NULL; i++)
-	// 	printf("%s\n", questions_list[i]);
-
-	// for (i=0; i < MAX_TOPICS && answers_list[i] != NULL; i++)
-	// 	printf("%s\n", answers_list[i]);
-
-	free_list(topics_list);
-	free_list(questions_list);
-	free_list(answers_list);
-
-	return 0;
-}
+// int main(int argc, char const *argv[]) {
+// 	
+// 	int i, error_code = 0;
+// 	char topic_name[MAX_FILENAME] = "Topic07\0";
+// 	char question_name[MAX_FILENAME] = "Question02\0";
+// 	char **topics_list = NULL;
+// 	char **questions_list = NULL;
+// 	char **answers_list = NULL;
+// 
+// 	/* TEST POST TOPIC */
+// 	// error_code = post_topic(topic_name, "89559\0");
+// 	// if (error_code == TOPIC_ALREADY_EXISTS) {
+// 	// 	fprintf(stderr, "Topic %s already exists\n", topic_name);
+// 	// 	exit(TOPIC_ALREADY_EXISTS);
+// 	// }
+// 
+// 	/* TEST POST QUESTION */
+// 	// error_code = post_question(topic_name, question_name, "89559\0");
+// 	// if (error_code == TOPIC_DOESNT_EXIST) {
+// 	// 	fprintf(stderr, "Topic %s doesnt exist\n", topic_name);
+// 	// 	exit(TOPIC_DOESNT_EXIST);
+// 	// } else if (error_code == QUESTION_ALREADY_EXISTS) {
+// 	// 	fprintf(stderr, "Question %s already exists\n", question_name);
+// 	// 	exit(QUESTION_ALREADY_EXISTS);
+// 	// }
+// 
+// 	/* TEST GET TOPICS */
+// 	error_code = get_topics(&topics_list);
+// 	int j;
+// 	for(j=0; j < MAX_TOPICS; j++) {
+// 		printf("%s", topics_list[j]);
+// 		printf("\n");
+// 	}
+// 
+// 	
+// 
+// 	/* TEST GET QUESTIONS */
+// 	// error_code = get_questions(topic_name, &questions_list);
+// 	// if (error_code == TOPIC_DOESNT_EXIST) {
+// 	// 	fprintf(stderr, "ERROR: TOPIC_DOESNT_EXIST\n");
+// 	// 	exit(TOPIC_DOESNT_EXIST);
+// 	// }
+// 
+// 	// error_code = get_answers(topic_name, question_name, &answers_list);
+// 	// if (error_code == TOPIC_DOESNT_EXIST) {
+// 	// 	fprintf(stderr, "ERROR: TOPIC_DOESNT_EXIST\n");
+// 	// 	exit(TOPIC_DOESNT_EXIST);
+// 	// } else if (error_code == QUESTION_DOESNT_EXIST) {
+// 	// 	fprintf(stderr, "ERROR: QUESTION_DOESNT_EXIST\n");
+// 	// 	exit(QUESTION_DOESNT_EXIST);
+// 	// }
+// 
+// 	// for (i = 0; i< MAX_TOPICS && topics_list[i] != NULL; i++)
+// 	// 	printf("%s\n", topics_list[i]);
+// 
+// 	// for (i=0; i < MAX_TOPICS && questions_list[i] != NULL; i++)
+// 	// 	printf("%s\n", questions_list[i]);
+// 
+// 	// for (i=0; i < MAX_TOPICS && answers_list[i] != NULL; i++)
+// 	// 	printf("%s\n", answers_list[i]);
+// 
+// 	free_list(topics_list);
+// 	free_list(questions_list);
+// 	free_list(answers_list);
+// 
+// 	return 0;
+// }

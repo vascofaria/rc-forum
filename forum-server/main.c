@@ -14,23 +14,72 @@
 
 #define MAX(A, B) (((A) >= (B)) ? (A) : (B))
 
-#define SERV 		 "58000"
-#define BUFFER_SIZE  128
-#define MAX_CLIENTS  5
-#define MAX_ARGS_N	 3
-#define MAX_ARGS_L   20
+#define PORT 		 "58000"
+#define GROUP_NUMBER "1"
+#define BUFFER_SIZE   128
+#define MAX_CLIENTS   5
+#define ASCII_LIMIT   256
+#define MAX_ARGS_N    3
+#define MAX_ARGS_L    128
+
+enum param_types {
+	PARAM_FSPORT  = (unsigned char)'p',
+};
+
+static void set_default_params(char main_params[ASCII_LIMIT][BUFFER_SIZE]) {
+	strcpy(main_params[PARAM_FSPORT], PORT);
+	strcat(main_params[PARAM_FSPORT], GROUP_NUMBER);
+}
+
+static void display_usage (const char* appName, char main_params[ASCII_LIMIT][BUFFER_SIZE]) {
+    printf("Usage: %s [options]\n", appName);
+    puts("\nOptions:                            (defaults)\n");
+    printf("    p <INT>    [p]ort               (%s)\n", main_params['p']);
+    exit(EXIT_FAILURE);
+}
+
+static void parse_args (int argc, char* const argv[], char main_params[ASCII_LIMIT][BUFFER_SIZE]) {
+    int i;
+    int opt;
+
+    opterr = 0;
+
+    set_default_params(main_params);
+
+    while ((opt = getopt(argc, argv, "p:")) != -1) {
+        switch (opt) {
+            case 'p':
+            	strcpy(main_params[PARAM_FSPORT], optarg);
+                break;
+			case '?':
+            default:
+                opterr++;
+                break;
+        }
+    }
+
+    for (i = optind; i < argc; i++) {
+        fprintf(stderr, "Non-option argument: %s\n", argv[i]);
+        opterr++;
+    }
+
+    if (opterr) {
+        display_usage(argv[0], main_params);
+    }
+}
 
 int main(int argc, char const *argv[])
 {
 	int              				server_sock_udp, server_sock_tcp, client_sock_tcp, error_code, max_fd;
-	pid_t            			  pid; 
-	struct addrinfo 	   	 *res_tcp, *res_udp, hints;
-	char             				buffer[BUFFER_SIZE], *buffer_ptr;
-	socklen_t 		 					addrlen_udp, addrlen_tcp;
-	struct sockaddr_in      addr_udp, addr_tcp;
-	ssize_t                 n, n_write;
-	fd_set 									read_fds;
+	pid_t            			  	pid; 
+	struct addrinfo 	   	 		*res_tcp, *res_udp, hints;
+	char             				buffer[BUFFER_SIZE], *buffer_ptr, main_params[ASCII_LIMIT][BUFFER_SIZE];
+	socklen_t 		 				addrlen_udp, addrlen_tcp;
+	struct sockaddr_in      		addr_udp, addr_tcp;
+	ssize_t                	 		n, n_write;
+	fd_set 							read_fds;
 
+	parse_args (argc, (char** const) argv, main_params);
 
 	/* Initialization of hints structure for socket UDP */
 	memset((void *) &hints, 0, sizeof(struct addrinfo));
@@ -39,7 +88,7 @@ int main(int argc, char const *argv[])
 	hints.ai_flags    = AI_PASSIVE | AI_NUMERICSERV;
 	/*									                */
 
-	error_code = getaddrinfo(NULL, SERV, &hints, &res_udp);
+	error_code = getaddrinfo(NULL, main_params[PARAM_FSPORT], &hints, &res_udp);
 
 	if (error_code != 0) {
 		fprintf(stderr, "getaddrinfo failed: %s\n", gai_strerror(error_code));
@@ -54,7 +103,7 @@ int main(int argc, char const *argv[])
 		exit(EXIT_FAILURE);
 	}
 	/*			           */
-
+	
 	/* Socket UDP bind */
 	error_code = bind(server_sock_udp, res_udp->ai_addr, res_udp->ai_addrlen);
 
@@ -68,7 +117,7 @@ int main(int argc, char const *argv[])
 	hints.ai_socktype = SOCK_STREAM;
 	/*                                                  */
 		
-	error_code = getaddrinfo(NULL, SERV, &hints, &res_tcp);
+	error_code = getaddrinfo(NULL, main_params[PARAM_FSPORT], &hints, &res_tcp);
 
 	if (error_code != 0) {
 		fprintf(stderr, "getaddrinfo failed: %s\n", gai_strerror(error_code));
@@ -159,7 +208,7 @@ int main(int argc, char const *argv[])
 					exit(EXIT_FAILURE);
 				}
 				/*                  */
-				printf("%s\n", buffer);
+				printf("%s %d\n", buffer, n);
 				/**
 				 * TODO: implement menu
 				 */
@@ -210,6 +259,8 @@ int main(int argc, char const *argv[])
 				exit(EXIT_FAILURE);
 			}
 			buffer[n] = '\0';
+			/*                   */
+
 			udp_manager(buffer);
 
 			/* write on client */
@@ -218,7 +269,9 @@ int main(int argc, char const *argv[])
 				fprintf(stderr, "sendto failed: %s\n", strerror(errno));
 				exit(EXIT_FAILURE);
 			}
+			/*                 */
 		}
+		/*                            */
 	}
 
 	return 0;

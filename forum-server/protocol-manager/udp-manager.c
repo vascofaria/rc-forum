@@ -126,7 +126,7 @@ static int parse_input_LQU(char* request, char* topic) {
 
 static char *parse_output_LQR(char* topic, char **questions_list){
 	int num = 0;
-	    
+	
 	char questions[MAX_TOPIC_LIST_RESPONSE];
 	char response[MAX_TOPIC_LIST_RESPONSE + 6];
 	

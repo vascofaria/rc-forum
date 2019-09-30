@@ -12,10 +12,11 @@
 
 # FLAGS= ANSI
 NAME= server
-Object= main.o protocol-manager/udp-manager.o protocol-manager/tcp-manager.o file-manager.o usecases.o
+Object= protocol-manager/udp-manager.o protocol-manager/tcp-manager.o file-manager.o usecases.o
 CC= gcc
 
 all: $(Object)
+	$(CC) -o $(NAME) main.c $(Object)
 
 usecases.o: usecases/usecases.c usecases/usecases.h
 	$(CC) -c usecases/usecases.c
@@ -29,12 +30,10 @@ tcp-manager.o: protocol-manager/tcp-manager.c protocol-manager/tcp-manager.h ent
 udp-manager.o: protocol-manager/udp-manager.c protocol-manager/udp-manager.h exceptions.h constants.h protocol.h
 	$(CC) -c protocol-manager/udp-manager.c
 
-main.o: main.c protocol-manager/udp-manager.h protocol-manager/tcp-manager.h constants.h
-	$(CC) -c main.c
-
 
 clean:
-	(rm file-manager/*.o)
-	(rm protocol-manager/*.o)
-	(rm *.o)
-	(rm server)
+	@echo Cleaning Server...
+	(rm -f file-manager/*.o)
+	(rm -f protocol-manager/*.o)
+	(rm -f *.o)
+	(rm -f $(NAME))

@@ -10,10 +10,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#define BUFFER_SIZE 128
-#define ASCII_LIMIT 256
-#define MAX_ARGS_N  3
-#define MAX_ARGS_L  128
+#include "protocol-manager/client-manager.h"
+#include "user/user.h"
+
+#define PORT 		 "58000"
+#define GROUP_NUMBER "1"
+#define BUFFER_SIZE  128
+#define ASCII_LIMIT  256
 
 enum param_types {
 	PARAM_FSIP    = (unsigned char)'n',
@@ -21,62 +24,68 @@ enum param_types {
 };
 
 static void set_default_params(char main_params[ASCII_LIMIT][BUFFER_SIZE]) {
-	strcpy(main_params[PARAM_FSIP],   "fedux");
-	strcpy(main_params[PARAM_FSPORT], "58000");
+	if(gethostname(main_params[PARAM_FSIP], BUFFER_SIZE) == -1) {
+		fprintf(stderr, "gethostname failed: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+	strcpy(main_params[PARAM_FSPORT], PORT);
+	strcat(main_params[PARAM_FSPORT], GROUP_NUMBER);
 }
 
-static void concatenate_args(char *buffer, char* msg, char args[MAX_ARGS_N][MAX_ARGS_L], int num_tokens) {
-	int i;
-	buffer[0] = '\0';
-	strcpy(buffer, msg);
-	for (i = 0; i < num_tokens - 1; i++) {
-		strcat(buffer, " \0");
-		strcat(buffer, args[i + 1]);
-	}
-	strcat(buffer, "\n\0");
+static void display_usage (const char* appName, char main_params[ASCII_LIMIT][BUFFER_SIZE]) {
+    printf("Usage: %s [options]\n", appName);
+    puts("\nOptions:                            (defaults)\n");
+    printf("    p <INT>    [p]ort               (%s)\n", main_params['p']);
+    printf("    n <INT>    [n]ode               (%s)\n", main_params['n']);
+    exit(EXIT_FAILURE);
 }
 
-static void executes_tcp_command(char *buffer, struct addrinfo *res_tcp) {
-	int server_sock_tcp, error_code;
+static void parse_args (int argc, char* const argv[], char main_params[ASCII_LIMIT][BUFFER_SIZE]) {
+    int i;
+    int opt;
 
-	/* Socket TCP creation */
-	server_sock_tcp = socket(res_tcp->ai_family, res_tcp->ai_socktype, res_tcp->ai_protocol);
+    opterr = 0;
 
-	if (server_sock_tcp == -1) {
-		fprintf(stderr, "socket creation failed: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-	/*			           */
+    set_default_params(main_params);
 
-	/* Connect to TCP socket */
-	error_code = connect(server_sock_tcp, res_tcp->ai_addr, res_tcp->ai_addrlen);
+    while ((opt = getopt(argc, argv, "p:")) != -1) {
+        switch (opt) {
+            case 'p':
+            	strcpy(main_params[PARAM_FSPORT], optarg);
+                break;
+			case 'n':
+            	strcpy(main_params[PARAM_FSIP], optarg);
+                break;
+			case '?':
+            default:
+                opterr++;
+                break;
+        }
+    }
 
-	if (error_code == -1) {
-		fprintf(stderr, "connect failed: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+    for (i = optind; i < argc; i++) {
+        fprintf(stderr, "Non-option argument: %s\n", argv[i]);
+        opterr++;
+    }
 
-	/* Write on server socket */
-	write(server_sock_tcp, buffer, BUFFER_SIZE);
-
-	/* Read from server socket */
-	read(server_sock_tcp, buffer, BUFFER_SIZE);
-
-	error_code = close(server_sock_tcp);
-	if (error_code == -1) {
-		fprintf(stderr, "close failed: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+    if (opterr) {
+        display_usage(argv[0], main_params);
+    }
 }
 
 int main(int argc, char const *argv[])
 {
-	int 				server_sock_udp, error_code, num_tokens;
+	int 				server_sock_udp, error_code;
 	struct addrinfo 	hints, *res_udp, *res_tcp;
-	char				buffer[BUFFER_SIZE], *buffer_ptr, main_params[ASCII_LIMIT][BUFFER_SIZE], args[MAX_ARGS_N][MAX_ARGS_L];
+	char				buffer[BUFFER_SIZE], *buffer_ptr, main_params[ASCII_LIMIT][BUFFER_SIZE];
 	ssize_t 			n;
+	user_t 				*user;
 
-	set_default_params(main_params);
+	parse_args (argc, (char** const) argv, main_params);
+
+	/* Initialization of user structure */
+	user = create_user();
+	/*                                  */
 
 	/* Initialization of hints structure for socket UDP */
 	memset((void *) &hints, 0, sizeof(struct addrinfo));
@@ -91,6 +100,7 @@ int main(int argc, char const *argv[])
 		fprintf(stderr, "getaddrinfo failed: %s\n", gai_strerror(error_code));
 		exit(EXIT_FAILURE);
 	}
+	set_user_udp_addrinfo(user, res_udp);
 
 	/* Socket UDP creation */
 	server_sock_udp = socket(res_udp->ai_family, res_udp->ai_socktype, res_udp->ai_protocol);
@@ -99,6 +109,7 @@ int main(int argc, char const *argv[])
 		fprintf(stderr, "socket creation failed: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
+	set_user_server_sock_udp(user, server_sock_udp);
 	/*			           */
 
 	/* Initialization of hints structure for socket TCP */
@@ -111,7 +122,7 @@ int main(int argc, char const *argv[])
 		fprintf(stderr, "getaddrinfo failed: %s\n", gai_strerror(error_code));
 		exit(EXIT_FAILURE);
 	}
-
+	set_user_tcp_addrinfo(user, res_tcp);
 
 	while (1) {
 		printf("Enter command (? for help) : ");
@@ -125,115 +136,7 @@ int main(int argc, char const *argv[])
 		/*                     */
 
 		/* executes command */
-		num_tokens = sscanf(buffer, "%s %s %s %s %s", args[0], args[1], args[2], args[3], args[4]);
-
-		if (!strcmp(args[0], "register")             || 
-			!strcmp(args[0], "reg")) {
-				if (num_tokens == 2) {
-					concatenate_args(buffer, "REG", args, num_tokens);
-					sendto(server_sock_udp, buffer, strlen(buffer), 0, (struct sockaddr *) res_udp->ai_addr, res_udp->ai_addrlen);
-				}
-				else {
-					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
-				}
-		}
-		else if (!strcmp(args[0], "topic_list")      || 
-			     !strcmp(args[0], "tl")) {
-				if (num_tokens == 1) {
-					concatenate_args(buffer, "LTP", args, num_tokens);
-					sendto(server_sock_udp, buffer, strlen(buffer), 0, (struct sockaddr *) res_udp->ai_addr, res_udp->ai_addrlen);
-				}
-				else {
-					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
-				}
-		}
-		else if (!strcmp(args[0], "topic_select")    || 
-			     !strcmp(args[0], "ts")) {
-				 /* this option dont comunicate with server */
-				if (num_tokens != 1) {
-					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
-				} 
-		}
-		else if (!strcmp(args[0], "topic_propose")   || 
-			     !strcmp(args[0], "tp")) {
-				if (num_tokens == 2) {
-					concatenate_args(buffer, "PTP", args, num_tokens);
-					sendto(server_sock_udp, buffer, strlen(buffer), 0, (struct sockaddr *) res_udp->ai_addr, res_udp->ai_addrlen);
-				}
-				else {
-					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
-				}
-		}
-		else if (!strcmp(args[0], "question_list")   || 
-			     !strcmp(args[0], "ql")) {
-				if (num_tokens == 1) {
-					concatenate_args(buffer, "LQU", args, num_tokens);
-					sendto(server_sock_udp, buffer, strlen(buffer), 0, (struct sockaddr *) res_udp->ai_addr, res_udp->ai_addrlen);
-				}
-				else {
-					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
-				}
-		}
-		else if (!strcmp(args[0], "question_get")    || 
-			     !strcmp(args[0], "qg")) {
-				if (num_tokens == 2) {
-					concatenate_args(buffer, "GQU", args, num_tokens);
-					executes_tcp_command(buffer, res_tcp);
-				}
-				else {
-					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
-				}
-		}
-		else if (!strcmp(args[0], "question_submit") || 
-			     !strcmp(args[0], "qs")) {
-				if (num_tokens == 3 || num_tokens == 4) {
-					concatenate_args(buffer, "QUS", args, num_tokens);
-					executes_tcp_command(buffer, res_tcp);
-				}
-				else {
-					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
-				}
-		}
-		else if (!strcmp(args[0], "answer_submit")   || 
-			     !strcmp(args[0], "as")) {
-				if (num_tokens == 2 || num_tokens == 3) {	
-					concatenate_args(buffer, "ANS", args, num_tokens);
-					executes_tcp_command(buffer, res_tcp);
-				}
-				else {
-					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
-				}
-		}
-		else if (!strcmp(args[0], "exit")) {
-				if (num_tokens == 1) {
-					break;
-				}
-				else {
-					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
-				}
-
-		}
-		else if (!strcmp(args[0], "?")) {
-				if (num_tokens == 1) {
-					printf( "\tregister\t/reg\t<userId>\n" 
-							"\ttopic_list\t/tl\n"
-							"\ttopic_select\t\t<topic name>\n"
-							"\tts\t\t\t<topic number>\n"
-							"\ttopic_propose\t/tp\t<topic>\n"
-							"\tquestion_list\t/ql\n"
-							"\tquestion_get\t\t<question name>\n"
-							"\tqg\t\t\t<question_number>\n"
-							"\tanswer_submit\t/as\t<text_file [image_file]>\n"
-							"\tquestion_submit\t/qs\t<text_file [image_file]>\n"
-							"\texit\n");
-				}
-				else {
-					fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
-				}
-		}
-		else {
-				fprintf(stdout, "Invalid command!\n");
-		}
+		client_manager(user, buffer);
 		/*                  */
 	}
 
