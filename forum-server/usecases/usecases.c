@@ -13,6 +13,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "usecases.h"
 #include "../exceptions.h"
 #include "../file-manager/file-manager.h"

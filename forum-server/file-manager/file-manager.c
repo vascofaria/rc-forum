@@ -29,7 +29,7 @@
 #define MAX_QUESTIONS 99
 #define MAX_ANSWERS   99
 
-#define TOPICS_PATH    "../topics/\0"
+#define TOPICS_PATH    "./topics/\0"
 #define QUESTIONS_PATH "/questions/\0"
 #define ANSWERS_PATH   "/answers/\0"
 
@@ -68,30 +68,19 @@ char **list_directory(char* path) {
 	d = opendir(path);
 
 	char **dir_list = (char**) malloc(sizeof(char*) * MAX_TOPICS);
-	if (dir_list)
-		for (i=0;i<MAX_TOPICS;i++) dir_list[i]=(char*)NULL;
 
 	if (d) {
-		printf("HEY\n");
+		i = 0;
 		while ((dir = readdir(d)) != NULL) {
 			if (dir->d_name[0] != '.') {
-				dir_name = (char*) malloc(sizeof(char) * MAX_FILENAME);
-				printf("%s:%ld\n", dir->d_name, dir->d_ino);
-				strcpy(dir_name, dir->d_name);
-				dir_list[i++] = dir_name;
+				dir_list[i] = (char*) malloc(sizeof(char) * MAX_FILENAME);
+				// printf("%s\n", dir->d_name);
+				strcpy(dir_list[i++], dir->d_name);
 			}
 		}
-		closedir(d);
+		// closedir(d);
 	}
-
 	return dir_list;
-}
-
-void free_list(char **list) {
-	int i;
-	for (i=0; i<MAX_TOPICS && list[i] != NULL; i++)
-		free(list[i]);
-	free(list);
 }
 
 int get_topics(char ***topics_list) {
@@ -99,6 +88,10 @@ int get_topics(char ***topics_list) {
 	char p[MAX_PATH] = TOPICS_PATH;
 
 	*topics_list = list_directory(p);
+
+	for (int i = 0; i<99 && (*topics_list)[i] != NULL; i++) {
+		printf("%s\n", (*topics_list)[i]);
+	}
 	return SUCCESS;
 }
 
