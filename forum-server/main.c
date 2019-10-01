@@ -261,12 +261,11 @@ int main(int argc, char const *argv[])
 			}
 			buffer[n] = '\0';
 			/*                   */
-
 			response = udp_manager(buffer);
 			printf("%s\n", response);
 
 			/* write on client */
-			n = sendto(server_sock_udp, buffer, n, 0, (struct sockaddr *) &addr_udp, addrlen_udp);
+			n = sendto(server_sock_udp, buffer, strlen(buffer), 0, (struct sockaddr *) &addr_udp, addrlen_udp);
 			if (n == -1) {
 				fprintf(stderr, "sendto failed: %s\n", strerror(errno));
 				exit(EXIT_FAILURE);

@@ -143,7 +143,6 @@ client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_
 			request = make_new_GQU_request(protocol, get_user_topic(user), args[1]);
 			
 			if (request) {
-				printf("%s %ld\n", request, strlen(request));
 				executes_tcp_command(request, get_user_tcp_addrinfo(user));
 				free(request);
 				request = NULL;
@@ -192,7 +191,6 @@ client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_
 					data = NULL;
 				}
 				if (request) {
-					printf("%s %ld\n", request, strlen(request));
 					executes_tcp_command(request, get_user_tcp_addrinfo(user));
 					free(request);
 					request = NULL;
@@ -247,7 +245,6 @@ client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_
 						data = NULL;
 					}
 					if (request) {
-						printf("%s %ld\n", request, strlen(request));
 						executes_tcp_command(request, get_user_tcp_addrinfo(user));
 						free(request);
 						request = NULL;
