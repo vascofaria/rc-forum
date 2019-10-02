@@ -74,7 +74,7 @@ char **list_directory(char* path) {
 		while ((dir = readdir(d)) != NULL) {
 			if (dir->d_name[0] != '.') {
 				strcpy(id, "\0");
-				strcpy(current_dir, TOPICS_PATH); 
+				strcpy(current_dir, path); 
 				dir_list[i] = (char*) malloc(sizeof(char) * (MAX_FILENAME + 1 + USER_ID_SIZE + 1));
 				strcat(current_dir, dir->d_name);
 				strcat(current_dir, "/uid.txt\0");
