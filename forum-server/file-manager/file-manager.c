@@ -12,6 +12,7 @@
  */
 
 #include "file-manager.h"
+#include "../constants.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -27,7 +28,6 @@
 #define MAX_FILENAME  20
 #define MAX_TOPICS    99
 #define MAX_QUESTIONS 99
-#define MAX_ANSWERS   99
 
 #define TOPICS_PATH    "./topics/\0"
 #define QUESTIONS_PATH "/questions/\0"
@@ -53,7 +53,10 @@ char **list_directory(char* path) {
 
 	int i = 0;
 	char *dir_name;
+	char current_dir[MAX_FILENAME*2]; 
+	char id[USER_ID_SIZE + 10];
 	DIR *d = NULL;
+	FILE *fp = NULL;
 	struct dirent *dir = NULL;
 	d = opendir(path);
 
@@ -63,10 +66,19 @@ char **list_directory(char* path) {
 		i = 0;
 		while ((dir = readdir(d)) != NULL) {
 			if (dir->d_name[0] != '.') {
-				dir_list[i] = (char*) malloc(sizeof(char) * MAX_FILENAME);
-				// printf("%s\n", dir->d_name);
-				strcpy(dir_list[i++], dir->d_name);
-				// TODO: Load user ID
+				strcpy(id, "\0");
+				strcpy(current_dir, TOPICS_PATH); 
+				dir_list[i] = (char*) malloc(sizeof(char) * (MAX_FILENAME + 1 + USER_ID_SIZE + 1));
+				strcat(current_dir, dir->d_name);
+				strcat(current_dir, "/uid.txt\0");
+				fp = fopen(current_dir, "r"); //TODO ERRO DO SISTEMA
+				if (fp) {
+					fscanf(fp, "%s", id); 
+					fclose(fp);
+				}
+				strcpy(dir_list[i], dir->d_name);
+				strcat(dir_list[i], ":");
+				strcat(dir_list[i++], id);
 			}
 		}
 		// closedir(d);
@@ -130,8 +142,8 @@ int post_topic(char *topic_name, char *user_id) {
 	FILE *fd;
 	strcat(user_id_path, p);
 	strcat(user_id_path, "/\0");
-	strcat(user_id_path, topic_name);
-	strcat(user_id_path, "_uid.txt\0");
+	//strcat(user_id_path, topic_name);
+	strcat(user_id_path, "uid.txt\0");
 
 	if (topic_exists(p) == TOPIC_ALREADY_EXISTS)
 		return TOPIC_ALREADY_EXISTS;
