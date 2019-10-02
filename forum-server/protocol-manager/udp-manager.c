@@ -166,17 +166,12 @@ static char *parse_output_ERROR(int error_code) {
 		strcpy(response, "BAD_INPUT\0");
 
 	} else if (error_code == TOPIC_DOESNT_EXIST) {
+		// TODO: change error msg
 		strcpy(response, "TOPIC_DOESNT_EXIST\0");
 
 	} else if (error_code == TOPIC_ALREADY_EXISTS) {
 		strcpy(response, "PTR \0");
 		strcat(response, DUP);
-
-	} else if (error_code == QUESTION_DOESNT_EXIST) {
-		strcpy(response, "QUESTION_DOESNT_EXIST\0");
-
-	} else if (error_code == QUESTION_ALREADY_EXISTS) {
-		strcpy(response, "QUESTION_ALREADY_EXISTS\0");
 
 	} else {
 		strcpy(response, ERR);
