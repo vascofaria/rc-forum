@@ -4,6 +4,7 @@
 #include "../constants.h"
 #include "../usecases/usecases.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 
@@ -67,7 +68,7 @@ static char *parse_output_LTR(char **topics_list) {
 	strcat(response, " ");
 	strcat(response, num_str);
 
-	if (num == 0) strcat(response, '\n');
+	if (num == 0) strcat(response, "\n\0");
 	else strcat(response, topics);
 	
 	return response;
@@ -132,6 +133,7 @@ static int parse_input_LQU(char* request, char* topic) {
 
 static char *parse_output_LQR(char* topic, char **questions_list){
 	int num = 0;
+	char num_str[3];
 	
 	char questions[MAX_TOPIC_LIST_RESPONSE];
 	char *response = (char*) malloc(sizeof(char)*(MAX_TOPIC_LIST_RESPONSE + 6));
@@ -140,11 +142,17 @@ static char *parse_output_LQR(char* topic, char **questions_list){
 		strcat(questions, " ");
 		strcat(questions, questions_list[num]);
 	}
+
+	sprintf(num_str, "%d", num);
+
 	
 	strcat(response, LQR);
 	strcat(response, " ");
-	strcat(response, num);
-	strcat(response, questions);
+	strcat(response, num_str);
+
+	if (num == 0) strcat(response, "\n\0");
+	else strcat(response, questions);
+
 	return response;
 }
 

@@ -48,7 +48,7 @@ static void parse_args (int argc, char* const argv[], char main_params[ASCII_LIM
 
     set_default_params(main_params);
 
-    while ((opt = getopt(argc, argv, "p:")) != -1) {
+    while ((opt = getopt(argc, argv, "p:n:")) != -1) {
         switch (opt) {
             case 'p':
             	strcpy(main_params[PARAM_FSPORT], optarg);

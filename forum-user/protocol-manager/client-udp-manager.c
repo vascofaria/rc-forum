@@ -11,7 +11,7 @@
 #include "../error-messages/input-error-messages.h"
 
 static char* make_new_REG_request(char *protocol, char *user_id) {
-	char* request = (char *) malloc (sizeof(char) * (strlen(protocol) + strlen(user_id) + strlen(" ") + strlen("\n") + 1));
+	char* request = (char *) malloc(sizeof(char) * (strlen(protocol) + strlen(user_id) + strlen(" ") + strlen("\n") + 1));
 	if (request != NULL) {
 		request[0] = '\0';
 		strcpy(request, protocol);
@@ -23,7 +23,7 @@ static char* make_new_REG_request(char *protocol, char *user_id) {
 }
 
 static char* make_new_LTP_request(char *protocol) {
-	char* request = (char *) malloc (sizeof(char) * (strlen(protocol) + strlen(protocol) + strlen("\n") + 1));
+	char* request = (char *) malloc(sizeof(char) * (strlen(protocol) + strlen(protocol) + strlen("\n") + 1));
 	if (request != NULL) {
 		request[0] = '\0';
 		strcpy(request, protocol);
@@ -33,7 +33,7 @@ static char* make_new_LTP_request(char *protocol) {
 }
 
 static char* make_new_PTP_request(char *protocol, char *user_id, char *topic) {
-	char* request = (char *) malloc (sizeof(char) * (strlen(protocol) + strlen(user_id) + strlen(topic) + (strlen(" ") * 2) + strlen("\n") + 1));
+	char* request = (char *) malloc(sizeof(char) * (strlen(protocol) + strlen(user_id) + strlen(topic) + (strlen(" ") * 2) + strlen("\n") + 1));
 	if (request != NULL) {
 		request[0] = '\0';
 		strcpy(request, protocol);
@@ -47,7 +47,7 @@ static char* make_new_PTP_request(char *protocol, char *user_id, char *topic) {
 }
 
 static char* make_new_LQU_request(char *protocol, char *topic) {
-	char* request = (char *) malloc (sizeof(char) * (strlen(protocol) + strlen(topic) + strlen(" ") + strlen("\n") + 1));
+	char* request = (char *) malloc(sizeof(char) * (strlen(protocol) + strlen(topic) + strlen(" ") + strlen("\n") + 1));
 	if (request != NULL) {
 		request[0] = '\0';
 		strcpy(request, protocol);
