@@ -12,6 +12,8 @@
  */
 
 #include "file-manager.h"
+#include "../entities/answer.h"
+#include "../entities/question.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -27,14 +29,12 @@
 #define MAX_FILENAME  20
 #define MAX_TOPICS    99
 #define MAX_QUESTIONS 99
-#define MAX_ANSWERS   99
 
 #define TOPICS_PATH    "./topics/\0"
 #define QUESTIONS_PATH "/questions/\0"
 #define ANSWERS_PATH   "/answers/\0"
 
 int topic_exists(char *topic_path) {
-
 	if (opendir(topic_path)) {
 		return TOPIC_ALREADY_EXISTS;
 	}
@@ -42,11 +42,17 @@ int topic_exists(char *topic_path) {
 }
 
 int question_exists(char *question_path) {
-
 	if (opendir(question_path)) {
 		return QUESTION_ALREADY_EXISTS;
 	}
 	return QUESTION_DOESNT_EXIST;
+}
+
+int answer_exists(char *answer_path) {
+	if (opendir(answer_path)) {
+		return ANSWER_ALREADY_EXISTS;
+	}
+	return ANSWER_DOESNT_EXIST;
 }
 
 char **list_directory(char* path) {
@@ -74,6 +80,22 @@ char **list_directory(char* path) {
 	return dir_list;
 }
 
+int count_directories(char *path) {
+	int dirs_number = 0;
+	DIR *d = NULL;
+	struct dirent *dir = NULL;
+	d = opendir(path);
+
+	if (d) {
+		while((dir = readdir(d)) != NULL) {
+			if (dir->d_name[0] != '.') {
+				dirs_number++;
+			}
+		}
+	}
+	return dirs_number;
+}
+
 int get_topics(char ***topics_list) {
 
 	char p[MAX_PATH] = TOPICS_PATH;
@@ -84,6 +106,24 @@ int get_topics(char ***topics_list) {
 	// 	printf("%s\n", (*topics_list)[i]);
 	// }
 	return SUCCESS;
+}
+
+int get_question(char *topic_name, char *question_name, question_t *question) {
+	
+	char p[MAX_PATH] = TOPICS_PATH;
+	strcat(p, topic_name);
+
+	if (topic_exists(p) == TOPIC_DOESNT_EXIST)
+		return TOPIC_DOESNT_EXIST;
+
+	strcat(p, QUESTIONS_PATH);
+	strcat(p, question_name);
+
+	if (question_exists(p) == QUESTION_DOESNT_EXIST)
+		return QUESTION_DOESNT_EXIST;
+
+
+	// TODO: load all the data to the question structure
 }
 
 int get_questions(char *topic_name, char ***questions_list) {
@@ -136,21 +176,23 @@ int post_topic(char *topic_name, char *user_id) {
 	if (topic_exists(p) == TOPIC_ALREADY_EXISTS)
 		return TOPIC_ALREADY_EXISTS;
 
+	if (count_directories(TOPICS_PATH) >= 99) {
+		return MAX_TOPICS_REACHED;
+	}
+
 	/* Create Topic directory */
 	error_code = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if (error_code) {
 		fprintf(stderr, "ERROR: Unable to create directory: %s: %s, %d\n", p, strerror(errno), errno);
 		// exit(error_code);
 		return FAILURE;
-	} //VASCO- AQUI DEVIA DEVOLVER SE ALGO P usecases escreverem NOK 
+	}
 
 	/* Create topic user_id file */
 	fd = fopen(user_id_path, "ab+");
 	fprintf(fd, "%s", user_id);
 	fclose(fd);
-
-	//VASCO - falta dares erro FUL
-
+	
 	/* Create topic questions directory */
 	strcat(p, QUESTIONS_PATH);
 	error_code = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -162,7 +204,7 @@ int post_topic(char *topic_name, char *user_id) {
 	return SUCCESS;
 }
 
-int post_question(char *topic_name, char *question_name, char *user_id) {
+int post_question(char *topic_name, question_t *question, char *user_id) {
 
 	FILE *fd;
 	int error_code;
@@ -173,17 +215,20 @@ int post_question(char *topic_name, char *question_name, char *user_id) {
 	if (topic_exists(p) == TOPIC_DOESNT_EXIST)
 		return TOPIC_DOESNT_EXIST;
 
-	strcat(p, "/\0");
 	strcat(p, QUESTIONS_PATH);
-	strcat(p, question_name);
+
+	if (count_directories(p) >= 99)
+		return MAX_QUESTIONS_REACHED;
+	
+	strcat(p, question->title);
 
 	if (question_exists(p) == QUESTION_ALREADY_EXISTS)
 		return QUESTION_ALREADY_EXISTS;
 
 	strcat(user_id_path, p);
 	strcat(user_id_path, "/\0");
-	strcat(user_id_path, question_name);
-	strcat(user_id_path, "_uid.txt\0");
+	// strcat(user_id_path, question->title);
+	strcat(user_id_path, "uid.txt\0");
 
 	/* Create Question directory */
 	error_code = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -192,90 +237,84 @@ int post_question(char *topic_name, char *question_name, char *user_id) {
 		exit(error_code);
 	}
 
-	/* Create topic user_id file */
+	/* Create question user_id file */
 	fd = fopen(user_id_path, "ab+");
 	fprintf(fd, "%s", user_id);
 	fclose(fd);
 
-	/* Create topic questions directory */
+	/* Create question answers directory */
 	strcat(p, ANSWERS_PATH);
 	error_code = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if (error_code) {
 		fprintf(stderr, "ERROR: Unable to create directory: %s: %s\n", p, strerror(errno));
 		exit(error_code);
 	}
+
+	if (question->data_size != 0) {
+		// strcat(p, "/question.txt");
+		// TODO: question->data => question.txt
+	}
+
+	if (question->image_size != 0) {
+		// strcat(p, "/question.ext");
+		// TODO: question->image => question.ext
+	}
+
 	return SUCCESS;
 }
 
-/*------------------------------------------------------*/
-/*------------------------TESTING-----------------------*/
-/*      gcc file-manager.c file-manager.h -o run        */
-/*------------------------------------------------------*/
+int post_answer(char *topic_name, char *question_name, answer_t *answer, char *user_id) {
 
-// int main(int argc, char const *argv[]) {
-// 	
-// 	int i, error_code = 0;
-// 	char topic_name[MAX_FILENAME] = "Topic07\0";
-// 	char question_name[MAX_FILENAME] = "Question02\0";
-// 	char **topics_list = NULL;
-// 	char **questions_list = NULL;
-// 	char **answers_list = NULL;
-// 
-// 	/* TEST POST TOPIC */
-// 	// error_code = post_topic(topic_name, "89559\0");
-// 	// if (error_code == TOPIC_ALREADY_EXISTS) {
-// 	// 	fprintf(stderr, "Topic %s already exists\n", topic_name);
-// 	// 	exit(TOPIC_ALREADY_EXISTS);
-// 	// }
-// 
-// 	/* TEST POST QUESTION */
-// 	// error_code = post_question(topic_name, question_name, "89559\0");
-// 	// if (error_code == TOPIC_DOESNT_EXIST) {
-// 	// 	fprintf(stderr, "Topic %s doesnt exist\n", topic_name);
-// 	// 	exit(TOPIC_DOESNT_EXIST);
-// 	// } else if (error_code == QUESTION_ALREADY_EXISTS) {
-// 	// 	fprintf(stderr, "Question %s already exists\n", question_name);
-// 	// 	exit(QUESTION_ALREADY_EXISTS);
-// 	// }
-// 
-// 	/* TEST GET TOPICS */
-// 	error_code = get_topics(&topics_list);
-// 	int j;
-// 	for(j=0; j < MAX_TOPICS; j++) {
-// 		printf("%s", topics_list[j]);
-// 		printf("\n");
-// 	}
-// 
-// 	
-// 
-// 	/* TEST GET QUESTIONS */
-// 	// error_code = get_questions(topic_name, &questions_list);
-// 	// if (error_code == TOPIC_DOESNT_EXIST) {
-// 	// 	fprintf(stderr, "ERROR: TOPIC_DOESNT_EXIST\n");
-// 	// 	exit(TOPIC_DOESNT_EXIST);
-// 	// }
-// 
-// 	// error_code = get_answers(topic_name, question_name, &answers_list);
-// 	// if (error_code == TOPIC_DOESNT_EXIST) {
-// 	// 	fprintf(stderr, "ERROR: TOPIC_DOESNT_EXIST\n");
-// 	// 	exit(TOPIC_DOESNT_EXIST);
-// 	// } else if (error_code == QUESTION_DOESNT_EXIST) {
-// 	// 	fprintf(stderr, "ERROR: QUESTION_DOESNT_EXIST\n");
-// 	// 	exit(QUESTION_DOESNT_EXIST);
-// 	// }
-// 
-// 	// for (i = 0; i< MAX_TOPICS && topics_list[i] != NULL; i++)
-// 	// 	printf("%s\n", topics_list[i]);
-// 
-// 	// for (i=0; i < MAX_TOPICS && questions_list[i] != NULL; i++)
-// 	// 	printf("%s\n", questions_list[i]);
-// 
-// 	// for (i=0; i < MAX_TOPICS && answers_list[i] != NULL; i++)
-// 	// 	printf("%s\n", answers_list[i]);
-// 
-// 	free_list(topics_list);
-// 	free_list(questions_list);
-// 	free_list(answers_list);
-// 
-// 	return 0;
-// }
+	FILE *fd;
+	int error_code;
+	char p[MAX_PATH] = TOPICS_PATH;
+	char user_id_path[MAX_PATH] = "\0";
+	strcat(p, topic_name);
+
+	if (topic_exists(p) == TOPIC_DOESNT_EXIST)
+		return TOPIC_DOESNT_EXIST;
+
+	strcat(p, QUESTIONS_PATH);	
+	strcat(p, question_name);
+
+	if (question_exists(p) == QUESTION_DOESNT_EXIST)
+		return QUESTION_DOESNT_EXIST;
+
+	strcat(p, ANSWERS_PATH);
+
+	if (count_directories(p) >= 99)
+		return MAX_ANSWERS_REACHED;
+	
+	strcat(p, answer->title);
+
+	if (answer_exists(p) == ANSWER_ALREADY_EXISTS)
+		return ANSWER_ALREADY_EXISTS;
+
+	strcat(user_id_path, p);
+	strcat(user_id_path, "/\0");
+	// TODO: USERID
+
+	/* Create Answer directory */
+	error_code = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	if (error_code) {
+		fprintf(stderr, "ERROR: Unable to create directory: %s: %s, %d\n", p, strerror(errno), errno);
+		exit(error_code);
+	}
+
+	/* Create answer user_id file */
+	fd = fopen(user_id_path, "ab+");
+	fprintf(fd, "%s", user_id);
+	fclose(fd);
+
+	if (answer->data_size != 0) {
+		// strcat(p, "/answer.txt");
+		// TODO: answer->data => answer.txt
+	}
+
+	if (answer->image_size != 0) {
+		// strcat(p, "/answer.ext");
+		// TODO: answer->image => answer.ext
+	}
+
+	return SUCCESS;
+}

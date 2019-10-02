@@ -12,11 +12,17 @@
 
 # FLAGS= ANSI
 NAME= server
-Object= protocol-manager/udp-manager.o protocol-manager/tcp-manager.o file-manager.o usecases.o
+Object= protocol-manager/udp-manager.o protocol-manager/tcp-manager.o file-manager.o answer.o question.o usecases.o
 CC= gcc
 
 all: $(Object)
 	$(CC) -o $(NAME) main.c $(Object)
+
+answer.o: entities/answer.c entities/answer.h
+	$(CC) -c entities/answer.c
+
+question.o: entities/question.c entities/question.h
+	$(CC) -c entities/question.c
 
 usecases.o: usecases/usecases.c usecases/usecases.h
 	$(CC) -c usecases/usecases.c

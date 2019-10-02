@@ -39,6 +39,7 @@ static char *parse_output_RGR() {
 	char *response = (char*) malloc(sizeof(char) * (MAX_STATUS_RESPONSE+1));
 	strcpy(response, RGR);
 	strcat(response, OK);
+	strcat(response, "\n\0");
 	return response;
 }
 
@@ -68,8 +69,9 @@ static char *parse_output_LTR(char **topics_list) {
 	strcat(response, " ");
 	strcat(response, num_str);
 
-	if (num == 0) strcat(response, "\n\0");
-	else strcat(response, topics);
+	if (num != 0) strcat(response, topics);
+	
+	strcat(response, "\n\0");
 	
 	return response;
 }
@@ -110,7 +112,7 @@ static char *parse_output_PTR() {
 	response[0] = '\0';
 	strcat(response, PTR);
 	strcat(response, OK);
-
+	strcat(response, "\n\0");
 	return response;
 }
 
@@ -163,18 +165,22 @@ static char *parse_output_ERROR(int error_code) {
 	
 	char* response = (char*) malloc(sizeof(char)*(MAX_STATUS_RESPONSE+1));
 	if (error_code == BAD_INPUT) {
-		strcpy(response, "BAD_INPUT\0");
+		strcpy(response, "BAD_INPUT\n\0");
 
 	} else if (error_code == TOPIC_DOESNT_EXIST) {
 		// TODO: change error msg
-		strcpy(response, "TOPIC_DOESNT_EXIST\0");
+		strcpy(response, "TOPIC_DOESNT_EXIST\n\0");
 
 	} else if (error_code == TOPIC_ALREADY_EXISTS) {
 		strcpy(response, "PTR \0");
 		strcat(response, DUP);
-
+		strcat(response, "\n\0");
+	} else if (error_code == MAX_TOPICS_REACHED) {
+		strcpy(response, FUL);
+		strcpy(response, "\n\0");
 	} else {
 		strcpy(response, ERR);
+		strcpy(response, "\n\0");
 	}
 	return response;
 }
@@ -250,7 +256,5 @@ char* udp_manager(char *request) {
 
 		return parse_output_LQR(topic, questions_list);
 	}
-	// no protocol
-	// parse_output_ERROR();
-	return NULL;
+	return parse_output_ERROR(FAILURE);
 }
