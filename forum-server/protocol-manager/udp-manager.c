@@ -107,6 +107,7 @@ static int parse_input_PTP(char* request, char* user_id, char* topic) {
 static char *parse_output_PTR() {
 
 	char *response = (char*) malloc(sizeof(char)*(MAX_STATUS_RESPONSE+1));
+	response[0] = '\0';
 	strcat(response, PTR);
 	strcat(response, OK);
 
@@ -135,7 +136,7 @@ static char *parse_output_LQR(char* topic, char **questions_list){
 	int num = 0;
 	char num_str[3];
 	
-	char questions[MAX_TOPIC_LIST_RESPONSE];
+	char questions[MAX_TOPIC_LIST_RESPONSE] = "\0";
 	char *response = (char*) malloc(sizeof(char)*(MAX_TOPIC_LIST_RESPONSE + 6));
 	
 	for(num = 0; num < MAX_TOPIC_LIST_RESPONSE && questions_list[num] != NULL; num++){
@@ -145,7 +146,6 @@ static char *parse_output_LQR(char* topic, char **questions_list){
 
 	sprintf(num_str, "%d", num);
 
-	
 	strcat(response, LQR);
 	strcat(response, " ");
 	strcat(response, num_str);
@@ -164,22 +164,24 @@ static char *parse_output_ERROR(int error_code) {
 	char* response = (char*) malloc(sizeof(char)*(MAX_STATUS_RESPONSE+1));
 	if (error_code == BAD_INPUT) {
 		strcpy(response, "BAD_INPUT\0");
-		return response;
+
 	} else if (error_code == TOPIC_DOESNT_EXIST) {
 		strcpy(response, "TOPIC_DOESNT_EXIST\0");
-		return response;
+
 	} else if (error_code == TOPIC_ALREADY_EXISTS) {
-		strcpy(response, "TOPIC_ALREADY_EXISTS\0");
-		return response;
+		strcpy(response, "PTR \0");
+		strcat(response, DUP);
+
 	} else if (error_code == QUESTION_DOESNT_EXIST) {
 		strcpy(response, "QUESTION_DOESNT_EXIST\0");
-		return response;
+
 	} else if (error_code == QUESTION_ALREADY_EXISTS) {
 		strcpy(response, "QUESTION_ALREADY_EXISTS\0");
-		return response;
-	}
 
-	return NULL;
+	} else {
+		strcpy(response, ERR);
+	}
+	return response;
 }
 
 char* udp_manager(char *request) {

@@ -35,27 +35,17 @@
 
 int topic_exists(char *topic_path) {
 
-	char cwd[MAX_PATH];
-	getcwd(cwd, sizeof cwd);
-
-	if (!chdir(topic_path)) {
-		chdir(cwd);
+	if (opendir(topic_path)) {
 		return TOPIC_ALREADY_EXISTS;
 	}
-	chdir(cwd);
 	return TOPIC_DOESNT_EXIST;
 }
 
 int question_exists(char *question_path) {
 
-	char cwd[MAX_PATH];
-	getcwd(cwd, sizeof cwd);
-
-	if (!chdir(question_path)) {
-		chdir(cwd);
+	if (opendir(question_path)) {
 		return QUESTION_ALREADY_EXISTS;
 	}
-	chdir(cwd);
 	return QUESTION_DOESNT_EXIST;
 }
 
@@ -76,6 +66,7 @@ char **list_directory(char* path) {
 				dir_list[i] = (char*) malloc(sizeof(char) * MAX_FILENAME);
 				// printf("%s\n", dir->d_name);
 				strcpy(dir_list[i++], dir->d_name);
+				// TODO: Load user ID
 			}
 		}
 		// closedir(d);
@@ -89,9 +80,9 @@ int get_topics(char ***topics_list) {
 
 	*topics_list = list_directory(p);
 
-	for (int i = 0; i<99 && (*topics_list)[i] != NULL; i++) {
-		printf("%s\n", (*topics_list)[i]);
-	}
+	// for (int i = 0; i<99 && (*topics_list)[i] != NULL; i++) {
+	// 	printf("%s\n", (*topics_list)[i]);
+	// }
 	return SUCCESS;
 }
 
@@ -105,6 +96,10 @@ int get_questions(char *topic_name, char ***questions_list) {
 
 	strcat(p, QUESTIONS_PATH);
 	*questions_list = list_directory(p);
+
+	// for (int i = 0; i<99 && (*questions_list)[i] != NULL; i++) {
+	// 	printf("%s\n", (*questions_list)[i]);
+	// }
 	return SUCCESS;
 }
 
