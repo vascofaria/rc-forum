@@ -74,8 +74,9 @@ char **list_directory(char* path) {
 		while ((dir = readdir(d)) != NULL) {
 			if (dir->d_name[0] != '.') {
 				strcpy(id, "\0");
-				strcpy(current_dir, path); 
+				strcpy(current_dir, path);
 				dir_list[i] = (char*) malloc(sizeof(char) * (MAX_FILENAME + 1 + USER_ID_SIZE + 1));
+				/*if (dir_list[i]) printf("ALOQUEI\n");
 				strcat(current_dir, dir->d_name);
 				strcat(current_dir, "/uid.txt\0");
 				fp = fopen(current_dir, "r"); //TODO ERRO DO SISTEMA
@@ -83,10 +84,10 @@ char **list_directory(char* path) {
 					fscanf(fp, "%s", id); 
 					fclose(fp);
 				}
-				strcpy(dir_list[i], dir->d_name);
-				strcat(dir_list[i], ":");
-				strcat(dir_list[i++], id);
-			}
+				//strcpy(dir_list[i], dir->d_name);
+				//strcat(dir_list[i], ":");
+				//strcat(dir_list[i++], id);
+			}*/
 		}
 		// closedir(d);
 	}

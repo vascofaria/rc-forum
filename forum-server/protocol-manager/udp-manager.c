@@ -57,6 +57,7 @@ static char *parse_output_LTR(char **topics_list) {
 	char num_str[3];
 	char topics[MAX_TOPIC_LIST_RESPONSE] = "\0";
 	char *response = (char*) malloc(sizeof(char)*(MAX_TOPIC_LIST_RESPONSE + PROTOCOL_SIZE + 3));
+	response[0] = '\0';
 
 	for(num = 0; num < MAX_TOPIC_LIST_RESPONSE && topics_list[num] != NULL; num++) {
 	    strcat(topics, " ");
