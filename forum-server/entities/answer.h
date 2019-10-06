@@ -17,13 +17,15 @@
 
 typedef struct answer {
 	char *title;
+	char *user_id;
 	int  data_size;
 	char *data;
 	int  image_size;
+	char *image_ext;
 	char *image;
 } answer_t;
 
-answer_t *new_answer(char *title, int data_size, char *data, int image_size, char *image);
+answer_t *new_answer(char *title, char *user_id, int data_size, char *data, int image_size, char *image_ext, char *image);
 
 void free_answer(answer_t *answer_ptr);
 

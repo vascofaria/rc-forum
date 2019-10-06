@@ -33,7 +33,7 @@ int topic_list(char ***topic_list) {
 int propose_topic(char *user_id, char *topic) {
     int error_code;
 
-    error_code = post_topic(topic, user_id);
+    error_code = post_topic(user_id, topic);
 
     return error_code;
 }
@@ -46,3 +46,26 @@ int list_questions(char *topic, char ***questions_list) {
     return error_code;
 }
 
+int search_question(char *topic, char *question_name, question_t **question) {
+    int error_code;
+
+    error_code = get_question(topic, question_name, question);
+
+    return error_code;
+}
+
+int question_submit(char *topic, question_t *question) {
+    int error_code;
+
+    error_code = post_question(topic, question);
+
+    return error_code;
+}
+
+int answer_submit(char *topic, char *question_name, answer_t *answer) {
+    int error_code;
+
+    error_code = post_answer(topic, question_name, answer);
+
+    return error_code;
+}

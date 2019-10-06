@@ -136,11 +136,12 @@ static int parse_input_LQU(char* request, char* topic) {
 }
 
 static char *parse_output_LQR(char* topic, char **questions_list){
-	int num = 0;
-	char num_str[3];
+	int  num = 0;
+	char num_str[3] = "\0";
 	
 	char questions[MAX_TOPIC_LIST_RESPONSE] = "\0";
 	char *response = (char*) malloc(sizeof(char)*(MAX_TOPIC_LIST_RESPONSE + 6));
+	response[0] = '\0';
 	
 	for(num = 0; num < MAX_TOPIC_LIST_RESPONSE && questions_list[num] != NULL; num++){
 		strcat(questions, " ");
@@ -149,12 +150,15 @@ static char *parse_output_LQR(char* topic, char **questions_list){
 
 	sprintf(num_str, "%d", num);
 
-	strcat(response, LQR);
+	strcpy(response, LQR);
 	strcat(response, " ");
 	strcat(response, num_str);
 
-	if (num == 0) strcat(response, "\n\0");
-	else strcat(response, questions);
+	if (num != 0) {
+		strcat(response, questions);
+	}
+
+	strcat(response, "\n\0");
 
 	return response;
 }

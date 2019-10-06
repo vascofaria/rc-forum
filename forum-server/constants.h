@@ -33,8 +33,11 @@
 #define ANSWER_TITLE_SIZE 10
 #define ANSWER_SIZE 256
 
-#define MAX_STATUS_RESPONSE 9
+#define MAX_STATUS_RESPONSE 1000
 #define MAX_TOPIC_LIST_RESPONSE 1100 
 //(10+1+5)*99 + 99*1
+
+#define FALSE 0
+#define TRUE  1
 
 #endif

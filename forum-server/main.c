@@ -1,3 +1,16 @@
+/* _______________________________________________________________________________
+ * »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
+ * IST - RC 2019/2020
+ *
+ * main.c
+ *
+ * -------------------------------------------------------------------------------
+ *
+ * Made by: Bruno Meira (89421), Nikoletta Matsur (89513) and Vasco Faria (89559)
+ *
+ * «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
+ */
+
 #include <stdio.h>
 #include <netdb.h>
 #include <errno.h>
@@ -11,6 +24,7 @@
 #include <netinet/in.h>
 
 #include "protocol-manager/udp-manager.h"
+#include "protocol-manager/tcp-manager.h"
 
 #define MAX(A, B) (((A) >= (B)) ? (A) : (B))
 
@@ -208,11 +222,10 @@ int main(int argc, char const *argv[])
 					fprintf(stderr, "read failed: %s\n", strerror(errno));
 					exit(EXIT_FAILURE);
 				}
-				/*                  */
+
 				printf("%s %d\n", buffer, n);
-				/**
-				 * TODO: implement menu
-				 */
+				response = tcp_manager(buffer);
+				printf("%s\n", response);
 
 				/* write on client */
 				buffer_ptr = buffer;
@@ -225,7 +238,6 @@ int main(int argc, char const *argv[])
 					n          -= n_write;
 					buffer_ptr += n_write;
 				}
-				/*                 */
 
 				error_code = close(client_sock_tcp);
 				if (error_code == -1) {
@@ -260,7 +272,7 @@ int main(int argc, char const *argv[])
 				exit(EXIT_FAILURE);
 			}
 			buffer[n] = '\0';
-			/*                   */
+
 			response = udp_manager(buffer);
 			printf("%s\n", response);
 
@@ -271,9 +283,7 @@ int main(int argc, char const *argv[])
 				exit(EXIT_FAILURE);
 			}
 			free(response);
-			/*                 */
 		}
-		/*                            */
 	}
 
 	return 0;
