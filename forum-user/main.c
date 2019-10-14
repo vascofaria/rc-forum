@@ -13,8 +13,7 @@
 #include "protocol-manager/client-manager.h"
 #include "user/user.h"
 
-#define PORT 		 "58000"
-#define GROUP_NUMBER "1"
+#define PORT 		 "58001"
 #define BUFFER_SIZE  128
 #define ASCII_LIMIT  256
 
@@ -29,7 +28,6 @@ static void set_default_params(char main_params[ASCII_LIMIT][BUFFER_SIZE]) {
 		exit(EXIT_FAILURE);
 	}
 	strcpy(main_params[PARAM_FSPORT], PORT);
-	strcat(main_params[PARAM_FSPORT], GROUP_NUMBER);
 }
 
 static void display_usage (const char* appName, char main_params[ASCII_LIMIT][BUFFER_SIZE]) {
