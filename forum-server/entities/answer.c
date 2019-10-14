@@ -17,7 +17,7 @@
 #include "./answer.h"
 #include "../constants.h"
 
-answer_t *new_answer(char title[MAX_TITLE], char user_id[USER_ID_SIZE], int data_size, char data[MAX_TXT_SIZE], int image_size, char *image_ext, char image[MAX_IMG_SIZE]) {
+answer_t *new_answer(char title[MAX_ANSWER_TITLE], char user_id[USER_ID_SIZE], int data_size, char data[MAX_TXT_SIZE], int image_size, char *image_ext, char image[MAX_IMG_SIZE]) {
 	int title_size = strlen(title);
 	answer_t *a = (answer_t*) malloc(sizeof(answer_t));
 

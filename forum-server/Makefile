@@ -12,7 +12,7 @@
 
 # FLAGS= ANSI
 NAME= server
-Object= protocol-manager/udp-manager.o protocol-manager/tcp-manager.o file-manager.o answer.o question.o usecases.o
+Object= protocol-manager/udp-manager.o protocol-manager/tcp-manager.o file-manager/file-manager.o entities/answer.o entities/question.o usecases/usecases.o
 CC= gcc
 
 all: $(Object)
@@ -39,6 +39,8 @@ udp-manager.o: protocol-manager/udp-manager.c protocol-manager/udp-manager.h exc
 
 clean:
 	@echo Cleaning Server...
+	(rm -f entities/*.o)
+	(rm -f usecases/*.o)
 	(rm -f file-manager/*.o)
 	(rm -f protocol-manager/*.o)
 	(rm -f *.o)

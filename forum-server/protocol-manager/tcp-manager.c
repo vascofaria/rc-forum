@@ -19,7 +19,7 @@ static int parse_input_GQU(char *request, char *topic, char *question_title) {
 		return BAD_INPUT;
 	}
 
-	for (i = PROTOCOL_SIZE + 1, j = 0; j < TOPIC_SIZE && request[i] != '\0' && request[i] != '\n' && request[i] != ' '; i++, j++) {
+	for (i = PROTOCOL_SIZE + 1, j = 0; j < MAX_TOPIC_TITLE && request[i] != '\0' && request[i] != '\n' && request[i] != ' '; i++, j++) {
 		topic[j] = request[i];
 	}
 	topic[j] = '\0';
@@ -28,7 +28,7 @@ static int parse_input_GQU(char *request, char *topic, char *question_title) {
 		return BAD_INPUT;
 	}
 
-	for (j = 0; j < QUESTION_TITLE_SIZE && request[i] != '\0' && request[i] != '\n'; i++, j++) {
+	for (j = 0; j < MAX_QUESTION_TITLE && request[i] != '\0' && request[i] != '\n'; i++, j++) {
 		if (request[i] == ' ') {
 			return BAD_INPUT;
 		}
@@ -45,7 +45,7 @@ static int parse_input_GQU(char *request, char *topic, char *question_title) {
 
 static char *parse_output_QGR(question_t *question) {
 	int answers_number = 0, i, j;
-	char answers_number_str[3], data_size_str[MAX_TXT_SIZE], image_size_str[MAX_IMG_SIZE];
+	char answers_number_str[3], data_size_str[MAX_TXT_SIZE+1], image_size_str[MAX_IMG_SIZE+1];
 	char *response = (char*) malloc(sizeof(char)*(MAX_STATUS_RESPONSE+1));
 	response[0] = '\0';
 	strcat(response, QGR);
@@ -133,13 +133,13 @@ static char *parse_output_QGR(question_t *question) {
 static int parse_input_QUS(char *request, char *topic, question_t **question) {
 	int  i, j;
 	int  question_size = 0;
-	char question_user_id[MAX_TITLE+1];
-	char question_title[QUESTION_TITLE_SIZE+1];
-	char question_data[QUESTION_SIZE+1];
+	char question_user_id[USER_ID_SIZE+1];
+	char question_title[MAX_QUESTION_TITLE+1];
+	char question_data[MAX_TXT_SIZE+1];
 	bool has_question_img;
 	int  question_img_size = 0;
 	char question_img_ext[IMAGE_EXT_SIZE+1];
-	char question_img_data[IMAGE_SIZE+1];
+	char question_img_data[MAX_IMG_SIZE+1];
 
 	if (request[PROTOCOL_SIZE] != ' ') {
 		return BAD_INPUT;
@@ -163,7 +163,7 @@ static int parse_input_QUS(char *request, char *topic, question_t **question) {
 
 	printf("c\n");
 
-	for (j = 0; j < TOPIC_SIZE && request[i] != '\0' && request[i] != '\n' && request[i] != ' '; i++, j++) {
+	for (j = 0; j < MAX_TOPIC_TITLE && request[i] != '\0' && request[i] != '\n' && request[i] != ' '; i++, j++) {
 		topic[j] = request[i];
 	}
 	topic[j] = '\0';
@@ -176,7 +176,7 @@ static int parse_input_QUS(char *request, char *topic, question_t **question) {
 
 	printf("d\n");
 
-	for (j = 0; j < QUESTION_TITLE_SIZE && request[i] != '\0' && request[i] != '\n' && request[i] != ' '; i++, j++) {
+	for (j = 0; j < MAX_QUESTION_TITLE && request[i] != '\0' && request[i] != '\n' && request[i] != ' '; i++, j++) {
 		question_title[j] = request[i];
 	}
 	question_title[j] = '\0';
@@ -209,7 +209,7 @@ static int parse_input_QUS(char *request, char *topic, question_t **question) {
 	printf("i\n");
 	printf("%s %s %s %d\n", question_user_id, topic, question_title, question_size);
 
-	for (j = 0; j < question_size && j < QUESTION_SIZE; i++, j++) {
+	for (j = 0; j < question_size && j < MAX_TXT_SIZE; i++, j++) {
 		question_data[j] = request[i];
 	}
 	question_data[j] = '\0';
@@ -253,7 +253,7 @@ static int parse_input_QUS(char *request, char *topic, question_t **question) {
 			return BAD_INPUT;
 		}
 
-		for (j = 0; j < question_img_size && j < IMAGE_SIZE; i++, j++) {
+		for (j = 0; j < question_img_size && j < MAX_IMG_SIZE; i++, j++) {
 			question_img_data[j] = request[i];
 		}
 		printf("m\n");
@@ -293,13 +293,13 @@ static char *parse_output_QUR() {
 static int parse_input_ANS(char *request, char *topic, char *question_title, answer_t **answer) {
 	int  i, j;
 	char answer_user_id[USER_ID_SIZE+1];
-	char answer_title[ANSWER_TITLE_SIZE+1];
+	char answer_title[MAX_ANSWER_TITLE+1];
 	int  answer_size = 0;
-	char answer_data[ANSWER_SIZE+1];
+	char answer_data[MAX_TXT_SIZE+1];
 	bool has_answer_img;
 	int  answer_img_size = 0;
 	char answer_img_ext[IMAGE_EXT_SIZE+1];
-	char answer_img_data[IMAGE_SIZE+1];
+	char answer_img_data[MAX_IMG_SIZE+1];
 
 	if (request[PROTOCOL_SIZE] != ' ') {
 		return BAD_INPUT;
@@ -317,7 +317,7 @@ static int parse_input_ANS(char *request, char *topic, char *question_title, ans
 		return BAD_INPUT;
 	}
 
-	for (j = 0; j < TOPIC_SIZE && request[i] != '\0' && request[i] != '\n'; i++, j++) {
+	for (j = 0; j < MAX_TOPIC_TITLE && request[i] != '\0' && request[i] != '\n'; i++, j++) {
 		if (request[i] == ' ') {
 			return BAD_INPUT;
 		}
@@ -329,7 +329,7 @@ static int parse_input_ANS(char *request, char *topic, char *question_title, ans
 		return BAD_INPUT;
 	}
 
-	for (j = 0; j < QUESTION_TITLE_SIZE && request[i] != '\0' && request[i] != '\n'; i++, j++) {
+	for (j = 0; j < MAX_QUESTION_TITLE && request[i] != '\0' && request[i] != '\n'; i++, j++) {
 		if (request[i] == ' ') {
 			return BAD_INPUT;
 		}
@@ -357,7 +357,7 @@ static int parse_input_ANS(char *request, char *topic, char *question_title, ans
 		return BAD_INPUT;
 	}
 
-	for (j = 0; j < answer_size && j < QUESTION_SIZE && request[i] != '\0'; i++, j++) {
+	for (j = 0; j < answer_size && j < MAX_TXT_SIZE && request[i] != '\0'; i++, j++) {
 		answer_data[j] = request[i];
 	}
 	answer_data[j] = '\0';
@@ -399,7 +399,7 @@ static int parse_input_ANS(char *request, char *topic, char *question_title, ans
 			return BAD_INPUT;
 		}
 
-		for (j = 0; j < answer_img_size && j < IMAGE_SIZE && request[i] != '\0'; i++, j++) {
+		for (j = 0; j < answer_img_size && j < MAX_IMG_SIZE && request[i] != '\0'; i++, j++) {
 			answer_img_data[j] = request[i];
 		}
 		answer_img_data[j] = '\0';
@@ -455,8 +455,8 @@ static char *parse_output_ERROR(int error_code) {
 char *tcp_manager(char *request) {
 	int  i, error_code;
 	char protocol[PROTOCOL_SIZE + 1];
-	char topic[TOPIC_SIZE + 1];
-	char question_title[QUESTION_SIZE + 1];
+	char topic[MAX_TOPIC_TITLE + 1];
+	char question_title[MAX_QUESTION_TITLE + 1];
 	question_t *question;
 	answer_t *answer;
 

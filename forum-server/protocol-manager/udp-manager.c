@@ -96,7 +96,7 @@ static int parse_input_PTP(char* request, char* user_id, char* topic) {
 		return BAD_INPUT;
 	}
 
-	for (j = 0; j < TOPIC_SIZE && request[i] != '\0' && request[i] != '\n'; i++, j++) {
+	for (j = 0; j < MAX_TOPIC_TITLE && request[i] != '\0' && request[i] != '\n'; i++, j++) {
 		if (request[i] == ' ') {
 			return BAD_INPUT;
 		}
@@ -124,7 +124,7 @@ static int parse_input_LQU(char* request, char* topic) {
 		return BAD_INPUT;
 	}
 
-	for (i = PROTOCOL_SIZE + 1, j = 0; j < TOPIC_SIZE && request[i] != '\0' && request[i] != '\n'; i++, j++) {
+	for (i = PROTOCOL_SIZE + 1, j = 0; j < MAX_TOPIC_TITLE && request[i] != '\0' && request[i] != '\n'; i++, j++) {
 		if (request[i] == ' ') {
 			return BAD_INPUT;
 		}
@@ -194,7 +194,7 @@ char* udp_manager(char *request) {
 	int i, error_code;
 	char protocol[PROTOCOL_SIZE + 1];
 	char user_id[USER_ID_SIZE + 1];
-	char topic[TOPIC_SIZE + 1];
+	char topic[MAX_TOPIC_TITLE + 1];
 
 	char **topics_list;
 	char **questions_list;

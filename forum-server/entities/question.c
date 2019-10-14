@@ -19,7 +19,7 @@
 #include "./question.h"
 #include "../constants.h"
 
-question_t *new_question(char title[MAX_TITLE], char user_id[USER_ID_SIZE+1], int data_size, char data[MAX_TXT_SIZE], int image_size, char *image_ext, char *image, answer_t **answers) {
+question_t *new_question(char title[MAX_QUESTION_TITLE], char user_id[USER_ID_SIZE+1], int data_size, char data[MAX_TXT_SIZE], int image_size, char *image_ext, char *image, answer_t **answers) {
 	int i;
 	question_t *q = (question_t*) malloc(sizeof(question_t));
 

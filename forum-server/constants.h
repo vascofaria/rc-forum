@@ -14,27 +14,22 @@
 #ifndef __CONSTANTS_H__
 #define __CONSTANTS_H__
 
-#define MAX_TITLE    10
-#define MAX_ANSWERS  10
-
-#define MAX_TXT_SIZE 256
-#define MAX_IMG_SIZE 256
-
-#define TOPIC_SIZE    99
-
-#define QUESTION_TITLE_SIZE 99
-#define QUESTION_SIZE 200
-
-#define IMAGE_EXT_SIZE 3
-#define IMAGE_SIZE 256
-
 #define USER_ID_SIZE 5
 
-#define ANSWER_TITLE_SIZE 10
-#define ANSWER_SIZE 256
+#define MAX_TOPIC_TITLE    10
+#define MAX_QUESTION_TITLE 10
+#define MAX_ANSWER_TITLE   10
+
+#define MAX_TOPICS    99
+#define MAX_QUESTIONS 99
+#define MAX_ANSWERS   10
+
+#define MAX_TXT_SIZE   256
+#define IMAGE_EXT_SIZE 3
+#define MAX_IMG_SIZE   5120
 
 #define MAX_STATUS_RESPONSE 1000
-#define MAX_TOPIC_LIST_RESPONSE 1100 
+#define MAX_TOPIC_LIST_RESPONSE 1100
 //(10+1+5)*99 + 99*1
 
 #define FALSE 0
