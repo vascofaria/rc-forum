@@ -207,6 +207,7 @@ static int parse_input_QUS(char *request, char *topic, question_t **question) {
 		return BAD_INPUT;
 	}
 	printf("i\n");
+	printf("%s %s %s %d\n", question_user_id, topic, question_title, question_size);
 
 	for (j = 0; j < question_size && j < QUESTION_SIZE; i++, j++) {
 		question_data[j] = request[i];
