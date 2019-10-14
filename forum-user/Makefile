@@ -11,7 +11,7 @@
 # «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
 
 NAME= client
-Object= protocol-manager/client-manager.o protocol-manager/client-tcp-manager.o protocol-manager/client-udp-manager.o user/user.o file-manager/file-manager.o
+Object= protocol-manager/client-manager.o protocol-manager/client-tcp-manager.o protocol-manager/client-udp-manager.o user/user.o topic/topic.o vector/vector.o file-manager/file-manager.o
 CC= gcc
 
 all: $(Object)
@@ -33,10 +33,18 @@ client-udp-manager.o: protocol-manager/client-udp-manager.c protocol-manager/cli
 user.o: user/user.c user/user.h
 	$(CC) -c user/user.c
 
+topic.o: topic/topic.c topic/topic.h
+	$(CC) -c topic/topic.c
+
+vector.o: vector/vector.c vector/vector.h
+	$(CC) -c vector/vector.c
+
 clean:
 	@echo Cleaning Client...
 	(rm -f file-manager/*.o;)
 	(rm -f protocol-manager/*.o;)
 	(rm -f user/*.o;)
+	(rm -f vector/*.o;)
+	(rm -f topic/*.o;)
 	(rm -f *.o;)
 	(rm -f $(NAME);)

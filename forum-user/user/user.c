@@ -3,9 +3,11 @@
 #include <string.h>
 
 #include "user.h"
+#include "../constants.h"
 
 user_t* 
 create_user () {
+	int i;
 	user_t* user = (user_t*) malloc (sizeof(user_t));
 	
 	if (user != NULL) {
@@ -14,6 +16,7 @@ create_user () {
 		user->question = NULL;
 		user->udp_addrinfo = NULL;
 		user->tcp_addrinfo = NULL;
+		user->topics = vector_alloc(1, erase_topic);
 	}
 
 	return user;
@@ -37,12 +40,30 @@ get_user_topic (user_t *user) {
 	return NULL;
 }
 
+topic_t*
+get_topic_from_topiclist(user_t *user, int topic_number) {
+	if (user && user->topics) {
+		if (topic_number - 1 < 0 || topic_number - 1 >= user->topics->size) {
+			return NULL;
+		}
+ 		return (topic_t*) vector_at(user->topics, topic_number - 1);	
+	}
+	return NULL;
+}
+
 char*
 get_user_question (user_t *user) {
 	if (user) {
 		return user->question;
 	}
+	return NULL;
+}
 
+vector_t*
+get_user_topics(user_t *user) {
+	if (user) {
+		return user->topics;
+	}
 	return NULL;
 }
 
@@ -79,6 +100,27 @@ get_user_server_sock_tcp(user_t *user) {
 }
 
 void 
+add_topic_to_topiclist(user_t *user, char* topic_name, char* topic_user) {
+	topic_t *topic;
+
+	if (user && user->topics && user->topics->size < MAX_TOPICS_NUMBER) {
+		topic = create_topic(topic_name, topic_user);
+		if (topic) {
+			vector_pushBack(user->topics, topic);
+		}
+	}
+}
+
+void
+add_existing_topic_to_topiclist(user_t *user, topic_t* topic) {
+	if (user && user->topics && user->topics->size < MAX_TOPICS_NUMBER) {
+		if (topic) {
+			vector_pushBack(user->topics, topic);
+		}
+	}
+}
+
+void 
 set_user_id (user_t *user, char* id) {
 	if (user) {
 		if (user->user_id) {
@@ -90,7 +132,7 @@ set_user_id (user_t *user, char* id) {
 }
 
 void 
-set_user_topic (user_t* user, char* topic) {
+set_user_topic(user_t* user, char* topic) {
 	if (user) {
 		if (user->topic) {
 			free(user->topic);
@@ -101,13 +143,32 @@ set_user_topic (user_t* user, char* topic) {
 }
 
 void 
-set_user_question (user_t* user, char* question) {
+set_user_question(user_t* user, char* question) {
 	if (user) {
 		if (user->question) {
 			free(user->question);
 			user->question = NULL;
 		}
 		user->question = strdup(question);
+	}
+}
+
+void 
+set_user_topics(user_t* user, vector_t* topics) {
+	int i;
+
+	if (user) {
+		if (user->topics) {
+			vector_free(user->topics);
+		}
+		
+		user->topics = ((topics->size) > (MAX_TOPICS_NUMBER)) ? vector_alloc(MAX_TOPICS_NUMBER, erase_topic) : vector_alloc(topics->size, erase_topic);
+		
+		if (user->topics) {
+			for (i = 0; i < topics->size; i++) {
+				vector_pushBack(user->topics, vector_at(topics, i));
+			}
+		}
 	}
 }
 
@@ -155,6 +216,8 @@ clear_user_tcp_addrinfo(user_t *user) {
 
 void
 erase_user (user_t *user) {
+	int i;
+
 	if (user) {
 		if (user->user_id) {
 			free(user->user_id);
@@ -169,6 +232,12 @@ erase_user (user_t *user) {
 		if (user->question) {	
 			free(user->question);
 			user->question = NULL;
+		}
+
+		if (user->topics != NULL) {
+			vector_free(user->topics);
+			free(user->topics);
+			user->topics = NULL;
 		}
 
 		free(user);

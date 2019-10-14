@@ -28,8 +28,7 @@
 
 #define MAX(A, B) (((A) >= (B)) ? (A) : (B))
 
-#define PORT 		 "58000"
-#define GROUP_NUMBER "1"
+#define PORT 		 "58001"
 #define BUFFER_SIZE   128
 #define MAX_CLIENTS   5
 #define ASCII_LIMIT   256
@@ -42,7 +41,6 @@ enum param_types {
 
 static void set_default_params(char main_params[ASCII_LIMIT][BUFFER_SIZE]) {
 	strcpy(main_params[PARAM_FSPORT], PORT);
-	strcat(main_params[PARAM_FSPORT], GROUP_NUMBER);
 }
 
 static void display_usage (const char* appName, char main_params[ASCII_LIMIT][BUFFER_SIZE]) {
