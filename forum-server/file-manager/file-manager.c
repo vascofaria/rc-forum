@@ -56,15 +56,6 @@ int answer_exists(char *answer_path) {
 	return ANSWER_DOESNT_EXIST;
 }
 
-// int has_image(char *path) {
-// 	char* has_image = get_file_ext(path);
-// 	if (has_image) {
-// 		free(has_image);
-// 		return TRUE;
-// 	}
-// 	return FALSE;
-// }
-
 static char **list_directory(char* path) {
 
 	int i = 0;

@@ -2,7 +2,7 @@
  * »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
  * IST - RC 2019/2020
  *
- * tcp-manager.h
+ * question-get-io.h
  *
  * -------------------------------------------------------------------------------
  *
@@ -11,14 +11,13 @@
  * «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
  */
 
-#ifndef __TCP_MANAGER_H__
-#define __TCP_MANAGER_H__
+#ifndef  __QUESTION_GET_IO_H__
+#define  __QUESTION_GET_IO_H__
 
+#include "../entities/question.h"
 
-/*
- * RETURNS A RESPONSE
-*/
-char *tcp_manager(char *request);
+int parse_input_GQU(char *request, char *topic, char *question_title);
 
+char *parse_output_QGR(question_t *question);
 
 #endif
