@@ -1,9 +1,12 @@
 prof-user/MSGLOG.txt
+prof-user/1*
+prof-user/2*
 
 forum-server/entities/*.o
 forum-server/usecases/*.o
 forum-server/file-manager/*.o
-forum-server/protocol-manager/*.o
+forum-server/udp-manager/*.o
+forum-server/tcp-manager/*.o
 forum-server/server
 
 forum-user/file-manager/*.o
