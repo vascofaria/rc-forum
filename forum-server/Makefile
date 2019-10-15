@@ -12,7 +12,7 @@
 
 # FLAGS= ANSI
 NAME= server
-Object= protocol-manager/udp-manager.o protocol-manager/tcp-manager.o file-manager.o answer.o question.o usecases.o
+Object= protocol-manager/udp-manager.o protocol-manager/tcp-manager.o protocol-manager/question-get-io.o protocol-manager/question-submit-io.o protocol-manager/answer-submit-io.o file-manager/file-manager.o entities/answer.o entities/question.o usecases/usecases.o
 CC= gcc
 
 all: $(Object)
@@ -33,12 +33,23 @@ file-manager.o: file-manager/file-manager.c file-manager/file-manager.h entities
 tcp-manager.o: protocol-manager/tcp-manager.c protocol-manager/tcp-manager.h entities/question.h entities/answer.h exceptions.h constants.h protocol.h
 	$(CC) -c protocol-manager/tcp-manager.c
 
+question-get-io.o: protocol-manager/question-get-io.c protocol-manager/question-get-io.h entities/question.h entities/answer.h exceptions.h constants.h protocol.h
+	$(CC) -c protocol-manager/question-get-io.c
+
+question-submit-io.o: protocol-manager/question-submit-io.c protocol-manager/question-submit-io.h entities/question.h exceptions.h protocol.h constants.h
+	$(CC) -c protocol-manager/question-submit-io.c
+
+answer-submit-io.o: protocol-manager/answer-submit-io.c protocol-manager/answer-submit-io.h entities/question.h entities/answer.h protocol.h constants.h
+	$(CC) -c protocol-manager/answer-submit-io.c
+
 udp-manager.o: protocol-manager/udp-manager.c protocol-manager/udp-manager.h exceptions.h constants.h protocol.h
 	$(CC) -c protocol-manager/udp-manager.c
 
 
 clean:
 	@echo Cleaning Server...
+	(rm -f entities/*.o)
+	(rm -f usecases/*.o)
 	(rm -f file-manager/*.o)
 	(rm -f protocol-manager/*.o)
 	(rm -f *.o)

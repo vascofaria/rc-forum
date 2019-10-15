@@ -1,0 +1,14 @@
+prof-user/MSGLOG.txt
+
+forum-server/entities/*.o
+forum-server/usecases/*.o
+forum-server/file-manager/*.o
+forum-server/protocol-manager/*.o
+forum-server/server
+
+forum-user/file-manager/*.o
+forum-user/protocol-manager/*.o
+forum-user/topic/*.o
+forum-user/user/*.o
+forum-user/vector/*.o
+forum-user/client
