@@ -23,20 +23,20 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include "protocol-manager/udp-manager.h"
-#include "protocol-manager/tcp-manager.h"
+#include "udp-manager/udp-manager.h"
+#include "tcp-manager/tcp-manager.h"
 
 #define MAX(A, B) (((A) >= (B)) ? (A) : (B))
 
-#define PORT 		 "58001"
-#define BUFFER_SIZE   9999
-#define MAX_CLIENTS   5
-#define ASCII_LIMIT   256
-#define MAX_ARGS_N    3
-#define MAX_ARGS_L    128
+#define PORT        "58001"
+#define BUFFER_SIZE 256
+#define MAX_CLIENTS 5
+#define ASCII_LIMIT 256
+#define MAX_ARGS_N  3
+#define MAX_ARGS_L  128
 
 enum param_types {
-	PARAM_FSPORT  = (unsigned char)'p',
+	PARAM_FSPORT = (unsigned char)'p',
 };
 
 static void set_default_params(char main_params[ASCII_LIMIT][BUFFER_SIZE]) {
@@ -44,53 +44,57 @@ static void set_default_params(char main_params[ASCII_LIMIT][BUFFER_SIZE]) {
 }
 
 static void display_usage (const char* appName, char main_params[ASCII_LIMIT][BUFFER_SIZE]) {
-    printf("Usage: %s [options]\n", appName);
-    puts("\nOptions:                            (defaults)\n");
-    printf("    p <INT>    [p]ort               (%s)\n", main_params['p']);
-    exit(EXIT_FAILURE);
+	printf("Usage: %s [options]\n", appName);
+	puts("\nOptions:                            (defaults)\n");
+	printf("    p <INT>    [p]ort               (%s)\n", main_params['p']);
+	exit(EXIT_FAILURE);
 }
 
 static void parse_args (int argc, char* const argv[], char main_params[ASCII_LIMIT][BUFFER_SIZE]) {
-    int i;
-    int opt;
+	int i;
+	int opt;
 
-    opterr = 0;
+	opterr = 0;
 
-    set_default_params(main_params);
+	set_default_params(main_params);
 
-    while ((opt = getopt(argc, argv, "p:")) != -1) {
-        switch (opt) {
-            case 'p':
-            	strcpy(main_params[PARAM_FSPORT], optarg);
-                break;
+	while ((opt = getopt(argc, argv, "p:")) != -1) {
+		switch (opt) {
+			case 'p':
+				strcpy(main_params[PARAM_FSPORT], optarg);
+				break;
+
 			case '?':
-            default:
-                opterr++;
-                break;
-        }
-    }
 
-    for (i = optind; i < argc; i++) {
-        fprintf(stderr, "Non-option argument: %s\n", argv[i]);
-        opterr++;
-    }
+			default:
+				opterr++;
+				break;
+		}
+	}
 
-    if (opterr) {
-        display_usage(argv[0], main_params);
-    }
+	for (i = optind; i < argc; i++) {
+		fprintf(stderr, "Non-option argument: %s\n", argv[i]);
+		opterr++;
+	}
+
+	if (opterr) {
+		display_usage(argv[0], main_params);
+	}
 }
 
-int main(int argc, char const *argv[])
-{
-	int              				server_sock_udp, server_sock_tcp, client_sock_tcp, error_code, max_fd;
-	pid_t            			  	pid; 
-	struct addrinfo 	   	 		*res_tcp, *res_udp, hints;
-	char             				buffer[BUFFER_SIZE], *buffer_ptr, main_params[ASCII_LIMIT][BUFFER_SIZE];
-	socklen_t 		 				addrlen_udp, addrlen_tcp;
-	struct sockaddr_in      		addr_udp, addr_tcp;
-	ssize_t                	 		n, n_write;
-	fd_set 							read_fds;
-	char *response;
+int main(int argc, char const *argv[]) {
+	int    server_sock_udp, server_sock_tcp, client_sock_tcp, error_code, max_fd;
+	pid_t  pid; 
+	
+	struct addrinfo *res_tcp, *res_udp, hints;
+	char   buffer[BUFFER_SIZE], *buffer_ptr, main_params[ASCII_LIMIT][BUFFER_SIZE];
+	
+	socklen_t addrlen_udp, addrlen_tcp;
+	struct sockaddr_in addr_udp, addr_tcp;
+	ssize_t n, n_write;
+	fd_set read_fds;
+	
+	char   *response;
 
 	parse_args (argc, (char** const) argv, main_params);
 
@@ -99,7 +103,6 @@ int main(int argc, char const *argv[])
 	hints.ai_family   = AF_INET;
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_flags    = AI_PASSIVE | AI_NUMERICSERV;
-	/*									                */
 
 	error_code = getaddrinfo(NULL, main_params[PARAM_FSPORT], &hints, &res_udp);
 
@@ -115,7 +118,6 @@ int main(int argc, char const *argv[])
 		fprintf(stderr, "socket creation failed: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-	/*			           */
 	
 	/* Socket UDP bind */
 	error_code = bind(server_sock_udp, res_udp->ai_addr, res_udp->ai_addrlen);
@@ -124,11 +126,9 @@ int main(int argc, char const *argv[])
 		fprintf(stderr, "socket bind failed: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-	/*                 */
 
 	/* Initialization of hints structure for socket TCP */
 	hints.ai_socktype = SOCK_STREAM;
-	/*                                                  */
 		
 	error_code = getaddrinfo(NULL, main_params[PARAM_FSPORT], &hints, &res_tcp);
 
@@ -144,7 +144,6 @@ int main(int argc, char const *argv[])
 		fprintf(stderr, "socket creation failed: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-	/*			           */
 
 	/* Socket TCP bind */
 	error_code = bind(server_sock_tcp, res_tcp->ai_addr, res_tcp->ai_addrlen);
@@ -153,7 +152,6 @@ int main(int argc, char const *argv[])
 		fprintf(stderr, "socket bind failed: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-	/*                 */
 
 	/* Socket TCP listen */
 	error_code = listen(server_sock_tcp, MAX_CLIENTS);
@@ -162,7 +160,6 @@ int main(int argc, char const *argv[])
 		fprintf(stderr, "socket listen failed: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-	/*                   */
 
 	max_fd = MAX(server_sock_udp, server_sock_tcp);
 
@@ -214,18 +211,16 @@ int main(int argc, char const *argv[])
 					exit(EXIT_FAILURE);
 				}
 
-				/* read from client */
+				/* read from client
 				n = read(client_sock_tcp, buffer, BUFFER_SIZE);
 				if (n == -1) {
 					fprintf(stderr, "read failed: %s\n", strerror(errno));
 					exit(EXIT_FAILURE);
-				}
+				} */
 
-				printf("%s %d\n", buffer, n);
-				response = tcp_manager(buffer);
-				printf("%s\n", response);
+				tcp_manager(client_sock_tcp);
 
-				/* write on client */
+				/* write on client
 				buffer_ptr = buffer;
 
 				while (n > 0) {
@@ -235,7 +230,7 @@ int main(int argc, char const *argv[])
 					}
 					n          -= n_write;
 					buffer_ptr += n_write;
-				}
+				} */
 
 				error_code = close(client_sock_tcp);
 				if (error_code == -1) {

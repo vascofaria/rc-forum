@@ -2,7 +2,7 @@
  * »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
  * IST - RC 2019/2020
  *
- * question-submit-io.h
+ * list-topics-io.h
  *
  * -------------------------------------------------------------------------------
  *
@@ -11,13 +11,10 @@
  * «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
  */
 
-#ifndef  __QUESTION_SUBMIT_IO_H__
-#define  __QUESTION_SUBMIT_IO_H__
+#ifndef  __LIST_TOPICS_IO_H__
+#define  __LIST_TOPICS_IO_H__
 
-#include "../entities/question.h"
-
-int parse_input_QUS(char *request, char *topic, question_t **question);
-
-char *parse_output_QUR();
+int parse_input_LTP(char* request);
+char *parse_output_LTR(char **topics_list);
 
 #endif

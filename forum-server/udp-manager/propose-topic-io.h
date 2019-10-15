@@ -2,7 +2,7 @@
  * »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
  * IST - RC 2019/2020
  *
- * tcp-manager.h
+ * propose-topic-io.h
  *
  * -------------------------------------------------------------------------------
  *
@@ -11,14 +11,12 @@
  * «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
  */
 
-#ifndef __TCP_MANAGER_H__
-#define __TCP_MANAGER_H__
 
+#ifndef  __PROPOSE_TOPIC_IO_H__
+#define  __PROPOSE_TOPIC_IO_H__
 
-/*
- * RETURNS A RESPONSE
-*/
-char *tcp_manager(char *request);
+int parse_input_PTP(char* request, char* user_id, char* topic);
 
+char *parse_output_PTR();
 
 #endif

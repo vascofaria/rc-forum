@@ -17,7 +17,7 @@
 #include "./answer.h"
 #include "../constants.h"
 
-answer_t *new_answer(char title[MAX_ANSWER_TITLE], char user_id[USER_ID_SIZE], int data_size, char data[MAX_TXT_SIZE], int image_size, char *image_ext, char image[MAX_IMG_SIZE]) {
+answer_t *new_answer(char title[MAX_ANSWER_TITLE], char user_id[USER_ID_SIZE], int data_size, char *data_path, int image_size, char *image_ext, char *image_path) {
 	int title_size = strlen(title);
 	answer_t *a = (answer_t*) malloc(sizeof(answer_t));
 
@@ -28,18 +28,18 @@ answer_t *new_answer(char title[MAX_ANSWER_TITLE], char user_id[USER_ID_SIZE], i
 	strcpy(a->user_id, user_id);
 
 	a->data_size = data_size;
-	a->data = (char*) malloc(sizeof(char)*(data_size));
-	strcpy(a->data, data);
+	a->data_path = (char*) malloc(sizeof(char)*(strlen(data_path)+1));
+	strcpy(a->data_path, data_path);
 
 	a->image_size = image_size;
 	if (image_size) {
-		a->image_ext = (char*) malloc(sizeof(char)*(4));
+		a->image_ext = (char*) malloc(sizeof(char)*(IMAGE_EXT_SIZE+1));
 		strcpy(a->image_ext, image_ext);
 
-		a->image = (char*) malloc(sizeof(char)*(image_size));
-		strcpy(a->image, image);
+		a->image_path = (char*) malloc(sizeof(char)*(strlen(image_path)+1));
+		strcpy(a->image_path, image_path);
 	} else {
-		a->image = NULL;
+		a->image_path = NULL;
 	}
 
 	return a;
@@ -49,11 +49,11 @@ void free_answer(answer_t *answer_ptr) {
 
 	free(answer_ptr->title);
 	free(answer_ptr->user_id);
-	free(answer_ptr->data);
+	free(answer_ptr->data_path);
 
-	if (answer_ptr->image) {
+	if (answer_ptr->image_path) {
 		free(answer_ptr->image_ext);
-		free(answer_ptr->image);
+		free(answer_ptr->image_path);
 	}
 
 	free(answer_ptr);

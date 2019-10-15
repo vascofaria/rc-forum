@@ -21,14 +21,14 @@ typedef struct question {
 	char *title;
 	char *user_id;
 	int  data_size;
-	char *data;
+	char *data_path;
 	int  image_size;
 	char *image_ext;
-	char *image;
+	char *image_path;
 	answer_t *answers[MAX_ANSWERS];
 } question_t;
 
-question_t *new_question(char *title, char *user_id, int data_size, char *data, int image_size, char *image_ext, char *image, answer_t **answers);
+question_t *new_question(char *title, char *user_id, int data_size, char *data_path, int image_size, char *image_ext, char *image_path, answer_t **answers);
 
 void free_question(question_t* question_ptr);
 

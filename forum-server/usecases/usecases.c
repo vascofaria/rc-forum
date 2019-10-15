@@ -18,6 +18,10 @@
 #include "../exceptions.h"
 #include "../file-manager/file-manager.h"
 
+#include "../file-manager/topic-file-manager.h"
+#include "../file-manager/question-file-manager.h"
+#include "../file-manager/answer-file-manager.h"
+
 int register_user(char *userID) {
     return SUCCESS;
 }

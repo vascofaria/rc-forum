@@ -2,7 +2,7 @@
  * »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
  * IST - RC 2019/2020
  *
- * answer-submit-io.h
+ * register-io.h
  *
  * -------------------------------------------------------------------------------
  *
@@ -11,13 +11,11 @@
  * «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
  */
 
-#ifndef  __ANSWER_SUBMIT_IO_H__
-#define  __ANSWER_SUBMIT_IO_H__
+#ifndef  __REGISTER_IO_H__
+#define  __REGISTER_IO_H__
 
-#include "../entities/answer.h"
+int parse_input_REG(char* request, char* user_id);
 
-int parse_input_ANS(char *request, char *topic, char *question_title, answer_t **answer);
-
-char *parse_output_ANR();
+char *parse_output_RGR();
 
 #endif

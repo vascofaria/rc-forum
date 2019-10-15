@@ -2,7 +2,7 @@
  * »»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»
  * IST - RC 2019/2020
  *
- * question-get-io.h
+ * udp-manager.h
  *
  * -------------------------------------------------------------------------------
  *
@@ -11,13 +11,9 @@
  * «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
  */
 
-#ifndef  __QUESTION_GET_IO_H__
-#define  __QUESTION_GET_IO_H__
+#ifndef __UDP_MANAGER_H__ 
+#define __UDP_MANAGER_H__
 
-#include "../entities/question.h"
-
-int parse_input_GQU(char *request, char *topic, char *question_title);
-
-char *parse_output_QGR(question_t *question);
+char* udp_manager(char *request);
 
 #endif
