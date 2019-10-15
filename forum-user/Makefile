@@ -11,7 +11,7 @@
 # «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
 
 NAME= client
-Object= protocol-manager/client-manager.o protocol-manager/client-tcp-manager.o protocol-manager/client-udp-manager.o user/user.o topic/topic.o vector/vector.o file-manager/file-manager.o
+Object= protocol-manager/client-manager.o protocol-manager/client-tcp-manager.o protocol-manager/client-udp-manager.o user/user.o topic/topic.o question/question.o vector/vector.o file-manager/file-manager.o
 CC= gcc
 
 all: $(Object)
@@ -35,6 +35,9 @@ user.o: user/user.c user/user.h
 
 topic.o: topic/topic.c topic/topic.h
 	$(CC) -c topic/topic.c
+
+question.o: question/question.c question/question.h
+	$(CC) -c question/question.c
 
 vector.o: vector/vector.c vector/vector.h
 	$(CC) -c vector/vector.c

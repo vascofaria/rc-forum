@@ -11,6 +11,7 @@
 #include "../constants.h"
 #include "../exceptions.h"
 #include "../vector/vector.h"
+#include "../question/question.h"
 #include "../error-messages/input-error-messages.h"
 #include "../error-messages/server-error-messages.h"
 
@@ -209,7 +210,7 @@ static int parse_input_PTP(char *response, char status[STATUS_SIZE]) {
 	}
 
 	for (j = 0, i = i + 1; i < n - 1 && (response[i] >= '0' && response[i] <= '9') && j < USER_ID_SIZE; i++, j++) {}
-	printf("aaa\n");
+		
 	if (j != USER_ID_SIZE) {
 		return BAD_OUTPUT;
 	}
@@ -229,7 +230,7 @@ static int parse_input_PTP(char *response, char status[STATUS_SIZE]) {
 
 static int parse_output_PTP(char *response, char status[STATUS_SIZE]) {
 	char protocol[PROTOCOL_SIZE + 1];
-	int   i, j, n;
+	int  i, j, n;
 
 	n = strlen(response);
 
@@ -265,8 +266,104 @@ static int parse_output_PTP(char *response, char status[STATUS_SIZE]) {
 }
 
 
-static char* parse_output_LQU(char *response) {
+static int parse_output_LQU(char *response) {
+	char         protocol[PROTOCOL_SIZE + 1], num_questions[MAX_QUESTIONS_NUMBER + 1], num_answers[MAX_ANSWERS_NUMBER], question_name[QUESTION_TITLE_SIZE + 1], user_id[USER_ID_SIZE + 1];
+	int          i, j, k, n, n_questions, n_answers;
+	question_t  *question;
+	vector_t    *questions;
 
+	n = strlen(response);
+
+	if (n == 0 || response[n - 1] != '\n') {
+		return BAD_OUTPUT;
+	}
+
+	for (j = 0, i = 0; i < PROTOCOL_SIZE && i < n - 1; i++, j++) {
+		protocol[j] = response[i];
+	}
+
+	protocol[j] = '\0';
+
+	if (strcmp(protocol, "LQR")) {
+		return BAD_OUTPUT;
+	}
+
+	if (response[i] != ' ') {
+		return BAD_OUTPUT;
+	}
+
+	for (j = 0, i = i + 1; i < n - 1 && (response[i] >= '0' && response[i] <= '9'); i++, j++) {
+		num_questions[j] = response[i];
+	}
+
+	num_questions[j] = '\0';
+	n_questions      = atoi(num_questions);
+
+	if (j == 0 || n_questions > 99) {
+		return BAD_OUTPUT;
+	}
+
+	questions = vector_alloc(1, NULL);
+
+	for (k = 0; k < n_questions; k++) {
+		if (response[i] != ' ') {
+			break;
+		}
+
+		for (j = 0, i = i + 1; i < n - 1 && (response[i] != ':') && j < QUESTION_TITLE_SIZE; i++, j++) {
+			question_name[j] = response[i];
+		}
+
+		question_name[j] = '\0';
+
+		for (j = 0, i = i + 1; i < n - 1 && (response[i] >= '0' && response[i] <= '9') && j < USER_ID_SIZE; i++, j++) {
+			user_id[j] = response[i];
+		}
+
+		user_id[j] = '\0';
+
+		if (j != 5 || response[i] != ':') {
+			break;
+		}
+
+		for (j = 0, i = i + 1; i < n - 1 && (response[i] >= '0' && response[i] <= '9'); i++, j++) {
+			num_answers[j] = response[i];
+		}
+
+		num_answers[j] = '\0';
+		n_answers      = atoi(num_answers);
+
+		if (j == 0 || n_answers > 99) {
+			return BAD_OUTPUT;
+		}
+
+		question = create_question(question_name, user_id, num_answers);
+		vector_pushBack(questions, question);
+	}
+
+	if (k != n_questions) {
+		vector_free(questions);
+		return BAD_OUTPUT;
+	}
+
+	for (j = 0; j < n_questions; j++) {
+		printf("Question %2d: %-10s by user: %s width %d answers\n", j + 1,
+												((question_t*) vector_at(questions, j))->question_name, 
+												((question_t*) vector_at(questions, j))->question_user,
+												atoi(((question_t*) vector_at(questions, j))->answers_number));
+	}
+
+	if (j == 0) {
+		printf("No questions available for the selected topic\n");
+	}
+
+	vector_free(questions);
+
+	if (response[i] != '\n' && response[i + 1] != '\0') {
+		return BAD_OUTPUT;
+	}
+
+	return SUCCESS;
 }
 
 static char* send_request(user_t *user, char *request) {
@@ -332,9 +429,12 @@ client_udp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_
 				error_code = parse_output_LTP(response, user);
 				if (error_code == SUCCESS) {
 					for (i = 0; i < user->topics->size; i++) {
-						printf("Topic %2d: %-10s by user: %s\n", i,
+						printf("Topic %2d: %-10s by user: %s\n", i + 1,
 																((topic_t*) vector_at(user->topics, i))->topic_name, 
 																((topic_t*) vector_at(user->topics, i))->topic_user);
+					}
+					if (i == 0) {
+						printf("No topics to print\n");
 					}
 				}
 				free(response);
