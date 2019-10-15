@@ -5,11 +5,14 @@
 #include "client-manager.h"
 #include "client-udp-manager.h"
 #include "client-tcp-manager.h"
+#include "../user/user.h"
+#include "../topic/topic.h"
 
 void
 client_manager(user_t *user, char *request) {
-	char args[MAX_ARGS_N][MAX_ARGS_L];
-	int  num_tokens;
+	char     args[MAX_ARGS_N][MAX_ARGS_L];
+	int      num_tokens;
+	topic_t *topic;
 
 	num_tokens = sscanf(request, "%s %s %s %s %s", args[0], args[1], args[2], args[3], args[4]);
 
@@ -31,14 +34,23 @@ client_manager(user_t *user, char *request) {
 				fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
 			}
 	}
-	else if (!strcmp(args[0], "topic_select")    || 
-		     !strcmp(args[0], "ts")) {
-			 /* this option dont comunicate with server */
+	else if (!strcmp(args[0], "topic_select")) {
 			if (num_tokens != 2) {
 				fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
 			}
 			else {
 				set_user_topic(user, args[1]);
+			} 
+	}
+	else if (!strcmp(args[0], "ts")) {
+			if (num_tokens != 2) {
+				fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
+			}
+			else {
+				topic = get_topic_from_topiclist(user, atoi(args[1]));
+				if (topic) {
+					set_user_topic(user, get_topic_name(topic));
+				}
 			} 
 	}
 	else if (!strcmp(args[0], "topic_propose")   || 

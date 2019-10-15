@@ -4,93 +4,23 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
-#include "../constants.h"
 #include "client-tcp-manager.h"
-#include "../file-manager/file-manager.h"
 #include "../error-messages/input-error-messages.h"
+#include "../file-manager/file-manager.h"
 
-static void send_GQU_request(int sock_tcp, char *protocol, char *topic, char *question) {
-	write_to_tcp_socket(sock_tcp, protocol);
-	write_to_tcp_socket(sock_tcp, " ");
-	write_to_tcp_socket(sock_tcp, topic);
-	write_to_tcp_socket(sock_tcp, " ");
-	write_to_tcp_socket(sock_tcp, question);
-	write_to_tcp_socket(sock_tcp, "\n\0");
-}
-
-static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
-	char path[MAX_PATH_SIZE];
-	char protocol[PROTOCOL_SIZE];
-	char q_user_id[USER_ID_SIZE], qsize[FILE_SIZE_DIGITS], qiext[EXTENSION_SIZE_DIGITS], qisize[FILE_SIZE_DIGITS], answers[MAX_ANSWERS_SIZE_DIGITS], qimg[2], c;
-	char a_user_id[USER_ID_SIZE], asize[FILE_SIZE_DIGITS], aiext[EXTENSION_SIZE_DIGITS], aisize[FILE_SIZE_DIGITS], aimg[2];
-	int  qsize_n, qisize_n, asize_n, aisize_n, answers_n, i, error_code, file_fd;
-
-	/* Create Topic directory */
-	error_code = mkdir(get_user_topic(user), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-	if (error_code) {
-		fprintf(stderr, "ERROR: Unable to create directory: %s: %s\n", get_user_topic(user), strerror(errno));
-		exit(EXIT_FAILURE);
+static char* make_new_GQU_request(char *protocol, char *topic, char *question) {
+	char *request = (char *) malloc (sizeof(char) * (strlen(protocol) + strlen(topic) + strlen(question) + (strlen(" ") * 2) + strlen("\n") + 1));
+	if (request != NULL) {
+		request[0] = '\0';
+		strcpy(request, protocol);
+		strcat(request, " ");
+		strcat(request, topic);
+		strcat(request, " ");
+		strcat(request, question);
+		strcat(request, "\n\0");
 	}
-
-	read_from_tcp_socket(sock_tcp, protocol, PROTOCOL_SIZE + 1, ' ');
-
-	read_from_tcp_socket(sock_tcp, q_user_id, USER_ID_SIZE + 1, ' ');
-	
-	read_from_tcp_socket(sock_tcp, qsize, USER_ID_SIZE + 1, ' ');
-		
-	qsize_n = atoi(qsize);
-
-	strcpy(path, question);
-	strcat(path, ".txt\0");
-
-	write_from_socket_to_file(sock_tcp, path, qsize_n);
-	
-	read_from_tcp_socket(sock_tcp, qimg, 1 + 1, ' ');
-	
-	read_from_tcp_socket(sock_tcp, &c, 1, ' ');
-
-	if (!strcmp(qimg, "1")) {
-		read_from_tcp_socket(sock_tcp, qiext, EXTENSION_SIZE_DIGITS + 1, ' ');
-
-		read_from_tcp_socket(sock_tcp, qisize, FILE_SIZE_DIGITS + 1, ' ');
-
-		qisize_n = atoi(qsize);
-
-		write_from_socket_to_file(sock_tcp, "ola", qisize_n);
-	}
-
-	read_from_tcp_socket(sock_tcp, answers, MAX_ANSWERS_SIZE_DIGITS + 1, ' ');
-
-	answers_n = atoi(answers);
-
-	for (i = 0; i < answers_n; i++) {
-		read_from_tcp_socket(sock_tcp, answers, MAX_ANSWERS_SIZE_DIGITS, ' ');
-		
-		read_from_tcp_socket(sock_tcp, a_user_id, USER_ID_SIZE + 1, ' ');
-	
-		read_from_tcp_socket(sock_tcp, asize, USER_ID_SIZE + 1, ' ');
-		
-		asize_n = atoi(asize);
-
-		write_from_socket_to_file(sock_tcp, "ola", asize_n);
-	
-		read_from_tcp_socket(sock_tcp, aimg, 1 + 1, ' ');
-	
-		read_from_tcp_socket(sock_tcp, &c, 1, ' ');
-
-		if (!strcmp(aimg, "1")) {
-			read_from_tcp_socket(sock_tcp, aiext, EXTENSION_SIZE_DIGITS + 1, ' ');
-
-			read_from_tcp_socket(sock_tcp, aisize, FILE_SIZE_DIGITS + 1, ' ');
-
-			aisize_n = atoi(asize);
-
-			write_from_socket_to_file(sock_tcp, "ola", aisize_n);
-		}	
-	}
+	return request;
 }
 
 static char* make_new_QUS_request(char *protocol, char* user_id, char *topic, char *question, char *qsize, char *qdata, char *qimg, char *iext, char *isize, char *idata) {
@@ -167,36 +97,62 @@ static char* make_new_ANS_request(char *protocol, char* user_id, char *topic, ch
 	return request;
 }
 
-void client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_L], int num_args) {
-	int   error_code, server_sock_tcp;
-	char *request, *size, *data, *img, *iext, *isize, *idata;
-	
+static void executes_tcp_command(char *request, struct addrinfo *tcp_addrinfo) {
+	int server_sock_tcp, error_code;
+	char *buffer = (char *) malloc (sizeof(char) * (BUFFER_SIZE + 1));
+
+	if (buffer == NULL) {
+		return;
+	}
+
 	/* Socket TCP creation */
-	server_sock_tcp = socket(get_user_tcp_addrinfo(user)->ai_family, get_user_tcp_addrinfo(user)->ai_socktype, get_user_tcp_addrinfo(user)->ai_protocol);
+	server_sock_tcp = socket(tcp_addrinfo->ai_family, tcp_addrinfo->ai_socktype, tcp_addrinfo->ai_protocol);
 
 	if (server_sock_tcp == -1) {
 		fprintf(stderr, "socket creation failed: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
+	/*			           */
 
 	/* Connect to TCP socket */
-	error_code = connect(server_sock_tcp, get_user_tcp_addrinfo(user)->ai_addr, get_user_tcp_addrinfo(user)->ai_addrlen);
+	error_code = connect(server_sock_tcp, tcp_addrinfo->ai_addr, tcp_addrinfo->ai_addrlen);
 
 	if (error_code == -1) {
 		fprintf(stderr, "connect failed: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
+	/* Write on server socket */
+	write(server_sock_tcp, request, strlen(request) + 1);
+
+	/* Read from server socket */
+	read(server_sock_tcp, buffer, BUFFER_SIZE);
+
+	error_code = close(server_sock_tcp);
+	if (error_code == -1) {
+		fprintf(stderr, "close failed: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+}
+
+void
+client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_L], int num_args) {
+	char *request, *size, *data, *img, *iext, *isize, *idata;
 	if (!strcmp(protocol, "GQU")) {
 		if (get_user_topic(user)) {
-			send_GQU_request(server_sock_tcp, protocol, get_user_topic(user), args[1]);
-			recv_GQU_request(user, args[1], server_sock_tcp);
+			request = make_new_GQU_request(protocol, get_user_topic(user), args[1]);
+			
+			if (request) {
+				executes_tcp_command(request, get_user_tcp_addrinfo(user));
+				free(request);
+				request = NULL;
+			}
 		}
 		else {
 			printf("%s\n", TOPIC_IS_NOT_SELECTED);
 		}
 	}	
-	/*
+
 	else if (!strcmp(protocol, "QUS")) {
 		if (get_user_id(user)) {
 			if (get_user_topic(user)) {	
@@ -307,13 +263,5 @@ void client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_
 		else {
 			printf("%s\n", USER_IS_NOT_REGISTERED);
 		}
-	}*/
-
-	/* Close TCP socket */
-	error_code = close(server_sock_tcp);
-	
-	if (error_code == -1) {
-		fprintf(stderr, "close failed: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
 	}
 }
