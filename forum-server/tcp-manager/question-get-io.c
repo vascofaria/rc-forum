@@ -44,7 +44,7 @@ int parse_input_GQU(int socket_tcp, char *topic, char *question_title) {
 
 int parse_output_QGR(int socket_tcp, question_t *question) {
 	int  answers_number = 0, i, j, error_code;
-	char answers_number_str[3], data_size_str[MAX_TXT_SIZE+1], image_size_str[MAX_IMG_SIZE+1];
+	char answers_number_str[3], answer_number_str[2], data_size_str[MAX_TXT_SIZE+1], image_size_str[MAX_IMG_SIZE+1];
 
 	error_code = write_to_tcp_socket(socket_tcp, QGR, ' ');
 	if (error_code) {
@@ -103,7 +103,7 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 
 		printf("Image Size: %s\n", image_size_str);
 
-		error_code = write_from_file_to_socket(socket_tcp, question->image_path, question->data_size);
+		error_code = write_from_file_to_socket(socket_tcp, question->image_path, question->image_size);
 		if (error_code) {
 			return FAILURE;
 		}
@@ -126,9 +126,7 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 		printf("No img : 0\n");
 	}
 
-	for (i = 0; i < MAX_ANSWERS && question->answers[i] != NULL; i++) {
-		answers_number++;
-	}
+	for (answers_number = 0; answers_number < MAX_ANSWERS && question->answers[answers_number] != NULL; answers_number++);
 	if (answers_number < 10) {
 		answers_number_str[0] = '0';
 		answers_number_str[1] = '0' + answers_number;
@@ -139,12 +137,10 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 
 	printf("Answers Number: %s\n", answers_number_str);
 
-	error_code = write_to_tcp_socket(socket_tcp, answers_number_str, ' ');
+	error_code = write_to_tcp_socket(socket_tcp, answers_number_str, '\0');
 	if (error_code) {
 		return FAILURE;
 	}
-
-	printf("space\n");
 
 	// write response
 
@@ -154,15 +150,16 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 		if (error_code) {
 			return FAILURE;
 		}
-
 		printf("space\n");
 
-		error_code = write_to_tcp_socket(socket_tcp, question->answers[i]->title, ' ');
+		error_code = write_to_tcp_socket(socket_tcp, question->answers[i]->number, ' ');
 		if (error_code) {
 			return FAILURE;
 		}
 
-		printf("Answer Title: %s\n", question->answers[i]->title);
+		printf("Actual AnswerNumber: %s\n", question->answers[i]->number);
+
+		printf("space\n");
 
 		error_code = write_to_tcp_socket(socket_tcp, question->answers[i]->user_id, ' ');
 		if (error_code) {
@@ -177,7 +174,7 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 			return FAILURE;
 		}
 
-		printf("Answer size: %s\n", question->answers[i]->data_size);
+		printf("Answer size: %s\n", data_size_str);
 
 		error_code = write_from_file_to_socket(socket_tcp, question->answers[i]->data_path, question->answers[i]->data_size);
 		if (error_code) {

@@ -26,6 +26,8 @@
 #include "udp-manager/udp-manager.h"
 #include "tcp-manager/tcp-manager.h"
 
+#include "entities/question.h"
+
 #define MAX(A, B) (((A) >= (B)) ? (A) : (B))
 
 #define PORT        "58001"
@@ -211,26 +213,16 @@ int main(int argc, char const *argv[]) {
 					exit(EXIT_FAILURE);
 				}
 
-				/* read from client
-				n = read(client_sock_tcp, buffer, BUFFER_SIZE);
-				if (n == -1) {
-					fprintf(stderr, "read failed: %s\n", strerror(errno));
-					exit(EXIT_FAILURE);
-				} */
-
 				tcp_manager(client_sock_tcp);
 
-				/* write on client
-				buffer_ptr = buffer;
-
-				while (n > 0) {
-					n_write = write(client_sock_tcp, buffer_ptr, n);
-					if (n_write == -1) {
-						fprintf(stderr, "write failed: %s\n", strerror(errno));
-					}
-					n          -= n_write;
-					buffer_ptr += n_write;
-				} */
+				// ===> TO TEST GET QUESTION <===
+				//read(client_sock_tcp, NULL, 1);
+				//answer_t *l[2];
+				//answer_t *a = new_answer("AnswerN1", "89559", "01", 6, "./topics/TopicN1/questions/QuestionN1/answers/AnswerN1/answer.txt", 0, NULL, NULL);
+				//l[0] = a;
+				//l[1] = NULL;
+				//question_t *q = new_question("QuestionN1", "89559", 19, "./topics/TopicN1/questions/QuestionN1/question.txt", 2041, "png", "./topics/TopicN1/questions/QuestionN1/img.png", l);
+				//parse_output_QGR(client_sock_tcp, q);
 
 				error_code = close(client_sock_tcp);
 				if (error_code == -1) {

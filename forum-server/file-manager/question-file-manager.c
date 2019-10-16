@@ -182,8 +182,7 @@ int post_question(char *topic_name, question_t *question) {
 		return QUESTION_ALREADY_EXISTS;
 
 	strcat(user_id_path, p);
-	strcat(user_id_path, "/\0");
-	strcat(user_id_path, "uid.txt\0");
+	strcat(user_id_path, "/uid.txt\0");
 
 	/* Create Question directory */
 	error_code = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -193,7 +192,11 @@ int post_question(char *topic_name, question_t *question) {
 	}
 
 	/* Create question user_id file */
-	fd = fopen(user_id_path, "ab+");
+	fd = fopen(user_id_path, "w");
+	if (fd == NULL) {
+		fprintf(stderr, "ERROR: coudnt open file: %s: %s, %d\n", user_id_path, strerror(errno), errno);
+		return FAILURE;
+	}
 	fprintf(fd, "%s", question->user_id);
 	fclose(fd);
 
@@ -201,7 +204,11 @@ int post_question(char *topic_name, question_t *question) {
 	if (question->data_size != 0) {
 		strcpy(question_data_path, p);
 		strcat(question_data_path, "/question.txt\0");
-		// write_file_data(question_data_path, question->data_size, question->data);
+		printf("%s - %s\n", question->data_path, question_data_path);
+		error_code = move_file(question->data_path, question_data_path);
+		if (error_code) {
+			return FAILURE;
+		}
 	}
 
 	/* Create question image file */
@@ -209,8 +216,12 @@ int post_question(char *topic_name, question_t *question) {
 		strcpy(question_img_path, p);
 		strcat(question_img_path, "/img.\0");
 		strcat(question_img_path, question->image_ext);
-		// move from tmp or 
-		// write_file_data(question_img_path, question->image_size, question->image);
+		printf("%s - %s\n", question_img_path, question->image_path);
+
+		error_code = move_file(question->image_path, question_img_path);
+		if (error_code) {
+			return FAILURE;
+		}
 	}
 
 	/* Create question answers directory */
@@ -218,7 +229,7 @@ int post_question(char *topic_name, question_t *question) {
 	error_code = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if (error_code) {
 		fprintf(stderr, "ERROR: Unable to create directory: %s: %s\n", p, strerror(errno));
-		exit(error_code);
+		return FAILURE;
 	}
 
 	return SUCCESS;

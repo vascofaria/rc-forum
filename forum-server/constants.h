@@ -15,6 +15,7 @@
 #define __CONSTANTS_H__
 
 #define USER_ID_SIZE 5
+#define MAX_NUM_STR  2
 
 #define MAX_TOPIC_TITLE    10
 #define MAX_QUESTION_TITLE 10
@@ -35,5 +36,13 @@
 
 #define FALSE 0
 #define TRUE  1
+
+#define MAX_PATH      90
+#define MAX_FILENAME  20
+
+#define TMP_PATH       "./tmp/\0"
+#define TOPICS_PATH    "./topics/\0"
+#define QUESTIONS_PATH "/questions/\0"
+#define ANSWERS_PATH   "/answers/\0"
 
 #endif

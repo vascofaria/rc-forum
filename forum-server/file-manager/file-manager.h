@@ -15,18 +15,15 @@
 #define  __FILE_MANAGER_H__
 
 #include "../exceptions.h"
+#include "../constants.h"
 #include "../entities/question.h"
 #include "../entities/answer.h"
 
-#define MAX_PATH      90
-#define MAX_FILENAME  20
-
-#define TOPICS_PATH    "./topics/\0"
-#define QUESTIONS_PATH "/questions/\0"
-#define ANSWERS_PATH   "/answers/\0"
-
-
 int file_exists(char *file_path);
+
+int move_file(char *old_path, char *new_path);
+
+int create_dir(char *path);
 
 /* ===============================================================================
  * char **list_directory(char* path);
@@ -37,8 +34,6 @@ int file_exists(char *file_path);
  * ===============================================================================
 */
 char **list_directory(char* path);
-
-int move_directory(char *path);
 
 int get_file_size(const char *file_name, const char* mode);
 

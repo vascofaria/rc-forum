@@ -19,7 +19,7 @@
 #include "./question.h"
 #include "../constants.h"
 
-question_t *new_question(char title[MAX_QUESTION_TITLE], char user_id[USER_ID_SIZE+1], int data_size, char *data_path, int image_size, char *image_ext, char *image_path, answer_t **answers) {
+question_t *new_question(char title[MAX_QUESTION_TITLE+1], char user_id[USER_ID_SIZE+1], int data_size, char *data_path, int image_size, char *image_ext, char *image_path, answer_t **answers) {
 	int i;
 	question_t *q = (question_t*) malloc(sizeof(question_t));
 
@@ -75,10 +75,9 @@ void free_question(question_t* question_ptr) {
 		free(question_ptr->image_path);
 	}
 
-	for (i = 0; i < MAX_ANSWERS; i++) {
+	for (i = 0; i < MAX_ANSWERS && question_ptr->answers[i] != NULL; i++) {
 		free_answer(question_ptr->answers[i]);
 	}
 
 	free(question_ptr);
-	question_ptr = NULL;
 }
