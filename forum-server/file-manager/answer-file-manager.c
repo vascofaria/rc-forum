@@ -35,14 +35,21 @@ int answer_exists(char *answer_path) {
 	return ANSWER_DOESNT_EXIST;
 }
 
-int get_answers(char *topic_name, char *question_name, char ***answers_list) {
-	int i, answers_number = 0, total_answers = 0;
-	DIR *d = NULL;
-	FILE *fp = NULL;
+int get_answers(char *topic_name, char *question_name, answer_t ***answers_list) {
+
+	int  i, answers_number = 0, total_answers = 0;
+
+	DIR    *d = NULL;
+	FILE   *fp = NULL;
 	struct dirent *dir = NULL;
+
 	char id[USER_ID_SIZE + 1];
 	char current_dir[MAX_FILENAME*9];
 	char p[MAX_PATH] = TOPICS_PATH;
+	char user_id_path[MAX_PATH], data_path[MAX_PATH];
+
+	char *image, *image_ext, img_path[MAX_PATH];
+
 	strcat(p, topic_name);
 	if (topic_exists(p) == TOPIC_DOESNT_EXIST)
 		return TOPIC_DOESNT_EXIST;
@@ -58,9 +65,9 @@ int get_answers(char *topic_name, char *question_name, char ***answers_list) {
 
 	d = opendir(p);
 
-	char **dir_list = (char**) malloc(sizeof(char*) * MAX_ANSWERS);
+	answer_t **ans_list = (answer_t**) malloc(sizeof(answer_t*) * MAX_ANSWERS);
 
-	for (i = 0; i < MAX_ANSWERS; i++) dir_list[i] = NULL;
+	for (i = 0; i < MAX_ANSWERS; i++) ans_list[i] = NULL;
 
 	if (d) {
 		i = 0;
@@ -68,7 +75,8 @@ int get_answers(char *topic_name, char *question_name, char ***answers_list) {
 			if (dir->d_name[0] != '.') {
 
 				strcpy(current_dir, p);
-				strcat(current_dir, "num.txt\0");
+				strcat(current_dir, dir->d_name);
+				strcat(current_dir, "/num.txt\0");
 				fp = fopen(current_dir, "r");
 				if (fp) {
 					fscanf(fp, "%d", &answers_number);
@@ -77,28 +85,36 @@ int get_answers(char *topic_name, char *question_name, char ***answers_list) {
 
 				if (answers_number > total_answers - MAX_ANSWERS) {
 
-					dir_list[i] = (char*) malloc(sizeof(char) * (MAX_FILENAME + 1 + USER_ID_SIZE + 1));
-
 					strcpy(current_dir, p);
 					strcat(current_dir, dir->d_name);
-					strcat(current_dir, "/uid.txt\0");
-					strcpy(id, "\0");
-					fp = fopen(current_dir, "r"); //TODO ERRO DO SISTEMA
+
+					strcpy(user_id_path, current_dir);
+					strcat(user_id_path, "/uid.txt\0");
+					id[0] = '\0';
+					fp = fopen(user_id_path, "r"); //TODO ERRO DO SISTEMA
 					if (fp) {
 						fscanf(fp, "%s", id);
 						fclose(fp);
 					}
 
-					strcpy(dir_list[i], dir->d_name);
-					strcat(dir_list[i], ":");
-					strcat(dir_list[i++], id);
+					strcpy(data_path, current_dir);
+					strcat(data_path, "/answer.txt\0");
+
+					if (image = get_img_file(current_dir)) {
+						strcpy(img_path, current_dir);
+						strcat(img_path, "/\0");
+						strcat(img_path, image);
+						ans_list[i] = new_answer(dir->d_name, id, get_file_size(data_path, "r"), data_path, get_file_size(img_path, "r"), get_img_ext(image), img_path);
+					} else {
+						ans_list[i] = new_answer(dir->d_name, id, get_file_size(data_path, "r"), data_path, 0, NULL, NULL);
+					}
 				}
 			}
 		}
 		// closedir(d);
 	}
 
-	*answers_list = dir_list;
+	*answers_list = ans_list;
 	return SUCCESS;
 }
 

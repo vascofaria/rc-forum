@@ -14,6 +14,8 @@
 #include "question-submit-io.h"
 #include "tcp-manager.h"
 
+#include "../file-manager/file-manager.h"
+
 #include "../protocol.h"
 #include "../exceptions.h"
 
@@ -73,8 +75,12 @@ int parse_input_QUS(int socket_tcp, char *topic, question_t **question) {
 	question_size /= 10;
 
 	// READ FILE FROM SOCKET
+	error_code = write_from_socket_to_file(socket_tcp, "./tmp/question.txt\0", question_size);
+	if (error_code) {
+		return BAD_INPUT;
+	}
 
-	//if (request[i++] != ' ' || j != question_size) {
+	//if (request[i++] != ' ') {
 	//	return BAD_INPUT;
 	//}
 
@@ -109,6 +115,10 @@ int parse_input_QUS(int socket_tcp, char *topic, question_t **question) {
 		question_img_size /= 10;
 
 		// READ IMG FILE FROM SOCKET
+		error_code = write_from_socket_to_file(socket_tcp, "./tmp/img.png\0", question_img_size);
+		if (error_code) {
+			return BAD_INPUT;
+		}
 
 		//if (request[i] != ' ' && request[i+1] != '\0') {
 		//	return BAD_INPUT;

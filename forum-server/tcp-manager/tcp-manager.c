@@ -148,9 +148,9 @@ void tcp_manager(int socket_tcp) {
 			parse_output_ERROR(socket_tcp, error_code);
 		}
 
-	}/* else if (!strcmp(protocol, QUS)) {
+	} else if (!strcmp(protocol, QUS)) {
 
-		error_code = parse_input_QUS(request, topic, &question);
+		error_code = parse_input_QUS(socket_tcp, topic, &question);
 		if (error_code) {
 			printf("ERROR on QUS\n");
 			parse_output_ERROR(socket_tcp, error_code);
@@ -161,11 +161,15 @@ void tcp_manager(int socket_tcp) {
 			parse_output_ERROR(socket_tcp, error_code);
 		}
 		free_question(question);
-		// parse_output_QUR();
+		error_code = parse_output_QUR(socket_tcp);
+		if (error_code) {
+			printf("ERROR on QUR\n");
+			parse_output_ERROR(socket_tcp, error_code);
+		}
 
 	} else if (!strcmp(protocol, ANS)) {
 
-		error_code = parse_input_ANS(request, topic, question_title, &answer);
+		error_code = parse_input_ANS(socket_tcp, topic, question_title, &answer);
 		if (error_code) {
 			printf("ERROR on ANS\n");
 			parse_output_ERROR(socket_tcp, error_code);
@@ -176,8 +180,12 @@ void tcp_manager(int socket_tcp) {
 			parse_output_ERROR(socket_tcp, error_code);
 		}
 		free_answer(answer);
-		// parse_output_ANR();
-	}*/
+		error_code = parse_output_ANR(socket_tcp);
+		if (error_code) {
+			printf("ERROR on ANR\n");
+			parse_output_ERROR(socket_tcp, error_code);
+		}
+	}
 
 	parse_output_ERROR(socket_tcp, BAD_INPUT);
 }

@@ -38,7 +38,7 @@ int answer_exists(char *answer_path);
  * RETURN QUESTION_DOESNT_EXIST if question already exist
  * ===============================================================================
 */
-int get_answers(char *topic_name, char *question_name, char ***answers_list);
+int get_answers(char *topic_name, char *question_name, answer_t ***answers_list);
 
 /* ===============================================================================
  * int post_answer(char *user_id, char *topic_name, char *question_name, answer_t *answer);

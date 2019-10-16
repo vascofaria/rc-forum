@@ -75,6 +75,10 @@ char **list_directory(char* path) {
 	return dir_list;
 }
 
+int move_directory(char *path) {
+	return SUCCESS;
+}
+
 int get_file_size(const char *file_name, const char* mode) {
 	FILE*    fp;
 	long int size;
@@ -121,7 +125,20 @@ void write_file_data(const char *file_path, const long int size, const char *dat
 	}
 }
 
-char* get_img_ext(const char* path) {
+char *get_img_file(char *path) {
+	int i;
+	char **list = list_directory(path);
+	char *ext;
+
+	for (i = 0; list[i] != NULL; i++) {
+		if ((ext = list[i]) != "txt\0") {
+			return list[i];
+		}
+	}
+	return NULL;
+}
+
+char *get_img_ext(char* path) {
 	DIR *d = opendir(path);
 	struct dirent *dir = NULL;
 	char *ext;

@@ -15,6 +15,7 @@
 
 #include "file-manager.h"
 #include "topic-file-manager.h"
+#include "answer-file-manager.h"
 #include "../constants.h"
 
 #include <stdlib.h>
@@ -36,11 +37,14 @@ int question_exists(char *question_path) {
 
 int get_question(char *topic_name, char *question_title, question_t **question) {
 	
+	int error_code;
 	char p[MAX_PATH] = TOPICS_PATH, user_id_path[MAX_PATH], question_user_id[USER_ID_SIZE+1];
 	char question_data_path[MAX_PATH], question_image_path[MAX_PATH];
 	char *question_img_ext = NULL;
 	strcat(p, topic_name);
 	FILE *fp = NULL;
+
+	answer_t **answers_list;
 
 	if (topic_exists(p) == TOPIC_DOESNT_EXIST)
 		return TOPIC_DOESNT_EXIST;
@@ -53,7 +57,7 @@ int get_question(char *topic_name, char *question_title, question_t **question) 
 
 	strcpy(user_id_path, p);
 	strcat(user_id_path, "/uid.txt\0");
-	fp = fopen(p, "r");
+	fp = fopen(user_id_path, "r");
 	if (fp) {
 		fscanf(fp, "%s", question_user_id); 
 		fclose(fp);
@@ -61,6 +65,12 @@ int get_question(char *topic_name, char *question_title, question_t **question) 
 
 	strcpy(question_data_path, p);
 	strcat(question_data_path, "/question.txt\0");
+
+
+	error_code = get_answers(topic_name, question_title, &answers_list);
+	if (error_code) {
+		return error_code;
+	}
 
 	question_img_ext = get_img_ext(p);
 
@@ -71,13 +81,11 @@ int get_question(char *topic_name, char *question_title, question_t **question) 
 		strcat(question_image_path, "/img.\0");
 		strcat(question_image_path, question_img_ext);
 
-		printf("%s\n", question_image_path);
-
-		*question = new_question(question_title, question_user_id, get_file_size(question_data_path, "r"), question_data_path, get_file_size(question_image_path, "rb"), question_img_ext, question_image_path, NULL);
+		*question = new_question(question_title, question_user_id, get_file_size(question_data_path, "r"), question_data_path, get_file_size(question_image_path, "rb"), question_img_ext, question_image_path, answers_list);
 		// frees
 		free(question_img_ext);
 	} else {
-		*question = new_question(question_title, question_user_id, get_file_size(question_data_path, "r"), question_data_path, 0, NULL, NULL, NULL);
+		*question = new_question(question_title, question_user_id, get_file_size(question_data_path, "r"), question_data_path, 0, NULL, NULL, answers_list);
 		// frees
 	}
 

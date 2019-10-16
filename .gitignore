@@ -1,6 +1,8 @@
 prof-user/MSGLOG.txt
+prof-user/0*
 prof-user/1*
 prof-user/2*
+prof-user/3*
 
 forum-server/entities/*.o
 forum-server/usecases/*.o

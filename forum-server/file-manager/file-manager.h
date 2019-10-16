@@ -38,6 +38,7 @@ int file_exists(char *file_path);
 */
 char **list_directory(char* path);
 
+int move_directory(char *path);
 
 int get_file_size(const char *file_name, const char* mode);
 
@@ -45,7 +46,9 @@ char* get_file_data(const char* file_name, const char* mode);
 
 void write_file_data(const char *file_path, const long int size, const char *data);
 
-char* get_img_ext(const char* path);
+char *get_img_file(char *path);
+
+char* get_img_ext(char* path);
 
 int count_directories(char *path);
 
