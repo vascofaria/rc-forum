@@ -10,6 +10,7 @@ forum-server/file-manager/*.o
 forum-server/udp-manager/*.o
 forum-server/tcp-manager/*.o
 forum-server/server
+forum-server/tmp/*
 
 forum-user/file-manager/*.o
 forum-user/protocol-manager/*.o

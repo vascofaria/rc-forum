@@ -168,7 +168,7 @@ int parse_input_QUS(int socket_tcp, char *topic, question_t **question) {
 
 int parse_output_QUR(int socket_tcp) {
 	int error_code;
-	error_code = write_to_tcp_socket(socket_tcp, "OK\n\0", '\0');
+	error_code = write_to_tcp_socket(socket_tcp, "QUR OK\n\0", '\0');
 	if (error_code) {
 		return FAILURE;
 	}
