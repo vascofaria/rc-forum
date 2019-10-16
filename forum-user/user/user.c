@@ -16,7 +16,8 @@ create_user () {
 		user->question = NULL;
 		user->udp_addrinfo = NULL;
 		user->tcp_addrinfo = NULL;
-		user->topics = vector_alloc(1, erase_topic);
+		user->topics    = vector_alloc(1, erase_topic);
+		user->questions = vector_alloc(1, erase_question);
 	}
 
 	return user;
@@ -67,6 +68,14 @@ get_user_topics(user_t *user) {
 	return NULL;
 }
 
+vector_t*
+get_user_questions(user_t *user) {
+	if (user) {
+		return user->questions;
+	}
+	return NULL;
+}
+
 struct addrinfo* 
 get_user_udp_addrinfo(user_t *user) {
 	if (user) {
@@ -97,6 +106,27 @@ get_user_server_sock_tcp(user_t *user) {
 		return user->server_sock_tcp;
 	}
 	return -1;
+}
+
+void 
+add_question_to_questionlist(user_t *user, char* question_name, char* question_user, char* answers_number) {
+	question_t *question;
+
+	if (user && user->questions && user->questions->size < MAX_QUESTIONS_NUMBER) {
+		question = create_question(question_name, question_user, answers_number);
+		if (question) {
+			vector_pushBack(user->questions, question);
+		}
+	}
+}
+
+void
+add_existing_question_to_questionlist(user_t *user, question_t* question) {
+	if (user && user->questions && user->questions->size < MAX_QUESTIONS_NUMBER) {
+		if (question) {
+			vector_pushBack(user->questions, question);
+		}
+	}
 }
 
 void 
@@ -173,6 +203,25 @@ set_user_topics(user_t* user, vector_t* topics) {
 }
 
 void 
+set_user_questions(user_t* user, vector_t* questions) {
+	int i;
+
+	if (user) {
+		if (user->questions) {
+			vector_free(user->questions);
+		}
+		
+		user->questions = ((questions->size) > (MAX_QUESTIONS_NUMBER)) ? vector_alloc(MAX_QUESTIONS_NUMBER, erase_question) : vector_alloc(questions->size, erase_question);
+		
+		if (user->questions) {
+			for (i = 0; i < questions->size; i++) {
+				vector_pushBack(user->questions, vector_at(questions, i));
+			}
+		}
+	}
+}
+
+void 
 set_user_udp_addrinfo(user_t *user, struct addrinfo *addrinfo) {
 	if (user) {
 		user->udp_addrinfo = addrinfo;
@@ -238,6 +287,12 @@ erase_user (user_t *user) {
 			vector_free(user->topics);
 			free(user->topics);
 			user->topics = NULL;
+		}
+
+		if (user->questions != NULL) {
+			vector_free(user->questions);
+			free(user->questions);
+			user->questions = NULL;
 		}
 
 		free(user);

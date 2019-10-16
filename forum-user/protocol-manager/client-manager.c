@@ -47,9 +47,14 @@ client_manager(user_t *user, char *request) {
 				fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
 			}
 			else {
-				topic = get_topic_from_topiclist(user, atoi(args[1]));
-				if (topic) {
-					set_user_topic(user, get_topic_name(topic));
+				if (get_user_topics(user)->size > 0) {
+					topic = get_topic_from_topiclist(user, atoi(args[1]));
+					if (topic) {
+						set_user_topic(user, get_topic_name(topic));
+					}
+				}
+				else {
+					printf("Topic list not available\n");
 				}
 			} 
 	}

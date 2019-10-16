@@ -266,7 +266,7 @@ static int parse_output_PTP(char *response, char status[STATUS_SIZE]) {
 }
 
 
-static int parse_output_LQU(char *response) {
+static int parse_output_LQU(char *response, user_t *user) {
 	char         protocol[PROTOCOL_SIZE + 1], num_questions[MAX_QUESTIONS_NUMBER + 1], num_answers[MAX_ANSWERS_NUMBER], question_name[QUESTION_TITLE_SIZE + 1], user_id[USER_ID_SIZE + 1];
 	int          i, j, k, n, n_questions, n_answers;
 	question_t  *question;
@@ -346,16 +346,7 @@ static int parse_output_LQU(char *response) {
 		return BAD_OUTPUT;
 	}
 
-	for (j = 0; j < n_questions; j++) {
-		printf("Question %2d: %-10s by user: %s width %d answers\n", j + 1,
-												((question_t*) vector_at(questions, j))->question_name, 
-												((question_t*) vector_at(questions, j))->question_user,
-												atoi(((question_t*) vector_at(questions, j))->answers_number));
-	}
-
-	if (j == 0) {
-		printf("No questions available for the selected topic\n");
-	}
+	set_user_questions(user, questions);
 
 	vector_free(questions);
 
@@ -429,9 +420,10 @@ client_udp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_
 				error_code = parse_output_LTP(response, user);
 				if (error_code == SUCCESS) {
 					for (i = 0; i < user->topics->size; i++) {
-						printf("Topic %2d: %-10s by user: %s\n", i + 1,
-																((topic_t*) vector_at(user->topics, i))->topic_name, 
-																((topic_t*) vector_at(user->topics, i))->topic_user);
+						printf("Topic %2d: %-10s by user: %s\n", 
+							i + 1,
+							((topic_t*) vector_at(user->topics, i))->topic_name, 
+							((topic_t*) vector_at(user->topics, i))->topic_user);
 					}
 					if (i == 0) {
 						printf("No topics to print\n");
@@ -487,8 +479,19 @@ client_udp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_
 			if (request != NULL) {
 				response = send_request(user, request);
 				if (response) {
-					set_user_id(user, args[1]);
-					parse_output_LQU(response);
+					error_code = parse_output_LQU(response, user);
+					if (error_code == SUCCESS) {
+						for (i = 0; i < user->questions->size; i++) {
+							printf("Question %2d: %-10s by user: %s width %d answers\n", 
+								i + 1,
+								((question_t*) vector_at(user->questions, i))->question_name, 
+								((question_t*) vector_at(user->questions, i))->question_user,
+								atoi(((question_t*) vector_at(user->questions, i))->answers_number));
+						}
+						if (i == 0) {
+							printf("No questions available for the selected topic\n");
+						}
+					}
 
 					free(response);
 					response = NULL;

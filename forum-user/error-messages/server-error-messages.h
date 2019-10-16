@@ -1,8 +1,8 @@
 #ifndef __SERVER_ERROR_MESSAGES_H__
 #define __SERVER_ERROR_MESSAGES_H__
 
-#define REGISTRATION_SUCCESSFUL   "Register successed"
-#define REGISTRATION_UNSUCCESSFUL "Register unsuccessed"
+#define REGISTRATION_SUCCESSFUL   "Register succeeded"
+#define REGISTRATION_UNSUCCESSFUL "Register unsucceeded"
 
 #define TOPIC_ALREADY_EXISTS "Sorry, that topic already exists!"
 #define TOPIC_LIST_IS_FULL   "Sorry, the topic list is actually full!"

@@ -67,23 +67,34 @@ get_file_ext(const char* file_name) {
 	return ext;
 }
 
-void
-write_to_tcp_socket(int sock_tcp, char *buffer) {
-	int   n, nw;
-	char *buffer_ptr;
+int 
+write_to_tcp_socket(int socket_tcp, char *buffer, char final_char) {
+    int len, n;
+    char *buffer_ptr = buffer;
 
-	n          = strlen(buffer);
-	buffer_ptr = buffer;
+    len = strlen(buffer);
 
-	while (n > 0) {
-		nw = write(sock_tcp, buffer_ptr, n);
-		if (nw == -1) {
-			fprintf(stderr, "write failed: %s\n", strerror(errno));
-			exit(EXIT_FAILURE);
-		}
-		n -= nw;
-		buffer_ptr += (sizeof(char) * nw);
-	}
+    while(len > 0) {
+        n = write(socket_tcp, buffer_ptr, len);
+        if (n == -1) {
+            fprintf(stderr, "write to socket failed: %s\n", strerror(errno));
+            return FAILURE;
+        }
+        len -= n;
+        buffer_ptr += (sizeof(char) * n);
+    }
+
+    if (final_char != '\0') {
+        do {
+            n = write(socket_tcp, &final_char, 1);
+            if (n == -1) {
+                fprintf(stderr, "write to socket failed: %s\n", strerror(errno));
+                return FAILURE;
+            }
+        } while(n == 0);
+    }
+
+    return SUCCESS;
 }
 
 int 
@@ -145,31 +156,33 @@ write_from_socket_to_file(int sock_tcp, char *file_path, int file_size) {
 	}
 }
 
-void 
+int 
 write_from_file_to_socket(int sock_tcp, char *file_path, int file_size) {
-	int  i, n, file_fd, error_code;
-	char c;
+    int  i, n, file_fd, error_code;
+    unsigned char c;
 
-	file_fd = open(file_path, O_CREAT | O_RDONLY);
+    file_fd = open(file_path, O_CREAT | O_RDONLY);
 
-	if (file_fd == -1) {
-		fprintf(stderr, "open failed: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+    if (file_fd == -1) {
+        fprintf(stderr, "open failed: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
-	for (i = 0; i < file_size; i++) {
-		do {
-			n = read(file_fd, &c, 1);
-		} while (n == 0);
+    for (i = 0; i < file_size; i++) {
+        do {
+            n = read(file_fd, &c, 1);
+        } while (n == -1 && errno == EINTR);
 
-		do {
-			n = write(sock_tcp, &c, 1);
-		} while (n == 0);
-	}
+        do {
+            n = write(sock_tcp, &c, 1);
+        } while (n == -1 && errno == EINTR);
+    }
 
-	error_code = close(file_fd);
+    error_code = close(file_fd);
+    if (error_code == -1) {
+        fprintf(stderr, "close failed: %s\n", strerror(errno));
+        return FAILURE;
+    }
 
-	if (error_code == -1) {
-		fprintf(stderr, "close failed: %s\n", strerror(errno));
-	}
+    return SUCCESS;
 }

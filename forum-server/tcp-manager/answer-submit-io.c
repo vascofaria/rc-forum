@@ -20,6 +20,7 @@
 #include "../constants.h"
 #include "../exceptions.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -36,6 +37,7 @@ int parse_input_ANS(int socket_tcp, char *topic, char *question_title, answer_t 
 	char answer_img_data[MAX_IMG_SIZE+1];
 
 	error_code = read_from_tcp_socket(socket_tcp, answer_user_id, USER_ID_SIZE + 1, ' ');
+	printf("%s\n", answer_user_id);
 	if (error_code || strlen(answer_user_id) != USER_ID_SIZE) {
 		return BAD_INPUT;
 	}
@@ -50,18 +52,19 @@ int parse_input_ANS(int socket_tcp, char *topic, char *question_title, answer_t 
 	if (error_code) {
 		return BAD_INPUT;
 	}
-
+	printf("%s\n", topic);
 	error_code = read_from_tcp_socket(socket_tcp, question_title, MAX_QUESTION_TITLE + 1, ' ');
 	if (error_code) {
 		return BAD_INPUT;
 	}
-
+	printf("%s\n", question_title);
 	error_code = read_from_tcp_socket(socket_tcp, size_str, MAX_SIZE_STR + 1, ' ');
 	if (error_code) {
 		return BAD_INPUT;
 	}
-
-	for (i = 0; i < MAX_SIZE_STR; i++) {
+	printf("%s\n", size_str);
+	//merda no MAX_SIZE
+	for (i = 0; i < strlen(size_str); i++) {
 		if (size_str[i] < '0' || size_str[i] > '9') {
 			return BAD_INPUT;
 		}
@@ -78,12 +81,13 @@ int parse_input_ANS(int socket_tcp, char *topic, char *question_title, answer_t 
 	if (error_code) {
 		return BAD_INPUT;
 	}
-
+	printf("cccc\n");
 	//if (request[i++] != ' ') {
 	//	return BAD_INPUT;
 	//}
 
 	error_code = read_from_tcp_socket(socket_tcp, size_str, 1 + 1, ' ');
+	printf("%s\n", size_str);
 	if (error_code) {
 		return BAD_INPUT;
 	}
@@ -100,7 +104,8 @@ int parse_input_ANS(int socket_tcp, char *topic, char *question_title, answer_t 
 		if (error_code) {
 			return BAD_INPUT;
 		}
-		for (i = 0; i < MAX_SIZE_STR; i++) {
+		//merda2
+		for (i = 0; i < strlen(size_str); i++) {
 			if (size_str[i] < '0' || size_str[i] > '9') {
 				return BAD_INPUT;
 			}

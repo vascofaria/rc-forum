@@ -13,12 +13,9 @@
 #include "../error-messages/input-error-messages.h"
 
 static void send_GQU_request(int sock_tcp, char *protocol, char *topic, char *question) {
-	write_to_tcp_socket(sock_tcp, protocol);
-	write_to_tcp_socket(sock_tcp, " ");
-	write_to_tcp_socket(sock_tcp, topic);
-	write_to_tcp_socket(sock_tcp, " ");
-	write_to_tcp_socket(sock_tcp, question);
-	write_to_tcp_socket(sock_tcp, "\n\0");
+	write_to_tcp_socket(sock_tcp, protocol, ' ');
+	write_to_tcp_socket(sock_tcp, topic, ' ');
+	write_to_tcp_socket(sock_tcp, question, '\n');
 }
 
 static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
@@ -29,18 +26,21 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 	int  qsize_n, qisize_n, asize_n, aisize_n, answers_n, i, error_code, file_fd;
 
 	/* Create Topic directory */
-	error_code = mkdir(get_user_topic(user), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	/*error_code = mkdir(get_user_topic(user), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if (error_code) {
 		fprintf(stderr, "ERROR: Unable to create directory: %s: %s\n", get_user_topic(user), strerror(errno));
 		exit(EXIT_FAILURE);
-	}
+	}*/
 
 	read_from_tcp_socket(sock_tcp, protocol, PROTOCOL_SIZE + 1, ' ');
+	printf("%s\n", protocol);
 
 	read_from_tcp_socket(sock_tcp, q_user_id, USER_ID_SIZE + 1, ' ');
+	printf("%s\n", q_user_id);
 	
 	read_from_tcp_socket(sock_tcp, qsize, USER_ID_SIZE + 1, ' ');
-		
+	printf("%s\n", qsize);
+
 	qsize_n = atoi(qsize);
 
 	strcpy(path, question);
@@ -93,78 +93,40 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 	}
 }
 
-static char* make_new_QUS_request(char *protocol, char* user_id, char *topic, char *question, char *qsize, char *qdata, char *qimg, char *iext, char *isize, char *idata) {
-	int   img_size, i = 0, j;
-	char *request;
-
-	request = (char *) malloc (sizeof(char) * (
-			strlen(protocol) + strlen(user_id) + strlen(topic) + strlen(question) + strlen(qsize) +
-			strlen(qdata)    + strlen(qimg)    + strlen(iext)  + strlen(isize)    + atoi(isize)   +
-			+ (9 * strlen(" ")) + strlen("\n") + strlen("\0")));
-	if (request != NULL) {
-		request[0] = '\0';
-		strcpy(request, protocol);
-		strcat(request, " ");
-		strcat(request, user_id);
-		strcat(request, " ");
-		strcat(request, question);
-		strcat(request, " ");
-		strcat(request, qsize);
-		strcat(request, " ");
-		strcat(request, qdata);
-		strcat(request, " ");
-		strcat(request, qimg);
-		if (!strcmp(qimg, "1")) {
-			img_size = atoi(isize);
-			strcat(request, " ");
-			strcat(request, iext);
-			strcat(request, " ");
-			strcat(request, isize);
-			strcat(request, " ");
-			for (i = strlen(request), j = 0; j < img_size; i++, j++) {
-				request[i] = idata[j];
-			}
-		}
-		strcat(request, "\n\0");
+static void send_QUS_request(int sock_tcp, char *protocol, char* user_id, char *topic, char *question, char *qsize, char *qpath, char *qimg, char *iext, char *isize, char *ipath) {
+	write_to_tcp_socket(sock_tcp, protocol, ' ');
+	write_to_tcp_socket(sock_tcp, user_id, ' ');
+	write_to_tcp_socket(sock_tcp, topic, ' ');
+	write_to_tcp_socket(sock_tcp, question, ' ');
+	write_to_tcp_socket(sock_tcp, qsize, ' ');
+	write_from_file_to_socket(sock_tcp, qpath, atoi(qsize));
+	write_to_tcp_socket(sock_tcp, "\0", ' ');
+	write_to_tcp_socket(sock_tcp, qimg, '\0');
+	if (!strcmp(qimg, "1")) {
+		write_to_tcp_socket(sock_tcp, "\0", ' ');
+		write_to_tcp_socket(sock_tcp, iext, ' ');
+		write_to_tcp_socket(sock_tcp, isize, ' ');
+		write_from_file_to_socket(sock_tcp, ipath, atoi(isize));
 	}
-	return request;
+	write_to_tcp_socket(sock_tcp, "\0", '\n');
 }
 
-static char* make_new_ANS_request(char *protocol, char* user_id, char *topic, char *question, char *asize, char *adata, char *aimg, char *iext, char *isize, char *idata) {
-	int   img_size, i = 0, j;
-	char *request;
-	
-	request = (char *) malloc (sizeof(char) * (
-			strlen(protocol) + strlen(user_id) + strlen(topic) + strlen(question) + strlen(asize) +
-			strlen(adata)    + strlen(aimg)    + strlen(iext)  + strlen(isize)    + atoi(isize)   +
-			+ (9 * strlen(" ")) + strlen("\n") + strlen("\0")));
-	if (request != NULL) {
-		request[0] = '\0';
-		strcpy(request, protocol);
-		strcat(request, " ");
-		strcat(request, user_id);
-		strcat(request, " ");
-		strcat(request, question);
-		strcat(request, " ");
-		strcat(request, asize);
-		strcat(request, " ");
-		strcat(request, adata);
-		strcat(request, " ");
-		strcat(request, aimg);
-		if (!strcmp(aimg, "1")) {
-			img_size = atoi(isize);
-			strcat(request, " ");
-			strcat(request, iext);
-			strcat(request, " ");
-			strcat(request, isize);
-			strcat(request, " ");
-			for (i = strlen(request), j = 0; j < img_size; i++, j++) {
-				request[i] = idata[j];
-			}
-		}
-		strcat(request, "\n\0");
+static void send_ANS_request(int sock_tcp, char *protocol, char* user_id, char *topic, char *question, char *asize, char *apath, char *aimg, char *iext, char *isize, char *ipath) {
+	write_to_tcp_socket(sock_tcp, protocol, ' ');
+	write_to_tcp_socket(sock_tcp, user_id, ' ');
+	write_to_tcp_socket(sock_tcp, topic, ' ');
+	write_to_tcp_socket(sock_tcp, question, ' ');
+	write_to_tcp_socket(sock_tcp, asize, ' ');
+	write_from_file_to_socket(sock_tcp, apath, atoi(asize));
+	write_to_tcp_socket(sock_tcp, "\0", ' ');
+	write_to_tcp_socket(sock_tcp, aimg, '\0');
+	if (!strcmp(aimg, "1")) {
+		write_to_tcp_socket(sock_tcp, "\0", ' ');
+		write_to_tcp_socket(sock_tcp, iext, ' ');
+		write_to_tcp_socket(sock_tcp, isize, ' ');
+		write_from_file_to_socket(sock_tcp, ipath, atoi(isize));
 	}
-	return request;
+	write_to_tcp_socket(sock_tcp, "\0", '\n');
 }
 
 void client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_L], int num_args) {
@@ -189,29 +151,28 @@ void client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_
 
 	if (!strcmp(protocol, "GQU")) {
 		if (get_user_topic(user)) {
+			set_user_question(user, args[1]);
 			send_GQU_request(server_sock_tcp, protocol, get_user_topic(user), args[1]);
-			recv_GQU_request(user, args[1], server_sock_tcp);
+			//recv_GQU_request(user, args[1], server_sock_tcp);
 		}
 		else {
 			printf("%s\n", TOPIC_IS_NOT_SELECTED);
 		}
 	}	
-	/*
+	
 	else if (!strcmp(protocol, "QUS")) {
 		if (get_user_id(user)) {
 			if (get_user_topic(user)) {	
 				size = get_file_size(args[2], "r");
-				data = get_file_data(args[2], "r");
-				if (size && data) {
+				if (size) {
 					if (num_args == 3) {
-						request = make_new_QUS_request(protocol, get_user_id(user), get_user_topic(user), args[1], size, data, "0", "", "", "");
+						send_QUS_request(server_sock_tcp, protocol, get_user_id(user), get_user_topic(user), args[1], size, args[2], "0", "", "", "");
 					}
 					else {
-						isize = get_file_size(args[3], "rb");
-						idata = get_file_data(args[3], "rb");
+						isize = get_file_size(args[3], "r");
 						iext  = get_file_ext(args[3]);
-						if (isize && idata && iext) {
-							request = make_new_QUS_request(protocol, get_user_id(user), get_user_topic(user), args[1], size, data, "1", iext, isize, idata);
+						if (isize && iext) {
+							send_QUS_request(server_sock_tcp, protocol, get_user_id(user), get_user_topic(user), args[1], size, args[2], "1", iext, isize, args[3]);
 						}
 						if (iext) {
 							free(iext);
@@ -222,23 +183,10 @@ void client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_
 							free(isize);
 							isize = NULL;
 						}
-						if (idata) {
-							free(idata);
-							idata = NULL;
-						}
 					}
 					if (size) {
 						free(size);
 						size = NULL;
-					}
-					if (data) {
-						free(data);
-						data = NULL;
-					}
-					if (request) {
-						executes_tcp_command(request, get_user_tcp_addrinfo(user));
-						free(request);
-						request = NULL;
 					}
 				}
 			}
@@ -255,45 +203,32 @@ void client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_
 		if (get_user_id(user)) {
 			if (get_user_topic(user)) {
 				if (get_user_question(user)) {	
-					size = get_file_size(args[2], "r");
-					data = get_file_size(args[2], "r");
-					if (num_args == 2) {
-						request = make_new_ANS_request(protocol, get_user_id(user), get_user_topic(user), get_user_question(user), size, data, "0", "", "", "");
-					}
-					else {
-						isize = get_file_size(args[2], "rb");
-						idata = get_file_data(args[2], "rb");
-						iext  = get_file_ext(args[2]);
-						if (isize && idata) {
-							request = make_new_ANS_request(protocol, get_user_id(user), get_user_topic(user), get_user_question(user), size, data, "1", iext, isize, idata);
-						}
-						if (iext) {
-							free(iext);
-							iext = NULL;
-						}
-
-						if (isize) {
-							free(isize);
-							isize = NULL;
-						}
-						if (idata) {
-							free(idata);
-							idata = NULL;
-						}
-					}
-
+					size = get_file_size(args[1], "r");
 					if (size) {
-						free(size);
-						size = NULL;
-					}
-					if (data) {
-						free(data);
-						data = NULL;
-					}
-					if (request) {
-						executes_tcp_command(request, get_user_tcp_addrinfo(user));
-						free(request);
-						request = NULL;
+						if (num_args == 2) {
+							send_ANS_request(server_sock_tcp, protocol, get_user_id(user), get_user_topic(user), get_user_question(user), size, args[1], "0", "", "", "");
+						}
+						else {
+							isize = get_file_size(args[3], "r");
+							iext  = get_file_ext(args[3]);
+							if (isize && idata) {
+								send_ANS_request(server_sock_tcp, protocol, get_user_id(user), get_user_topic(user), get_user_question(user), size, args[2], "1", iext, isize, idata);
+							}
+							if (iext) {
+								free(iext);
+								iext = NULL;
+							}
+
+							if (isize) {
+								free(isize);
+								isize = NULL;
+							}
+						}
+
+						if (size) {
+							free(size);
+							size = NULL;
+						}
 					}
 				}
 				else {
@@ -307,7 +242,7 @@ void client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_
 		else {
 			printf("%s\n", USER_IS_NOT_REGISTERED);
 		}
-	}*/
+	}
 
 	/* Close TCP socket */
 	error_code = close(server_sock_tcp);

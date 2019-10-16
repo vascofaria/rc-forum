@@ -5,6 +5,7 @@
 #define PROTOCOL_SIZE           3
 #define STATUS_SIZE             3
 #define MAX_TOPICS_NUMBER       99
+#define MAX_QUESTIONS_NUMBER    99
 #define MAX_ANSWERS_SIZE_DIGITS 2
 #define MAX_ANSWERS_NUMBER      10
 #define MAX_QUESTIONS_NUMBER    99

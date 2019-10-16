@@ -3,9 +3,11 @@
 
 #include "../topic/topic.h"
 #include "../vector/vector.h"
+#include "../question/question.h"
 
 typedef struct user {
 	vector_t 	*topics;
+	vector_t    *questions;
 	char*    	user_id;
 	char*    	topic;
 	char*    	question;
@@ -31,6 +33,9 @@ get_user_question (user_t *user);
 vector_t*
 get_user_topics(user_t *user);
 
+vector_t*
+get_user_questions(user_t *user);
+
 struct addrinfo* 
 get_user_udp_addrinfo(user_t *user);
 
@@ -42,6 +47,12 @@ get_user_server_sock_udp(user_t *user);
 
 int 
 get_user_server_sock_tcp(user_t *user);
+
+void 
+add_question_to_questionlist(user_t *user, char* question_name, char* question_user, char *answers_number);
+
+void
+add_existing_question_to_questionlist(user_t *user, question_t* question);
 
 void 
 add_topic_to_topiclist(user_t *user, char *topic_name, char *topic_number);
@@ -60,6 +71,9 @@ set_user_question (user_t* user, char* question);
 
 void 
 set_user_topics(user_t* user, vector_t* topics);
+
+void 
+set_user_questions(user_t* user, vector_t* questions);
 
 void 
 set_user_udp_addrinfo(user_t *user, struct addrinfo *addrinfo);
