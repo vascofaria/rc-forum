@@ -79,9 +79,10 @@ int parse_input_ANS(int socket_tcp, char *topic, char *question_title, answer_t 
 		return BAD_INPUT;
 	}
 
-	//if (request[i++] != ' ') {
-	//	return BAD_INPUT;
-	//}
+	error_code = read_from_tcp_socket(socket_tcp, NULL, 0, ' ');
+	if (error_code) {
+		return BAD_INPUT;
+	}
 
 	error_code = read_from_tcp_socket(socket_tcp, size_str, 1 + 1, ' ');
 	if (error_code) {
@@ -118,21 +119,25 @@ int parse_input_ANS(int socket_tcp, char *topic, char *question_title, answer_t 
 			return BAD_INPUT;
 		}
 
-		//if (request[i] != ' ' && request[i+1] != '\0') {
-		//	return BAD_INPUT;
-		//}
+		error_code = read_from_tcp_socket(socket_tcp, NULL, 0, ' ');
+		if (error_code) {
+			return BAD_INPUT;
+		}
 
-		// care \0 above
-		*answer = new_answer(answer_title, answer_user_id, answer_size, answer_data, answer_img_size, answer_img_ext, answer_img_data);
+		// What if theres something next??
+
+		*answer = new_answer(answer_title, answer_user_id, "-1", answer_size, answer_data, answer_img_size, answer_img_ext, answer_img_data);
 		return SUCCESS;
 
 	} else if (opt == '0') {
-		//if (request[i] != ' ' && request[i+1] != '\0') {
-		//	return BAD_INPUT;
-		//}
+		error_code = read_from_tcp_socket(socket_tcp, NULL, 0, ' ');
+		if (error_code) {
+			return BAD_INPUT;
+		}
 
-		// care \0 above
-		*answer = new_answer(answer_title, answer_user_id, answer_size, answer_data, 0, NULL, NULL);
+		// What if theres something next??
+
+		*answer = new_answer(answer_title, answer_user_id, "-1", answer_size, answer_data, 0, NULL, NULL);
 		return SUCCESS;
 	}
 

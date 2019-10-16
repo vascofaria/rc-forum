@@ -69,6 +69,7 @@ int write_to_tcp_socket(int socket_tcp, char *buffer, char final_char) {
 int read_from_tcp_socket(int socket_tcp, char *buffer, int size, char final_char) {
 	int len, n;
 	char *buffer_ptr = buffer;
+	char space[2];
 
 	len = size;
 
@@ -87,6 +88,21 @@ int read_from_tcp_socket(int socket_tcp, char *buffer, int size, char final_char
 		}
 		len--;
 		buffer_ptr += (sizeof(char));
+	}
+
+	if (size == 0) {
+		do {
+			n = read(socket_tcp, space, 1);
+			if (n == -1) {
+				fprintf(stderr, "read from socket failed: %s\n", strerror(errno));
+				return FAILURE;
+			}
+		}	while (n == 0);
+		if (space[0] == final_char) {
+			return SUCCESS;
+		}
+	} else if (final_char == '\0') {
+		return SUCCESS;
 	}
 	return FAILURE;
 }
@@ -124,11 +140,6 @@ void tcp_manager(int socket_tcp) {
 		parse_output_ERROR(socket_tcp, error_code);
 		return;
 	}
-	
-	//for (i = 0; i < PROTOCOL_SIZE && request[i] != '\0' && request[i] != '\n';  i++) {
-	//	protocol[i] = request[i];
-	//}
-	//protocol[i] = '\0';
 
 	if (!strcmp(protocol, GQU)) {
 

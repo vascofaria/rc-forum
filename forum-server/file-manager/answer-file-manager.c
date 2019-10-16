@@ -38,6 +38,7 @@ int answer_exists(char *answer_path) {
 int get_answers(char *topic_name, char *question_name, answer_t ***answers_list) {
 
 	int  i, answers_number = 0, total_answers = 0;
+	char answers_number_str[MAX_NUM_STR+1];
 
 	DIR    *d = NULL;
 	FILE   *fp = NULL;
@@ -97,6 +98,9 @@ int get_answers(char *topic_name, char *question_name, answer_t ***answers_list)
 						fclose(fp);
 					}
 
+					sprintf(answers_number_str, "%d", answers_number+1);
+					answers_number_str[2] = '\0';
+
 					strcpy(data_path, current_dir);
 					strcat(data_path, "/answer.txt\0");
 
@@ -104,9 +108,9 @@ int get_answers(char *topic_name, char *question_name, answer_t ***answers_list)
 						strcpy(img_path, current_dir);
 						strcat(img_path, "/\0");
 						strcat(img_path, image);
-						ans_list[i] = new_answer(dir->d_name, id, get_file_size(data_path, "r"), data_path, get_file_size(img_path, "r"), get_img_ext(image), img_path);
+						ans_list[i] = new_answer(dir->d_name, id, answers_number_str, get_file_size(data_path, "r"), data_path, get_file_size(img_path, "r"), get_img_ext(image), img_path);
 					} else {
-						ans_list[i] = new_answer(dir->d_name, id, get_file_size(data_path, "r"), data_path, 0, NULL, NULL);
+						ans_list[i] = new_answer(dir->d_name, id, answers_number_str, get_file_size(data_path, "r"), data_path, 0, NULL, NULL);
 					}
 				}
 			}

@@ -36,6 +36,60 @@ int file_exists(char *file_path) {
 	return FALSE;
 }
 
+int move_file(char *old_path, char *new_path) {
+	int old_fd, new_fd;
+	int i, size, n;
+	size = get_file_size(old_path, "r");
+	char c;
+
+	old_fd = open(old_path, O_RDONLY);
+	if (old_fd == -1) {
+		fprintf(stderr, "open fail: %s\n", old_path);
+		return FAILURE;
+	}
+
+	new_fd = open(new_path, O_WRONLY | O_CREAT, 0644);
+	if (new_fd == -1) {
+		fprintf(stderr, "open fail: %s\n", new_path);
+		return FAILURE;
+	}
+
+	for (i = 0; i < size; i++) {
+		do {
+			n = read(old_fd, &c, 1);
+			if (n == -1) {
+				fprintf(stderr, "read from socket failed: %s\n", strerror(errno));
+				return FAILURE;
+			}
+		} while (n == 0);
+
+		do {
+			n = write(new_fd, &c, 1);
+			if (n == -1) {
+				fprintf(stderr, "write to file failed: %s\n", strerror(errno));
+				return FAILURE;
+			}
+		} while (n == 0);
+	}
+
+	close(new_fd);
+	close(old_fd);
+	return SUCCESS;
+}
+
+int create_dir(char *path) {
+	int error_code;
+	if (file_exists(path)) {
+		return SUCCESS;
+	}
+	error_code = mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	if (error_code) {
+		fprintf(stderr, "ERROR: Unable to create directory: %s: %s, %d\n", path, strerror(errno), errno);
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
 char **list_directory(char* path) {
 
 	int i = 0;
@@ -73,10 +127,6 @@ char **list_directory(char* path) {
 		// closedir(d);
 	}
 	return dir_list;
-}
-
-int move_directory(char *path) {
-	return SUCCESS;
 }
 
 int get_file_size(const char *file_name, const char* mode) {
@@ -178,7 +228,7 @@ int write_from_socket_to_file(int sock_tcp, char *file_path, int file_size) {
 	int  i, n, file_fd, error_code;
 	char c;
 
-	file_fd = open(file_path, O_CREAT | O_WRONLY);
+	file_fd = open(file_path, O_WRONLY | O_CREAT, 0644);
 
 	if (file_fd == -1) {
 		fprintf(stderr, "open failed: %s\n", strerror(errno));
@@ -216,8 +266,7 @@ int write_from_file_to_socket(int sock_tcp, char *file_path, int file_size) {
 	int  i, n, file_fd, error_code;
 	char c;
 
-	file_fd = open(file_path, O_CREAT | O_RDONLY);
-
+	file_fd = open(file_path, O_RDONLY);
 	if (file_fd == -1) {
 		fprintf(stderr, "open failed: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
@@ -231,7 +280,7 @@ int write_from_file_to_socket(int sock_tcp, char *file_path, int file_size) {
 				return FAILURE;
 			}
 		} while (n == 0);
-
+		printf("Char: %c I: %d File Size: %d\n", c, i, file_size);
 		do {
 			n = write(sock_tcp, &c, 1);
 			if (n == -1) {
