@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/select.h>
@@ -90,13 +91,17 @@ int main(int argc, char const *argv[]) {
 	
 	struct addrinfo *res_tcp, *res_udp, hints;
 	char   buffer[BUFFER_SIZE], *buffer_ptr, main_params[ASCII_LIMIT][BUFFER_SIZE];
+	char   *response;
 	
 	socklen_t addrlen_udp, addrlen_tcp;
 	struct sockaddr_in addr_udp, addr_tcp;
 	ssize_t n, n_write;
 	fd_set read_fds;
-	
-	char   *response;
+
+	struct sigaction act;
+	memset(&act,0,sizeof act);
+	act.sa_handler=SIG_IGN;
+	if(sigaction(SIGPIPE,&act,NULL)==-1)/*error*/exit(1);
 
 	parse_args (argc, (char** const) argv, main_params);
 

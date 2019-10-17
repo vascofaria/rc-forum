@@ -146,7 +146,6 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 	// write response
 
 	printf("ANUMBER::::: %d\n", answers_number);
-	printf("%s, %s\n", question->answers[0]->title, question->answers[1]->title);
 
 	for (i = 0; i < answers_number; i++) {
 
