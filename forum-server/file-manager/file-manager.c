@@ -170,18 +170,21 @@ char *get_img_file(char *path) {
 
 	for (i = 0; list[i] != NULL; i++) {
 		ext = get_file_ext(list[i]);
-		if (strcmp(ext, "txt\0")) {
+		if (ext) {
+			if (strcmp(ext, "txt\0")) {
+				free(ext);
+				return list[i];
+			}
 			free(ext);
-			return list[i];
 		}
-		free(ext);
 	}
 	return NULL;
 }
 
 char* get_file_ext(char* file_name) {
 	char  *ext, *ext_aux;
-	ext_aux = strchr(file_name, '.');
+	ext_aux = strrchr(file_name, '.');
+	if (ext_aux == NULL) return NULL;
 	ext     = (char *) malloc (sizeof(char) * (strlen(ext_aux) + 1));
 	strcpy(ext, ext_aux + sizeof(char));
 	ext[3] = '\0';
