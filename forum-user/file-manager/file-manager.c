@@ -63,7 +63,7 @@ get_file_ext(const char* file_name) {
 	char  *ext, *ext_aux;
 	ext_aux = strchr(file_name, '.');
 	ext     = (char *) malloc (sizeof(char) * (strlen(ext_aux) + 1));
-	strcpy(ext, ext_aux);
+	strcpy(ext, ext_aux + sizeof(char));
 	return ext;
 }
 
@@ -98,41 +98,53 @@ write_to_tcp_socket(int socket_tcp, char *buffer, char final_char) {
 }
 
 int 
-read_from_tcp_socket(int sock_tcp, char *buffer, int size, char final_char) {
-	int   n, nr;
-	char *buffer_ptr;
+read_from_tcp_socket(int socket_tcp, char *buffer, int size, char final_char) {
+	int len, n;
+	char *buffer_ptr = buffer;
+	char space[2];
 
-	n = size;
-	buffer_ptr = buffer;
+	len = size;
 
-	while (n > 0) {
-		nr = read(sock_tcp, buffer_ptr, 1);
-		if (nr == -1) {
-			fprintf(stderr, "read failed: %s\n", strerror(errno));
-			exit(EXIT_FAILURE);
-		}	
-		if (*buffer_ptr == '\n' || *buffer_ptr == ' ' || *buffer_ptr == '\0') {
+	while (len > 0) {
+		n = read(socket_tcp, buffer_ptr, 1);
+		if (n == -1) {
+			fprintf(stderr, "read from socket failed: %s\n", strerror(errno));
+			return FAILURE;
+		}
+		if (*buffer_ptr == ' ' || *buffer_ptr == '\n' || *buffer_ptr == '\0') {
 			if (*buffer_ptr != final_char) {
 				return FAILURE;
 			}
-			buffer_ptr = '\0';
+			*buffer_ptr = '\0';
 			return SUCCESS;
 		}
-		n--;
+		len--;
 		buffer_ptr += (sizeof(char));
 	}
 
-	buffer[size] = '\0';
-
+	if (size == 0) {
+		do {
+			n = read(socket_tcp, space, 1);
+			if (n == -1) {
+				fprintf(stderr, "read from socket failed: %s\n", strerror(errno));
+				return FAILURE;
+			}
+		}	while (n == 0);
+		if (space[0] == final_char) {
+			return SUCCESS;
+		}
+	} else if (final_char == '\0') {
+		return SUCCESS;
+	}
 	return FAILURE;
 }
 
 void 
 write_from_socket_to_file(int sock_tcp, char *file_path, int file_size) {
 	int  i, n, file_fd, error_code;
-	char c;
+	unsigned char c;
 
-	file_fd = open(file_path, O_CREAT | O_WRONLY);
+	file_fd = open(file_path, O_CREAT | O_WRONLY, 0644);
 
 	if (file_fd == -1) {
 		fprintf(stderr, "open failed: %s\n", strerror(errno));
