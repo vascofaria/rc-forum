@@ -138,6 +138,7 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 		} else {
 			strcpy(answer_number_str, question->answers[i]->number);
 		}
+		
 		error_code = write_to_tcp_socket(socket_tcp, answer_number_str, ' ');
 		if (error_code) {
 			return FAILURE;
