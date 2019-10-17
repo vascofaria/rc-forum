@@ -204,7 +204,7 @@ int post_question(char *topic_name, question_t *question) {
 	if (question->data_size != 0) {
 		strcpy(question_data_path, p);
 		strcat(question_data_path, "/question.txt\0");
-		printf("%s - %s\n", question->data_path, question_data_path);
+		
 		error_code = move_file(question->data_path, question_data_path);
 		if (error_code) {
 			return FAILURE;
@@ -216,7 +216,6 @@ int post_question(char *topic_name, question_t *question) {
 		strcpy(question_img_path, p);
 		strcat(question_img_path, "/img.\0");
 		strcat(question_img_path, question->image_ext);
-		printf("%s - %s\n", question_img_path, question->image_path);
 
 		error_code = move_file(question->image_path, question_img_path);
 		if (error_code) {

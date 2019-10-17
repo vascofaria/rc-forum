@@ -20,4 +20,6 @@ int parse_input_QUS(int socket_tcp, char *topic, question_t **question);
 
 int parse_output_QUR(int socket_tcp);
 
+void parse_output_ERROR_QUR(int socket_tcp, int error_code);
+
 #endif

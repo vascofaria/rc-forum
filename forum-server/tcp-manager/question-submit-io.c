@@ -121,7 +121,6 @@ int parse_input_QUS(int socket_tcp, char *topic, question_t **question) {
 		}
 		for (i = 0; i < strlen(size_str); i++) {
 			if (size_str[i] < '0' || size_str[i] > '9') {
-				printf("%s\n", size_str[i]);
 				return BAD_INPUT;
 			}
 			question_img_size += size_str[i] - '0';
@@ -173,4 +172,19 @@ int parse_output_QUR(int socket_tcp) {
 		return FAILURE;
 	}
 	return SUCCESS;
+}
+
+void parse_output_ERROR_QUR(int socket_tcp, int error_code) {
+	/* check wich error and turn it into the respective protocol error */
+	if (error_code == BAD_INPUT || error_code == FAILURE) {
+		write_to_tcp_socket(socket_tcp, "QUR NOK\0", '\n');
+	} else if (error_code == TOPIC_DOESNT_EXIST) {
+		write_to_tcp_socket(socket_tcp, "QUR NOK\0", '\n');
+	} else if (error_code == QUESTION_DOESNT_EXIST) {
+		write_to_tcp_socket(socket_tcp, "QUR NOK\0", '\n');
+	} else if (error_code == QUESTION_ALREADY_EXISTS) {
+		write_to_tcp_socket(socket_tcp, "QUR DUP\0", '\n');
+	} else if (error_code == MAX_QUESTIONS_REACHED) {
+		write_to_tcp_socket(socket_tcp, "QUR FUL\0", '\n');
+	}
 }

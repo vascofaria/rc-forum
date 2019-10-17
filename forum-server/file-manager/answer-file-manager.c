@@ -129,7 +129,9 @@ int get_answers(char *topic_name, char *question_name, answer_t ***answers_list)
 int post_answer(char *topic_name, char *question_name, answer_t *answer) {
 
 	FILE *fd;
-	int error_code, actual_answers_number;
+	int  error_code, actual_answers_number;
+	char answers_number_str[MAX_NUM_STR+1];
+
 	char p[MAX_PATH] = TOPICS_PATH;
 	char num_path[MAX_PATH] = "\0";
 	char user_id_path[MAX_PATH] = "\0";
@@ -152,6 +154,15 @@ int post_answer(char *topic_name, char *question_name, answer_t *answer) {
 		return MAX_ANSWERS_REACHED;
 	
 	strcat(p, answer->title);
+	if (actual_answers_number+1 < 10) {
+		answers_number_str[0] = '0';
+		answers_number_str[1] = '0' + actual_answers_number+1;
+		answers_number_str[2] = '\0';
+	} else {
+		sprintf(answers_number_str, "%d", actual_answers_number+1);
+	}
+	strcat(answer->title, answers_number_str);
+	strcat(p, answer->title);
 
 	if (answer_exists(p) == ANSWER_ALREADY_EXISTS)
 		return ANSWER_ALREADY_EXISTS;
@@ -170,26 +181,42 @@ int post_answer(char *topic_name, char *question_name, answer_t *answer) {
 	}
 
 	/* Create answer number file */
-	fd = fopen(num_path, "ab+");
-	fprintf(fd, "%d", actual_answers_number);
+	fd = fopen(num_path, "w");
+	if (fd == NULL) {
+		fprintf(stderr, "ERROR: coudnt open file: %s: %s, %d\n", num_path, strerror(errno), errno);
+		return FAILURE;
+	}
+	fprintf(fd, "%d", actual_answers_number+1);
 	fclose(fd);
 
 	/* Create answer user_id file */
-	fd = fopen(user_id_path, "ab+");
+	fd = fopen(user_id_path, "w");
+	if (fd == NULL) {
+		fprintf(stderr, "ERROR: coudnt open file: %s: %s, %d\n", user_id_path, strerror(errno), errno);
+		return FAILURE;
+	}
 	fprintf(fd, "%s", answer->user_id);
 	fclose(fd);
 
 	if (answer->data_size != 0) {
 		strcpy(answer_data_path, p);
-		strcat(answer_data_path, "answer.txt\0");
-		// write_file_data(answer_data_path, answer->data_size, answer->data);
+		strcat(answer_data_path, "/answer.txt\0");
+
+		error_code = move_file(answer->data_path, answer_data_path);
+		if (error_code) {
+			return FAILURE;
+		}
 	}
 
 	if (answer->image_size != 0) {
 		strcpy(answer_img_path, p);
-		strcat(answer_img_path, "img.\0");
+		strcat(answer_img_path, "/img.\0");
 		strcat(answer_img_path, answer->image_ext);
-		// write_file_data(answer_img_path, answer->image_size, answer->image);
+
+		error_code = move_file(answer->image_path, answer_img_path);
+		if (error_code) {
+			return FAILURE;
+		}
 	}
 
 	return SUCCESS;

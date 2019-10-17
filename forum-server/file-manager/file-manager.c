@@ -280,7 +280,6 @@ int write_from_file_to_socket(int sock_tcp, char *file_path, int file_size) {
 				return FAILURE;
 			}
 		} while (n == 0);
-		printf("Char: %c I: %d File Size: %d\n", c, i, file_size);
 		do {
 			n = write(sock_tcp, &c, 1);
 			if (n == -1) {

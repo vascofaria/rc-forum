@@ -20,4 +20,6 @@ int parse_input_GQU(int socket_tcp, char *topic, char *question_title);
 
 int parse_output_QGR(int socket_tcp, question_t *question);
 
+void parse_output_ERROR_QGR(int socket_tcp, int error_code);
+
 #endif

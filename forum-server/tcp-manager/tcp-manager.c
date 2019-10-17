@@ -111,18 +111,7 @@ int read_from_tcp_socket(int socket_tcp, char *buffer, int size, char final_char
  * ERROR PROTOCOL
 */
 static void parse_output_ERROR(int socket_tcp, int error_code) {
-	/* check wich error and turn it into the respective protocol error */
-	if (error_code == BAD_INPUT) {
-		write_to_tcp_socket(socket_tcp, "BAD_INPUT\0", '\0');
-	} else if (error_code == TOPIC_DOESNT_EXIST) {
-		write_to_tcp_socket(socket_tcp, "TOPIC_DOESNT_EXIST\0", '\0');
-	} else if (error_code == TOPIC_ALREADY_EXISTS) {
-		write_to_tcp_socket(socket_tcp, "TOPIC_ALREADY_EXISTS\0", '\0');
-	} else if (error_code == QUESTION_DOESNT_EXIST) {
-		write_to_tcp_socket(socket_tcp, "QUESTION_DOESNT_EXIST\0", '\0');
-	} else if (error_code == QUESTION_ALREADY_EXISTS) {
-		write_to_tcp_socket(socket_tcp, "QUESTION_ALREADY_EXISTS\0", '\0');
-	}
+	write_to_tcp_socket(socket_tcp, "ERR\0", '\n');
 }
 
 
@@ -146,17 +135,17 @@ void tcp_manager(int socket_tcp) {
 		error_code = parse_input_GQU(socket_tcp, topic, question_title);
 		if (error_code) {
 			printf("ERROR on GQU\n");
-			parse_output_ERROR(socket_tcp, error_code);
+			parse_output_ERROR_QGR(socket_tcp, error_code);
 		}
 		error_code = search_question(topic, question_title, &question);
 		if (error_code) {
 			printf("ERROR on search_question\n");
-			parse_output_ERROR(socket_tcp, error_code);
+			parse_output_ERROR_QGR(socket_tcp, error_code);
 		}
 		error_code = parse_output_QGR(socket_tcp, question); // -> free_question
 		if (error_code) {
 			printf("ERROR on QGR\n");
-			parse_output_ERROR(socket_tcp, error_code);
+			parse_output_ERROR_QGR(socket_tcp, error_code);
 		}
 
 	} else if (!strcmp(protocol, QUS)) {
@@ -164,18 +153,18 @@ void tcp_manager(int socket_tcp) {
 		error_code = parse_input_QUS(socket_tcp, topic, &question);
 		if (error_code) {
 			printf("ERROR on QUS\n");
-			parse_output_ERROR(socket_tcp, error_code);
+			parse_output_ERROR_QUR(socket_tcp, error_code);
 		}
 		error_code = question_submit(topic, question);
 		if (error_code) {
 			printf("ERROR on question_submit\n");
-			parse_output_ERROR(socket_tcp, error_code);
+			parse_output_ERROR_QUR(socket_tcp, error_code);
 		}
 		free_question(question);
 		error_code = parse_output_QUR(socket_tcp);
 		if (error_code) {
 			printf("ERROR on QUR\n");
-			parse_output_ERROR(socket_tcp, error_code);
+			parse_output_ERROR_QUR(socket_tcp, error_code);
 		}
 
 	} else if (!strcmp(protocol, ANS)) {
@@ -183,18 +172,18 @@ void tcp_manager(int socket_tcp) {
 		error_code = parse_input_ANS(socket_tcp, topic, question_title, &answer);
 		if (error_code) {
 			printf("ERROR on ANS\n");
-			parse_output_ERROR(socket_tcp, error_code);
+			parse_output_ERROR_ANR(socket_tcp, error_code);
 		}
 		error_code = answer_submit(topic, question_title, answer);
 		if (error_code) {
 			printf("ERROR on answer_submit\n");
-			parse_output_ERROR(socket_tcp, error_code);
+			parse_output_ERROR_ANR(socket_tcp, error_code);
 		}
 		free_answer(answer);
 		error_code = parse_output_ANR(socket_tcp);
 		if (error_code) {
 			printf("ERROR on ANR\n");
-			parse_output_ERROR(socket_tcp, error_code);
+			parse_output_ERROR_ANR(socket_tcp, error_code);
 		}
 	}
 

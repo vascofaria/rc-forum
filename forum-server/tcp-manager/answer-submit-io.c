@@ -31,10 +31,13 @@ int parse_input_ANS(int socket_tcp, char *topic, char *question_title, answer_t 
 	char answer_user_id[USER_ID_SIZE+1];
 	char answer_title[MAX_ANSWER_TITLE+1];
 	int  answer_size = 0;
-	char answer_data[MAX_TXT_SIZE+1];
 	int  answer_img_size = 0;
 	char answer_img_ext[IMAGE_EXT_SIZE+1];
-	char answer_img_data[MAX_IMG_SIZE+1];
+
+	char answer_path[MAX_PATH], image_path[MAX_PATH];
+
+	strcpy(answer_path, TMP_PATH);
+	create_dir(answer_path);
 
 	error_code = read_from_tcp_socket(socket_tcp, answer_user_id, USER_ID_SIZE + 1, ' ');
 	printf("%s\n", answer_user_id);
@@ -63,7 +66,6 @@ int parse_input_ANS(int socket_tcp, char *topic, char *question_title, answer_t 
 		return BAD_INPUT;
 	}
 	printf("%s\n", size_str);
-	//merda no MAX_SIZE
 	for (i = 0; i < strlen(size_str); i++) {
 		if (size_str[i] < '0' || size_str[i] > '9') {
 			return BAD_INPUT;
@@ -71,13 +73,17 @@ int parse_input_ANS(int socket_tcp, char *topic, char *question_title, answer_t 
 		answer_size += size_str[i] - '0';
 		answer_size *= 10;
 	}
+	answer_size /= 10;
+
 	if (answer_size == 0) {
 		return BAD_INPUT;
 	}
-	answer_size /= 10;
+
+	strcpy(image_path, answer_path);
+	strcat(answer_path, "/answer.txt\0");
 
 	// READ FILE FROM SOCKET
-	error_code = write_from_socket_to_file(socket_tcp, "./tmp/answer.txt\0", answer_size);
+	error_code = write_from_socket_to_file(socket_tcp, answer_path, answer_size);
 	if (error_code) {
 		return BAD_INPUT;
 	}
@@ -87,25 +93,32 @@ int parse_input_ANS(int socket_tcp, char *topic, char *question_title, answer_t 
 		return BAD_INPUT;
 	}
 
-	error_code = read_from_tcp_socket(socket_tcp, size_str, 1 + 1, ' ');
-	printf("%s\n", size_str);
+	error_code = read_from_tcp_socket(socket_tcp, &opt, 1, '\0');
+	printf("%c\n", opt);
 	if (error_code) {
 		return BAD_INPUT;
 	}
 
-	opt = size_str[0];
 	if (opt == '1') {
+
+		error_code = read_from_tcp_socket(socket_tcp, NULL, 0, ' ');
+		if (error_code) {
+			return BAD_INPUT;
+		}
 
 		error_code = read_from_tcp_socket(socket_tcp, answer_img_ext, IMAGE_EXT_SIZE + 1, ' ');
 		if (error_code) {
 			return BAD_INPUT;
 		}
 
+		strcat(image_path, "/answer.\0");
+		strcat(image_path, answer_img_ext);
+
 		error_code = read_from_tcp_socket(socket_tcp, size_str, MAX_SIZE_STR + 1, ' ');
 		if (error_code) {
 			return BAD_INPUT;
 		}
-		//merda2
+		
 		for (i = 0; i < strlen(size_str); i++) {
 			if (size_str[i] < '0' || size_str[i] > '9') {
 				return BAD_INPUT;
@@ -113,36 +126,37 @@ int parse_input_ANS(int socket_tcp, char *topic, char *question_title, answer_t 
 			answer_img_size += size_str[i] - '0';
 			answer_img_size *= 10;
 		}
+		answer_img_size /= 10;
+
 		if (answer_img_size == 0) {
 			return BAD_INPUT;
 		}
-		answer_img_size /= 10;
 
 		// READ IMG FILE FROM SOCKET
-		error_code = write_from_socket_to_file(socket_tcp, "./tmp/img.png\0", answer_img_size);
+		error_code = write_from_socket_to_file(socket_tcp, image_path, answer_img_size);
 		if (error_code) {
 			return BAD_INPUT;
 		}
 
-		error_code = read_from_tcp_socket(socket_tcp, NULL, 0, ' ');
+		error_code = read_from_tcp_socket(socket_tcp, NULL, 0, '\n');
 		if (error_code) {
 			return BAD_INPUT;
 		}
 
 		// What if theres something next??
 
-		*answer = new_answer(answer_title, answer_user_id, "-1", answer_size, answer_data, answer_img_size, answer_img_ext, answer_img_data);
+		*answer = new_answer(ANSWER_TITLE_PRE, answer_user_id, "-1", answer_size, answer_path, answer_img_size, answer_img_ext, image_path);
 		return SUCCESS;
 
 	} else if (opt == '0') {
-		error_code = read_from_tcp_socket(socket_tcp, NULL, 0, ' ');
+		error_code = read_from_tcp_socket(socket_tcp, NULL, 0, '\n');
 		if (error_code) {
 			return BAD_INPUT;
 		}
 
 		// What if theres something next??
 
-		*answer = new_answer(answer_title, answer_user_id, "-1", answer_size, answer_data, 0, NULL, NULL);
+		*answer = new_answer(ANSWER_TITLE_PRE, answer_user_id, "-1", answer_size, answer_path, 0, NULL, NULL);
 		return SUCCESS;
 	}
 
@@ -151,9 +165,22 @@ int parse_input_ANS(int socket_tcp, char *topic, char *question_title, answer_t 
 
 int parse_output_ANR(int socket_tcp) {
 	int error_code;
-	error_code = write_to_tcp_socket(socket_tcp, "OK\n\0", '\0');
+	error_code = write_to_tcp_socket(socket_tcp, "ANR OK\n\0", '\0');
 	if (error_code) {
 		return FAILURE;
 	}
 	return SUCCESS;
+}
+
+void parse_output_ERROR_ANR(int socket_tcp, int error_code) {
+	/* check wich error and turn it into the respective protocol error */
+	if (error_code == BAD_INPUT || error_code == FAILURE) {
+		write_to_tcp_socket(socket_tcp, "ANR NOK\0", '\n');
+	} else if (error_code == TOPIC_DOESNT_EXIST) {
+		write_to_tcp_socket(socket_tcp, "ANR NOK\0", '\n');
+	} else if (error_code == QUESTION_DOESNT_EXIST) {
+		write_to_tcp_socket(socket_tcp, "ANR NOK\0", '\n');
+	} else if (error_code == MAX_ANSWERS_REACHED) {
+		write_to_tcp_socket(socket_tcp, "ANR FUL\0", '\n');
+	}
 }

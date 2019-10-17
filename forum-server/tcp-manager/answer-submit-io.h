@@ -20,4 +20,6 @@ int parse_input_ANS(int socket_tcp, char *topic, char *question_title, answer_t 
 
 int parse_output_ANR(int socket_tcp);
 
+void parse_output_ERROR_ANR(int socket_tcp, int error_code);
+
 #endif

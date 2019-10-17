@@ -127,6 +127,7 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 	}
 
 	for (answers_number = 0; answers_number < MAX_ANSWERS && question->answers[answers_number] != NULL; answers_number++);
+	answers_number++;
 	if (answers_number < 10) {
 		answers_number_str[0] = '0';
 		answers_number_str[1] = '0' + answers_number;
@@ -144,7 +145,10 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 
 	// write response
 
-	for (i = 0; i < answers_number && question->answers[i] != NULL; i++) {
+	printf("ANUMBER::::: %d\n", answers_number);
+	printf("%s, %s\n", question->answers[0]->title, question->answers[1]->title);
+
+	for (i = 0; i < answers_number; i++) {
 
 		error_code = write_to_tcp_socket(socket_tcp, "\0", ' ');
 		if (error_code) {
@@ -189,6 +193,8 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 		}
 
 		printf("space\n");
+
+		printf("IMG SIZE: %d\n", question->answers[i]->image_size);
 
 		if (question->answers[i]->image_size) {
 
@@ -238,4 +244,15 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 
 	// write response
 	return SUCCESS;
+}
+
+void parse_output_ERROR_QGR(int socket_tcp, int error_code) {
+	/* check wich error and turn it into the respective protocol error */
+	if (error_code == BAD_INPUT || error_code == FAILURE) {
+		write_to_tcp_socket(socket_tcp, "QGR ERR\0", '\n');
+	} else if (error_code == TOPIC_DOESNT_EXIST) {
+		write_to_tcp_socket(socket_tcp, "QGR EOF\0", '\n');
+	} else if (error_code == QUESTION_DOESNT_EXIST) {
+		write_to_tcp_socket(socket_tcp, "QGR EOF\0", '\n');
+	}
 }

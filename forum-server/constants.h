@@ -32,7 +32,6 @@
 
 #define MAX_STATUS_RESPONSE 1000
 #define MAX_TOPIC_LIST_RESPONSE 1100
-//(10+1+5)*99 + 99*1
 
 #define FALSE 0
 #define TRUE  1
@@ -44,5 +43,7 @@
 #define TOPICS_PATH    "./topics/\0"
 #define QUESTIONS_PATH "/questions/\0"
 #define ANSWERS_PATH   "/answers/\0"
+
+#define ANSWER_TITLE_PRE "answer_"
 
 #endif
