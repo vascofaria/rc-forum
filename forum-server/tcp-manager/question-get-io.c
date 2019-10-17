@@ -48,7 +48,7 @@ int parse_input_GQU(int socket_tcp, char *topic, char *question_title) {
 
 int parse_output_QGR(int socket_tcp, question_t *question) {
 	int  answers_number = 0, i, j, error_code;
-	char answers_number_str[3], answer_number_str[2], data_size_str[MAX_TXT_SIZE+1], image_size_str[MAX_IMG_SIZE+1];
+	char answers_number_str[3], answer_number_str[3], data_size_str[MAX_TXT_SIZE+1], image_size_str[MAX_IMG_SIZE+1];
 
 	error_code = write_to_tcp_socket(socket_tcp, QGR, ' ');
 	if (error_code) {
@@ -135,7 +135,14 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 			return FAILURE;
 		}
 
-		error_code = write_to_tcp_socket(socket_tcp, question->answers[i]->number, ' ');
+		if (strlen(question->answers[i]->number) == 1) {
+			answer_number_str[0] = '0';
+			answer_number_str[1] = question->answers[i]->number[0];
+			answer_number_str[2] = '\0';
+		} else {
+			strcpy(answer_number_str, question->answers[i]->number);
+		}
+		error_code = write_to_tcp_socket(socket_tcp, answer_number_str, ' ');
 		if (error_code) {
 			return FAILURE;
 		}

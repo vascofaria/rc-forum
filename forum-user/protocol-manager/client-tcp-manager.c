@@ -21,9 +21,9 @@ static void send_GQU_request(int sock_tcp, char *protocol, char *topic, char *qu
 
 static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 	char path[MAX_PATH_SIZE];
-	char protocol[PROTOCOL_SIZE];
-	char q_user_id[USER_ID_SIZE], qsize[FILE_SIZE_DIGITS], qiext[EXTENSION_SIZE_DIGITS], qisize[FILE_SIZE_DIGITS], answers[MAX_ANSWERS_SIZE_DIGITS], qimg, c;
-	char a_user_id[USER_ID_SIZE], asize[FILE_SIZE_DIGITS], aiext[EXTENSION_SIZE_DIGITS], aisize[FILE_SIZE_DIGITS], aimg;
+	char protocol[PROTOCOL_SIZE + 1];
+	char q_user_id[USER_ID_SIZE + 1], qsize[FILE_SIZE_DIGITS + 1], qiext[EXTENSION_SIZE_DIGITS + 1], qisize[FILE_SIZE_DIGITS + 1], answers[MAX_ANSWERS_SIZE_DIGITS + 1], qimg, c;
+	char a_user_id[USER_ID_SIZE + 1], asize[FILE_SIZE_DIGITS + 1], aiext[EXTENSION_SIZE_DIGITS + 1], aisize[FILE_SIZE_DIGITS + 1], aimg;
 	int  qsize_n, qisize_n, asize_n, aisize_n, answers_n, i, error_code, file_fd;
 
 	if (access(get_user_topic(user), F_OK) != 0) {
@@ -68,26 +68,25 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 	
 	error_code =  read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
 	if (error_code) {
-		printf("Errro\n");
+		printf("Errro1\n");
 	}
 
-	error_code = read_from_tcp_socket(sock_tcp, &qimg, 1, '\0');
+	error_code = read_from_tcp_socket(sock_tcp, &qimg, 2, ' ');
 	printf("%c\n", qimg);
 	if (error_code) {
-		printf("Errro\n");
+		printf("Errro2\n");
 	}
-
-
-	error_code = read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
-	if (error_code) {
-		printf("Errro\n");
-	}
-
 
 	if (qimg == '1') {
-		read_from_tcp_socket(sock_tcp, qiext, EXTENSION_SIZE_DIGITS + 1, ' ');
+		error_code = read_from_tcp_socket(sock_tcp, qiext, EXTENSION_SIZE_DIGITS + 1, ' ');
+		if (error_code) {
+			printf("Errro4\n");
+		}
 		printf("%s\n", qiext);
-		read_from_tcp_socket(sock_tcp, qisize, FILE_SIZE_DIGITS + 1, ' ');
+		error_code = read_from_tcp_socket(sock_tcp, qisize, FILE_SIZE_DIGITS + 1, ' ');
+		if (error_code) {
+			printf("Errro5\n");
+		}
 		printf("%s\n", qisize);
 		qisize_n = atoi(qisize);
 		
@@ -100,24 +99,41 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 		printf("%s\n", path);
 		
 		write_from_socket_to_file(sock_tcp, path, qisize_n);
+		error_code = read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
+		if (error_code) {
+			printf("Errro6\n");
+		}
 	}
 
-	read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
-
-	read_from_tcp_socket(sock_tcp, answers, MAX_ANSWERS_SIZE_DIGITS, '\0');
+	error_code = read_from_tcp_socket(sock_tcp, answers, MAX_ANSWERS_SIZE_DIGITS, '\0');
+	if (error_code) {
+		printf("Errro7\n");
+	}
 	printf("%s\n", answers);
 	answers_n = atoi(answers);
 
 	for (i = 0; i < answers_n; i++) {
 		printf("ss\n");
-		read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
+		error_code = read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
+		if (error_code) {
+			printf("Errro8\n");
+		}
 
-		read_from_tcp_socket(sock_tcp, answers, MAX_ANSWERS_SIZE_DIGITS, ' ');
-		
-		read_from_tcp_socket(sock_tcp, a_user_id, USER_ID_SIZE + 1, ' ');
-	
-		read_from_tcp_socket(sock_tcp, asize, FILE_SIZE_DIGITS + 1, ' ');
-		
+		error_code = read_from_tcp_socket(sock_tcp, answers, MAX_ANSWERS_SIZE_DIGITS + 1, ' ');
+		if (error_code) {
+			printf("Errro9\n");
+		}
+		printf("%s\n", answers);
+		error_code =  read_from_tcp_socket(sock_tcp, a_user_id, USER_ID_SIZE + 1, ' ');
+		if (error_code) {
+			printf("Errro10\n");
+		}
+		printf("%s\n", a_user_id);
+		error_code = read_from_tcp_socket(sock_tcp, asize, FILE_SIZE_DIGITS + 1, ' ');
+		if (error_code) {
+			printf("Errro11\n");
+		}
+		printf("%s\n", asize);
 		asize_n = atoi(asize);
 
 		strcpy(path, "./");
@@ -130,13 +146,32 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 		printf("%s\n", path);
 
 		write_from_socket_to_file(sock_tcp, path, asize_n);
+
+		error_code = read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
+		if (error_code) {
+			printf("Errro111\n");
+		}
 	
-		read_from_tcp_socket(sock_tcp, &aimg, 2, ' ');
+		error_code = read_from_tcp_socket(sock_tcp, &aimg, 1, '\0');
+		if (error_code) {
+			printf("Errro12\n");
+		}
 
 		if (aimg == '1') {
-			read_from_tcp_socket(sock_tcp, aiext, EXTENSION_SIZE_DIGITS + 1, ' ');
 
-			read_from_tcp_socket(sock_tcp, aisize, FILE_SIZE_DIGITS + 1, ' ');
+			error_code = read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
+			if (error_code) {
+				printf("Errro122\n");
+			}
+			error_code = read_from_tcp_socket(sock_tcp, aiext, EXTENSION_SIZE_DIGITS + 1, ' ');
+			if (error_code) {
+				printf("Errro13\n");
+			}
+
+			error_code = read_from_tcp_socket(sock_tcp, aisize, FILE_SIZE_DIGITS + 1, ' ');
+			if (error_code) {
+				printf("Errro14\n");
+			}
 
 			aisize_n = atoi(asize);
 
@@ -153,7 +188,10 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 			write_from_socket_to_file(sock_tcp, path, aisize_n);
 		}	
 	}
-	read_from_tcp_socket(sock_tcp, NULL, 0, '\n');
+	error_code = read_from_tcp_socket(sock_tcp, NULL, 0, '\n');
+	if (error_code) {
+		printf("Errro15\n");
+	}
 }
 
 static void send_QUS_request(int sock_tcp, char *protocol, char* user_id, char *topic, char *question, char *qsize, char *qpath, char *qimg, char *iext, char *isize, char *ipath) {
