@@ -14,7 +14,7 @@ int
 write_to_tcp_socket(int socket_tcp, char *buffer, char final_char);
 
 int 
-read_from_tcp_socket(int sock_tcp, char *buffer, int size, char final_char);
+read_from_tcp_socket(int socket_tcp, char *buffer, int size, char final_char);
 
 void 
 write_from_socket_to_file(int sock_tcp, char *file_path, int file_size);

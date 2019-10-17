@@ -44,6 +44,8 @@ int parse_input_QUS(int socket_tcp, char *topic, question_t **question) {
 		return BAD_INPUT;
 	}
 
+	printf("%s\n", question_user_id);
+
 	strcat(question_path, question_user_id);
 	create_dir(question_path);
 
@@ -58,15 +60,21 @@ int parse_input_QUS(int socket_tcp, char *topic, question_t **question) {
 		return BAD_INPUT;
 	}
 
+	printf("%s\n", topic);
+
 	error_code = read_from_tcp_socket(socket_tcp, question_title, MAX_QUESTION_TITLE + 1, ' ');
 	if (error_code) {
 		return BAD_INPUT;
 	}
 
+	printf("%s\n", question_title);
+
 	error_code = read_from_tcp_socket(socket_tcp, size_str, MAX_SIZE_STR + 1, ' ');
 	if (error_code) {
 		return BAD_INPUT;
 	}
+
+	printf("%s\n", size_str);
 
 	for (i = 0; i < strlen(size_str); i++) {
 		if (size_str[i] < '0' || size_str[i] > '9') {
@@ -99,6 +107,7 @@ int parse_input_QUS(int socket_tcp, char *topic, question_t **question) {
 	if (error_code) {
 		return BAD_INPUT;
 	}
+	printf("%c\n", opt);
 
 	if (opt == '1') {
 
@@ -111,7 +120,7 @@ int parse_input_QUS(int socket_tcp, char *topic, question_t **question) {
 		if (error_code) {
 			return BAD_INPUT;
 		}
-
+		printf("%s\n", question_img_ext);
 		strcat(image_path, "/question.\0");
 		strcat(image_path, question_img_ext);
 
@@ -121,7 +130,6 @@ int parse_input_QUS(int socket_tcp, char *topic, question_t **question) {
 		}
 		for (i = 0; i < strlen(size_str); i++) {
 			if (size_str[i] < '0' || size_str[i] > '9') {
-				printf("%s\n", size_str[i]);
 				return BAD_INPUT;
 			}
 			question_img_size += size_str[i] - '0';
@@ -132,7 +140,7 @@ int parse_input_QUS(int socket_tcp, char *topic, question_t **question) {
 		if (question_img_size == 0) {
 			return BAD_INPUT;
 		}
-
+		printf("%s\n", size_str);
 		// READ IMG FILE FROM SOCKET
 		error_code = write_from_socket_to_file(socket_tcp, image_path, question_img_size);
 		if (error_code) {

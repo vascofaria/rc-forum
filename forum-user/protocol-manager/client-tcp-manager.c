@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <netdb.h>
 #include <stdlib.h>
@@ -21,16 +22,18 @@ static void send_GQU_request(int sock_tcp, char *protocol, char *topic, char *qu
 static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 	char path[MAX_PATH_SIZE];
 	char protocol[PROTOCOL_SIZE];
-	char q_user_id[USER_ID_SIZE], qsize[FILE_SIZE_DIGITS], qiext[EXTENSION_SIZE_DIGITS], qisize[FILE_SIZE_DIGITS], answers[MAX_ANSWERS_SIZE_DIGITS], qimg[2], c;
-	char a_user_id[USER_ID_SIZE], asize[FILE_SIZE_DIGITS], aiext[EXTENSION_SIZE_DIGITS], aisize[FILE_SIZE_DIGITS], aimg[2];
+	char q_user_id[USER_ID_SIZE], qsize[FILE_SIZE_DIGITS], qiext[EXTENSION_SIZE_DIGITS], qisize[FILE_SIZE_DIGITS], answers[MAX_ANSWERS_SIZE_DIGITS], qimg, c;
+	char a_user_id[USER_ID_SIZE], asize[FILE_SIZE_DIGITS], aiext[EXTENSION_SIZE_DIGITS], aisize[FILE_SIZE_DIGITS], aimg;
 	int  qsize_n, qisize_n, asize_n, aisize_n, answers_n, i, error_code, file_fd;
 
-	/* Create Topic directory */
-	/*error_code = mkdir(get_user_topic(user), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-	if (error_code) {
-		fprintf(stderr, "ERROR: Unable to create directory: %s: %s\n", get_user_topic(user), strerror(errno));
-		exit(EXIT_FAILURE);
-	}*/
+	if (access(get_user_topic(user), F_OK) != 0) {
+		/* Create Topic directory */
+		error_code = mkdir(get_user_topic(user), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		if (error_code) {
+			fprintf(stderr, "ERROR: Unable to create directory: %s: %s\n", get_user_topic(user), strerror(errno));
+			exit(EXIT_FAILURE);
+		}	
+	}
 
 	read_from_tcp_socket(sock_tcp, protocol, PROTOCOL_SIZE + 1, ' ');
 	printf("%s\n", protocol);
@@ -38,35 +41,56 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 	read_from_tcp_socket(sock_tcp, q_user_id, USER_ID_SIZE + 1, ' ');
 	printf("%s\n", q_user_id);
 	
-	read_from_tcp_socket(sock_tcp, qsize, USER_ID_SIZE + 1, ' ');
+	read_from_tcp_socket(sock_tcp, qsize, MAX_QUESTIONS_SIZE_DIGITS + 1, ' ');
 	printf("%s\n", qsize);
 
 	qsize_n = atoi(qsize);
 
-	strcpy(path, question);
+	strcpy(path, "./");
+	strcat(path, get_user_topic(user));
+	strcat(path, "/");
+	strcat(path, question);
 	strcat(path, ".txt\0");
-
+	printf("%s\n", path);
 	write_from_socket_to_file(sock_tcp, path, qsize_n);
 	
-	read_from_tcp_socket(sock_tcp, qimg, 1 + 1, ' ');
+	read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
+
+	read_from_tcp_socket(sock_tcp, &qimg, 1, '\0');
+	printf("%c\n", qimg);
 	
-	read_from_tcp_socket(sock_tcp, &c, 1, ' ');
+	read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
 
-	if (!strcmp(qimg, "1")) {
+	if (qimg == '1') {
 		read_from_tcp_socket(sock_tcp, qiext, EXTENSION_SIZE_DIGITS + 1, ' ');
-
+		printf("%s\n", qiext);
 		read_from_tcp_socket(sock_tcp, qisize, FILE_SIZE_DIGITS + 1, ' ');
-
-		qisize_n = atoi(qsize);
-
-		write_from_socket_to_file(sock_tcp, "ola", qisize_n);
+		printf("%s\n", qisize);
+		qisize_n = atoi(qisize);
+		
+		strcpy(path, "./");
+		strcat(path, get_user_topic(user));
+		strcat(path, "/");
+		strcat(path, question);
+		strcat(path, ".");
+		strcat(path, qiext);
+		printf("%s\n", path);
+		
+		write_from_socket_to_file(sock_tcp, path, qisize_n);
 	}
 
-	read_from_tcp_socket(sock_tcp, answers, MAX_ANSWERS_SIZE_DIGITS + 1, ' ');
-
-	answers_n = atoi(answers);
+	read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
+	char buf[100];
+	read(sock_tcp, buf, 100);
+	printf("%s\n", buf);
+	/*read_from_tcp_socket(sock_tcp, answers, MAX_ANSWERS_SIZE_DIGITS, '\0');
+	printf("%s\n", answers);
+	answers_n = atoi(answers);*/
 
 	for (i = 0; i < answers_n; i++) {
+		printf("ss\n");
+		read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
+
 		read_from_tcp_socket(sock_tcp, answers, MAX_ANSWERS_SIZE_DIGITS, ' ');
 		
 		read_from_tcp_socket(sock_tcp, a_user_id, USER_ID_SIZE + 1, ' ');
@@ -75,22 +99,40 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 		
 		asize_n = atoi(asize);
 
-		write_from_socket_to_file(sock_tcp, "ola", asize_n);
-	
-		read_from_tcp_socket(sock_tcp, aimg, 1 + 1, ' ');
-	
-		read_from_tcp_socket(sock_tcp, &c, 1, ' ');
+		strcpy(path, "./");
+		strcat(path, get_user_topic(user));
+		strcat(path, "/");
+		strcat(path, question);
+		strcat(path, "_");
+		strcat(path, answers);
+		strcat(path, ".txt");
+		printf("%s\n", path);
 
-		if (!strcmp(aimg, "1")) {
+		write_from_socket_to_file(sock_tcp, path, asize_n);
+	
+		read_from_tcp_socket(sock_tcp, &aimg, 2, ' ');
+
+		if (aimg == '1') {
 			read_from_tcp_socket(sock_tcp, aiext, EXTENSION_SIZE_DIGITS + 1, ' ');
 
 			read_from_tcp_socket(sock_tcp, aisize, FILE_SIZE_DIGITS + 1, ' ');
 
 			aisize_n = atoi(asize);
 
-			write_from_socket_to_file(sock_tcp, "ola", aisize_n);
+			strcpy(path, "./");
+			strcat(path, get_user_topic(user));
+			strcat(path, "/");
+			strcat(path, question);
+			strcat(path, "_");
+			strcat(path, answers);
+			strcat(path, ".");
+			strcat(path, aiext);
+			printf("%s\n", path);
+
+			write_from_socket_to_file(sock_tcp, path, aisize_n);
 		}	
 	}
+	read_from_tcp_socket(sock_tcp, NULL, 0, '\n');
 }
 
 static void send_QUS_request(int sock_tcp, char *protocol, char* user_id, char *topic, char *question, char *qsize, char *qpath, char *qimg, char *iext, char *isize, char *ipath) {
@@ -153,7 +195,7 @@ void client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_
 		if (get_user_topic(user)) {
 			set_user_question(user, args[1]);
 			send_GQU_request(server_sock_tcp, protocol, get_user_topic(user), args[1]);
-			//recv_GQU_request(user, args[1], server_sock_tcp);
+			recv_GQU_request(user, args[1], server_sock_tcp);
 		}
 		else {
 			printf("%s\n", TOPIC_IS_NOT_SELECTED);
