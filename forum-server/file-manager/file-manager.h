@@ -43,7 +43,7 @@ void write_file_data(const char *file_path, const long int size, const char *dat
 
 char *get_img_file(char *path);
 
-char* get_img_ext(char* path);
+char* get_file_ext(char* file_name);
 
 int count_directories(char *path);
 

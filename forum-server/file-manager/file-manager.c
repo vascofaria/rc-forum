@@ -95,9 +95,7 @@ char **list_directory(char* path) {
 	int i = 0;
 	char *dir_name;
 	char current_dir[MAX_FILENAME*9];
-	char id[USER_ID_SIZE + 1];
 	DIR *d = NULL;
-	FILE *fp = NULL;
 	struct dirent *dir = NULL;
 	d = opendir(path);
 
@@ -109,19 +107,9 @@ char **list_directory(char* path) {
 		i = 0;
 		while ((dir = readdir(d)) != NULL) {
 			if (dir->d_name[0] != '.') {
-				strcpy(id, "\0");
-				strcpy(current_dir, path);
-				dir_list[i] = (char*) malloc(sizeof(char) * (MAX_FILENAME + 1 + USER_ID_SIZE + 1));
-				strcat(current_dir, dir->d_name);
-				strcat(current_dir, "/uid.txt\0");
-				fp = fopen(current_dir, "r"); //TODO ERRO DO SISTEMA
-				if (fp) {
-					fscanf(fp, "%s", id); 
-					fclose(fp);
-				}
-				strcpy(dir_list[i], dir->d_name);
-				strcat(dir_list[i], ":");
-				strcat(dir_list[i++], id);
+
+				dir_list[i] = (char*) malloc(sizeof(char) * (MAX_FILENAME + 1));
+				strcpy(dir_list[i++], dir->d_name);
 			}
 		}
 		// closedir(d);
@@ -181,31 +169,23 @@ char *get_img_file(char *path) {
 	char *ext;
 
 	for (i = 0; list[i] != NULL; i++) {
-		if ((ext = list[i]) != "txt\0") {
+		ext = get_file_ext(list[i]);
+		if (strcmp(ext, "txt\0")) {
+			free(ext);
 			return list[i];
 		}
+		free(ext);
 	}
 	return NULL;
 }
 
-char *get_img_ext(char* path) {
-	DIR *d = opendir(path);
-	struct dirent *dir = NULL;
-	char *ext;
-
-	if (d) {
-		while ((dir = readdir(d)) != NULL) {
-			if (dir->d_name[0] == 'i') {
-				ext = (char*) malloc(sizeof(char)*4);
-				ext[0] = dir->d_name[4];
-				ext[1] = dir->d_name[5];
-				ext[2] = dir->d_name[6];
-				ext[3] = '\0';
-				return ext;
-			}
-		}
-	}
-	return NULL;
+char* get_file_ext(char* file_name) {
+	char  *ext, *ext_aux;
+	ext_aux = strchr(file_name, '.');
+	ext     = (char *) malloc (sizeof(char) * (strlen(ext_aux) + 1));
+	strcpy(ext, ext_aux + sizeof(char));
+	ext[3] = '\0';
+	return ext;
 }
 
 int count_directories(char *path) {
@@ -280,7 +260,7 @@ int write_from_file_to_socket(int sock_tcp, char *file_path, int file_size) {
 				return FAILURE;
 			}
 		} while (n == 0);
-		
+
 		do {
 			n = write(sock_tcp, &c, 1);
 			if (n == -1) {

@@ -72,7 +72,11 @@ int get_question(char *topic_name, char *question_title, question_t **question) 
 		return error_code;
 	}
 
-	question_img_ext = get_img_ext(p);
+	//for (int i = 0; answers_list[i] != NULL; i++) {
+	//	printf("ALI: %s - %s", answers_list[i]->title, answers_list[i]->data_path);
+	//}
+
+	question_img_ext = get_file_ext(p);
 
 	// TODO: load all the data to the question structure
 	if (question_img_ext) {
@@ -204,7 +208,7 @@ int post_question(char *topic_name, question_t *question) {
 	if (question->data_size != 0) {
 		strcpy(question_data_path, p);
 		strcat(question_data_path, "/question.txt\0");
-		
+
 		error_code = move_file(question->data_path, question_data_path);
 		if (error_code) {
 			return FAILURE;

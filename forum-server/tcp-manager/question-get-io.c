@@ -51,13 +51,10 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 		return FAILURE;
 	}
 
-	printf("QGR: %s\n", QGR);
 	error_code = write_to_tcp_socket(socket_tcp, question->user_id, ' ');
 	if (error_code) {
 		return FAILURE;
 	}
-
-	printf("User ID: %s\n", question->user_id);
 
 	sprintf(data_size_str, "%d", question->data_size);
 	error_code = write_to_tcp_socket(socket_tcp, data_size_str, ' ');
@@ -65,20 +62,15 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 		return FAILURE;
 	}
 
-	printf("Data Size: %s\n", data_size_str);
-
 	error_code = write_from_file_to_socket(socket_tcp, question->data_path, question->data_size);
 	if (error_code) {
 		return FAILURE;
 	}
-	printf("Data Path: %s\n", question->data_path);
 
 	error_code = write_to_tcp_socket(socket_tcp, "\0", ' ');
 	if (error_code) {
 		return FAILURE;
 	}
-
-	printf("space\n");
 
 	if (question->image_size) {
 
@@ -86,14 +78,11 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 		if (error_code) {
 			return FAILURE;
 		}
-		printf("number 1\n");
 
 		error_code = write_to_tcp_socket(socket_tcp, question->image_ext, ' ');
 		if (error_code) {
 			return FAILURE;
 		}
-
-		printf("Image Ext: %s\n", question->image_ext);
 
 		sprintf(image_size_str, "%d", question->image_size);
 		error_code = write_to_tcp_socket(socket_tcp, image_size_str, ' ');
@@ -101,33 +90,26 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 			return FAILURE;
 		}
 
-		printf("Image Size: %s\n", image_size_str);
-
 		error_code = write_from_file_to_socket(socket_tcp, question->image_path, question->image_size);
 		if (error_code) {
 			return FAILURE;
 		}
-
-		printf("Image Path: %s\n", question->image_path);
 
 		error_code = write_to_tcp_socket(socket_tcp, "\0", ' ');
 		if (error_code) {
 			return FAILURE;
 		}
 
-		printf("space\n");
-
 	} else {
 		error_code = write_to_tcp_socket(socket_tcp, "0\0", ' ');
 		if (error_code) {
 			return FAILURE;
 		}
-
-		printf("No img : 0\n");
 	}
 
-	for (answers_number = 0; answers_number < MAX_ANSWERS && question->answers[answers_number] != NULL; answers_number++);
-	answers_number++;
+	for (answers_number = 0; answers_number < MAX_ANSWERS && question->answers[answers_number] != NULL; ) {
+		answers_number++;
+	}
 	if (answers_number < 10) {
 		answers_number_str[0] = '0';
 		answers_number_str[1] = '0' + answers_number;
@@ -136,16 +118,10 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 		strcpy(answers_number_str, "10\0");
 	}
 
-	printf("Answers Number: %s\n", answers_number_str);
-
 	error_code = write_to_tcp_socket(socket_tcp, answers_number_str, '\0');
 	if (error_code) {
 		return FAILURE;
 	}
-
-	// write response
-
-	printf("ANUMBER::::: %d\n", answers_number);
 
 	for (i = 0; i < answers_number; i++) {
 
@@ -153,23 +129,16 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 		if (error_code) {
 			return FAILURE;
 		}
-		printf("space\n");
 
 		error_code = write_to_tcp_socket(socket_tcp, question->answers[i]->number, ' ');
 		if (error_code) {
 			return FAILURE;
 		}
 
-		printf("Actual AnswerNumber: %s\n", question->answers[i]->number);
-
-		printf("space\n");
-
 		error_code = write_to_tcp_socket(socket_tcp, question->answers[i]->user_id, ' ');
 		if (error_code) {
 			return FAILURE;
 		}
-
-		printf("Answer User Id: %s\n", question->answers[i]->user_id);
 
 		sprintf(data_size_str, "%d", question->answers[i]->data_size);
 		error_code = write_to_tcp_socket(socket_tcp, data_size_str, ' ');
@@ -177,23 +146,15 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 			return FAILURE;
 		}
 
-		printf("Answer size: %s\n", data_size_str);
-
 		error_code = write_from_file_to_socket(socket_tcp, question->answers[i]->data_path, question->answers[i]->data_size);
 		if (error_code) {
 			return FAILURE;
 		}
 
-		printf("Answer Data Path: %s\n", question->answers[i]->data_path);
-
 		error_code = write_to_tcp_socket(socket_tcp, "\0", ' ');
 		if (error_code) {
 			return FAILURE;
 		}
-
-		printf("space\n");
-
-		printf("IMG SIZE: %d\n", question->answers[i]->image_size);
 
 		if (question->answers[i]->image_size) {
 
@@ -202,14 +163,10 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 				return FAILURE;
 			}
 
-			printf("Has image: 1\n");
-
 			error_code = write_to_tcp_socket(socket_tcp, question->answers[i]->image_ext, ' ');
 			if (error_code) {
 				return FAILURE;
 			}
-
-			printf("Answer Image Ext: %s\n", question->answers[i]->image_ext);
 
 			sprintf(image_size_str, "%d", question->answers[i]->image_size);
 			error_code = write_to_tcp_socket(socket_tcp, image_size_str, ' ');
@@ -217,23 +174,17 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 				return FAILURE;
 			}
 
-			printf("Answer Image Size: %s\n", image_size_str);
-
 			error_code = write_from_file_to_socket(socket_tcp, question->answers[i]->image_path, question->answers[i]->image_size);
 			if (error_code) {
 				return FAILURE;
 			}
-
-			printf("Answer Image Path: %s\n", question->answers[i]->image_path);
 
 		} else {
 			error_code = write_to_tcp_socket(socket_tcp, "0\0", '\0');
 			if (error_code) {
 				return FAILURE;
 			}
-			printf("Answer Has no img: 0\n");
 		}
-		printf("END\n");
 	}
 
 	error_code = write_to_tcp_socket(socket_tcp, "\0", '\n');

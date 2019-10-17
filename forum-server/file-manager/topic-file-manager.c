@@ -35,13 +35,44 @@ int topic_exists(char *topic_path) {
 
 int get_topics(char ***topics_list) {
 
-	char p[MAX_PATH] = TOPICS_PATH;
+	char path[MAX_PATH] = TOPICS_PATH;
 
-	*topics_list = list_directory(p);
+	int i = 0;
+	char *dir_name;
+	char current_dir[MAX_FILENAME*9];
+	char id[USER_ID_SIZE + 1];
+	DIR *d = NULL;
+	FILE *fp = NULL;
+	struct dirent *dir = NULL;
+	d = opendir(path);
 
-	// for (int i = 0; i<99 && (*topics_list)[i] != NULL; i++) {
-	// 	printf("%s\n", (*topics_list)[i]);
-	// }
+	char **dir_list = (char**) malloc(sizeof(char*) * MAX_TOPICS);
+
+	for (i = 0; i < MAX_TOPICS; i++) dir_list[i] = NULL;
+
+	if (d) {
+		i = 0;
+		while ((dir = readdir(d)) != NULL) {
+			if (dir->d_name[0] != '.') {
+				strcpy(id, "\0");
+				strcpy(current_dir, path);
+				dir_list[i] = (char*) malloc(sizeof(char) * (MAX_FILENAME + 1 + USER_ID_SIZE + 1));
+				strcat(current_dir, dir->d_name);
+				strcat(current_dir, "/uid.txt\0");
+				fp = fopen(current_dir, "r"); //TODO ERRO DO SISTEMA
+				if (fp) {
+					fscanf(fp, "%s", id); 
+					fclose(fp);
+				}
+				strcpy(dir_list[i], dir->d_name);
+				strcat(dir_list[i], ":");
+				strcat(dir_list[i++], id);
+			}
+		}
+		// closedir(d);
+	}
+	*topics_list = dir_list;
+
 	return SUCCESS;
 }
 

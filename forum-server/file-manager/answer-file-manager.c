@@ -98,7 +98,7 @@ int get_answers(char *topic_name, char *question_name, answer_t ***answers_list)
 						fclose(fp);
 					}
 
-					sprintf(answers_number_str, "%d", answers_number+1);
+					sprintf(answers_number_str, "%d", answers_number);
 					answers_number_str[2] = '\0';
 
 					strcpy(data_path, current_dir);
@@ -108,9 +108,9 @@ int get_answers(char *topic_name, char *question_name, answer_t ***answers_list)
 						strcpy(img_path, current_dir);
 						strcat(img_path, "/\0");
 						strcat(img_path, image);
-						ans_list[i] = new_answer(dir->d_name, id, answers_number_str, get_file_size(data_path, "r"), data_path, get_file_size(img_path, "r"), get_img_ext(image), img_path);
+						ans_list[i++] = new_answer(dir->d_name, id, answers_number_str, get_file_size(data_path, "r"), data_path, get_file_size(img_path, "r"), get_file_ext(image), img_path);
 					} else {
-						ans_list[i] = new_answer(dir->d_name, id, answers_number_str, get_file_size(data_path, "r"), data_path, 0, NULL, NULL);
+						ans_list[i++] = new_answer(dir->d_name, id, answers_number_str, get_file_size(data_path, "r"), data_path, 0, NULL, NULL);
 					}
 				}
 			}
@@ -121,10 +121,6 @@ int get_answers(char *topic_name, char *question_name, answer_t ***answers_list)
 	*answers_list = ans_list;
 	return SUCCESS;
 }
-
-
-
-
 
 int post_answer(char *topic_name, char *question_name, answer_t *answer) {
 
@@ -153,7 +149,6 @@ int post_answer(char *topic_name, char *question_name, answer_t *answer) {
 	if ((actual_answers_number = count_directories(p)) >= 99)
 		return MAX_ANSWERS_REACHED;
 	
-	strcat(p, answer->title);
 	if (actual_answers_number+1 < 10) {
 		answers_number_str[0] = '0';
 		answers_number_str[1] = '0' + actual_answers_number+1;
