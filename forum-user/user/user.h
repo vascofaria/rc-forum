@@ -27,6 +27,9 @@ get_user_topic (user_t *user);
 topic_t*
 get_topic_from_topiclist(user_t *user, int topic_number);
 
+question_t*
+get_question_from_questionlist(user_t *user, int question_number);
+
 char*
 get_user_question (user_t *user);
 

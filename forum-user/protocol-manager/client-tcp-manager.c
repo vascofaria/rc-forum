@@ -35,14 +35,26 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 		}	
 	}
 
-	read_from_tcp_socket(sock_tcp, protocol, PROTOCOL_SIZE + 1, ' ');
+	error_code = read_from_tcp_socket(sock_tcp, protocol, PROTOCOL_SIZE + 1, ' ');
 	printf("%s\n", protocol);
+	if (error_code) {
+		printf("Errro\n");
+	}
 
-	read_from_tcp_socket(sock_tcp, q_user_id, USER_ID_SIZE + 1, ' ');
+
+	error_code = read_from_tcp_socket(sock_tcp, q_user_id, USER_ID_SIZE + 1, ' ');
 	printf("%s\n", q_user_id);
-	
-	read_from_tcp_socket(sock_tcp, qsize, MAX_QUESTIONS_SIZE_DIGITS + 1, ' ');
+	if (error_code) {
+		printf("Errro\n");
+	}
+
+
+	error_code =  read_from_tcp_socket(sock_tcp, qsize, MAX_QUESTIONS_SIZE_DIGITS + 1, ' ');
 	printf("%s\n", qsize);
+	if (error_code) {
+		printf("Errro\n");
+	}
+
 
 	qsize_n = atoi(qsize);
 
@@ -54,12 +66,23 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 	printf("%s\n", path);
 	write_from_socket_to_file(sock_tcp, path, qsize_n);
 	
-	read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
+	error_code =  read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
+	if (error_code) {
+		printf("Errro\n");
+	}
 
-	read_from_tcp_socket(sock_tcp, &qimg, 1, '\0');
+	error_code = read_from_tcp_socket(sock_tcp, &qimg, 1, '\0');
 	printf("%c\n", qimg);
-	
-	read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
+	if (error_code) {
+		printf("Errro\n");
+	}
+
+
+	error_code = read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
+	if (error_code) {
+		printf("Errro\n");
+	}
+
 
 	if (qimg == '1') {
 		read_from_tcp_socket(sock_tcp, qiext, EXTENSION_SIZE_DIGITS + 1, ' ');
@@ -80,12 +103,10 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 	}
 
 	read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
-	char buf[100];
-	read(sock_tcp, buf, 100);
-	printf("%s\n", buf);
-	/*read_from_tcp_socket(sock_tcp, answers, MAX_ANSWERS_SIZE_DIGITS, '\0');
+
+	read_from_tcp_socket(sock_tcp, answers, MAX_ANSWERS_SIZE_DIGITS, '\0');
 	printf("%s\n", answers);
-	answers_n = atoi(answers);*/
+	answers_n = atoi(answers);
 
 	for (i = 0; i < answers_n; i++) {
 		printf("ss\n");
@@ -95,7 +116,7 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 		
 		read_from_tcp_socket(sock_tcp, a_user_id, USER_ID_SIZE + 1, ' ');
 	
-		read_from_tcp_socket(sock_tcp, asize, USER_ID_SIZE + 1, ' ');
+		read_from_tcp_socket(sock_tcp, asize, FILE_SIZE_DIGITS + 1, ' ');
 		
 		asize_n = atoi(asize);
 

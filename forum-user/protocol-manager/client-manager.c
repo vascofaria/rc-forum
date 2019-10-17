@@ -7,12 +7,14 @@
 #include "client-tcp-manager.h"
 #include "../user/user.h"
 #include "../topic/topic.h"
+#include "../question/question.h"
 
 void
 client_manager(user_t *user, char *request) {
-	char     args[MAX_ARGS_N][MAX_ARGS_L];
-	int      num_tokens;
-	topic_t *topic;
+	char       args[MAX_ARGS_N][MAX_ARGS_L];
+	int        num_tokens;
+	topic_t    *topic;
+	question_t *question;
 
 	num_tokens = sscanf(request, "%s %s %s %s %s", args[0], args[1], args[2], args[3], args[4]);
 

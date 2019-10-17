@@ -33,10 +33,14 @@ int parse_input_GQU(int socket_tcp, char *topic, char *question_title) {
 		return BAD_INPUT;
 	}
 
+	printf("%s\n", topic);
+
 	error_code = read_from_tcp_socket(socket_tcp, question_title, MAX_QUESTION_TITLE + 1, '\n');
 	if (error_code) {
 		return BAD_INPUT;
 	}
+
+	printf("%s\n", question_title);
 
 	return SUCCESS;
 }

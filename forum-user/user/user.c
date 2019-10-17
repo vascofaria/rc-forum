@@ -52,6 +52,18 @@ get_topic_from_topiclist(user_t *user, int topic_number) {
 	return NULL;
 }
 
+question_t*
+get_question_from_questionlist(user_t *user, int question_number) {
+	if (user && user->questions) {
+		if (question_number - 1 < 0 || question_number - 1 >= user->questions->size) {
+			return NULL;
+		}
+ 		return (question_t*) vector_at(user->questions, question_number - 1);	
+	}
+	return NULL;
+}
+
+
 char*
 get_user_question (user_t *user) {
 	if (user) {
