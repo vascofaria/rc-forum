@@ -137,12 +137,5 @@ int main(int argc, char const *argv[])
 		client_manager(user, buffer);
 		/*                  */
 	}
-
-	error_code = close(server_sock_udp);
-	if (error_code == -1) {
-		fprintf(stderr, "close failed: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
 	return 0;
 }

@@ -71,11 +71,18 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 		printf("Errro1\n");
 	}
 
-	error_code = read_from_tcp_socket(sock_tcp, &qimg, 2, ' ');
+	error_code = read_from_tcp_socket(sock_tcp, &qimg, 1, '\0');
 	printf("%c\n", qimg);
 	if (error_code) {
 		printf("Errro2\n");
 	}
+
+
+	error_code = read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
+	if (error_code) {
+		printf("Errro3\n");
+	}
+
 
 	if (qimg == '1') {
 		error_code = read_from_tcp_socket(sock_tcp, qiext, EXTENSION_SIZE_DIGITS + 1, ' ');
@@ -173,7 +180,7 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 				printf("Errro14\n");
 			}
 
-			aisize_n = atoi(asize);
+			aisize_n = atoi(aisize);
 
 			strcpy(path, "./");
 			strcat(path, get_user_topic(user));
@@ -183,8 +190,7 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 			strcat(path, answers);
 			strcat(path, ".");
 			strcat(path, aiext);
-			printf("%s\n", path);
-
+			printf("%s - %d\n", path, aisize_n);
 			write_from_socket_to_file(sock_tcp, path, aisize_n);
 		}	
 	}

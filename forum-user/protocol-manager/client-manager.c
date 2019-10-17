@@ -1,6 +1,11 @@
+#include <errno.h>
 #include <stdio.h>
+#include <netdb.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #include "client-manager.h"
 #include "client-udp-manager.h"
@@ -12,7 +17,7 @@
 void
 client_manager(user_t *user, char *request) {
 	char       args[MAX_ARGS_N][MAX_ARGS_L];
-	int        num_tokens;
+	int        num_tokens, error_code;
 	topic_t    *topic;
 	question_t *question;
 
@@ -125,12 +130,18 @@ client_manager(user_t *user, char *request) {
 	}
 	else if (!strcmp(args[0], "exit")) {
 			if (num_tokens == 1) {
-				
+				error_code = close(get_user_server_sock_udp(user));
+				if (error_code == -1) {
+					fprintf(stderr, "close failed: %s\n", strerror(errno));
+					exit(EXIT_FAILURE);
+				}
+				freeaddrinfo(get_user_udp_addrinfo(user));
+				freeaddrinfo(get_user_tcp_addrinfo(user));
+				exit(EXIT_SUCCESS);
 			}
 			else {
 				fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
 			}
-
 	}
 	else {
 			fprintf(stdout, "Invalid command!\n");
