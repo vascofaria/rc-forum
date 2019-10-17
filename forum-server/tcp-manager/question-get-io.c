@@ -79,6 +79,7 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 			return FAILURE;
 		}
 
+		printf("%s\n", question->image_ext);
 		error_code = write_to_tcp_socket(socket_tcp, question->image_ext, ' ');
 		if (error_code) {
 			return FAILURE;

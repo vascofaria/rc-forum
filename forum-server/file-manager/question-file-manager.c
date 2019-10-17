@@ -40,7 +40,7 @@ int get_question(char *topic_name, char *question_title, question_t **question) 
 	int error_code;
 	char p[MAX_PATH] = TOPICS_PATH, user_id_path[MAX_PATH], question_user_id[USER_ID_SIZE+1];
 	char question_data_path[MAX_PATH], question_image_path[MAX_PATH];
-	char *question_img_ext = NULL;
+	char *question_img_ext = NULL, *question_img = NULL;
 	strcat(p, topic_name);
 	FILE *fp = NULL;
 
@@ -72,20 +72,20 @@ int get_question(char *topic_name, char *question_title, question_t **question) 
 		return error_code;
 	}
 
-	//for (int i = 0; answers_list[i] != NULL; i++) {
-	//	printf("ALI: %s - %s", answers_list[i]->title, answers_list[i]->data_path);
-	//}
-
-	question_img_ext = get_file_ext(p);
+	question_img = get_img_file(p);
 
 	// TODO: load all the data to the question structure
-	if (question_img_ext) {
+	if (question_img) {
 
 		strcpy(question_image_path, p);
-		strcat(question_image_path, "/img.\0");
-		strcat(question_image_path, question_img_ext);
+		strcat(question_image_path, "/\0");
+		strcat(question_image_path, question_img);
 
-		*question = new_question(question_title, question_user_id, get_file_size(question_data_path, "r"), question_data_path, get_file_size(question_image_path, "rb"), question_img_ext, question_image_path, answers_list);
+		question_img_ext = get_file_ext(question_img);
+
+		printf("%s - %s\n", question_img_ext, question_image_path);
+
+		*question = new_question(question_title, question_user_id, get_file_size(question_data_path, "r"), question_data_path, get_file_size(question_image_path, "r"), question_img_ext, question_image_path, answers_list);
 		// frees
 		free(question_img_ext);
 	} else {

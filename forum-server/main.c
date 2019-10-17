@@ -223,7 +223,7 @@ int main(int argc, char const *argv[]) {
 				// ===> TO TEST GET QUESTION <===
 				//read(client_sock_tcp, NULL, 1);
 				//answer_t *l[2];
-				//answer_t *a = new_answer("AnswerN1", "89559", "01", 6, "./topics/TopicN1/questions/QuestionN1/answers/AnswerN1/answer.txt", 0, NULL, NULL);
+				//answer_t *a = new_answer("AnswerN1", "89559", "01", 6, "./topics/TopicN1/questions/QuestionN1/answers/AnswerN1/answer.txt", 2041, "png", "./topics/TopicN1/questions/QuestionN1/img.png");
 				//l[0] = a;
 				//l[1] = NULL;
 				//question_t *q = new_question("QuestionN1", "89559", 19, "./topics/TopicN1/questions/QuestionN1/question.txt", 2041, "png", "./topics/TopicN1/questions/QuestionN1/img.png", l);
