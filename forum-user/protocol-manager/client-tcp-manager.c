@@ -9,9 +9,11 @@
 #include <sys/types.h>
 
 #include "../constants.h"
+#include "../exceptions.h"
 #include "client-tcp-manager.h"
 #include "../file-manager/file-manager.h"
 #include "../error-messages/input-error-messages.h"
+#include "../error-messages/server-error-messages.h"
 
 static void send_GQU_request(int sock_tcp, char *protocol, char *topic, char *question) {
 	write_to_tcp_socket(sock_tcp, protocol, ' ');
@@ -218,6 +220,25 @@ static void send_QUS_request(int sock_tcp, char *protocol, char* user_id, char *
 	write_to_tcp_socket(sock_tcp, "\0", '\n');
 }
 
+static int recv_QUS_request(int sock_tcp, user_t *user, char *status) {
+	int  error_code;
+	char protocol[PROTOCOL_SIZE + 1];
+
+	error_code = read_from_tcp_socket(sock_tcp, protocol, PROTOCOL_SIZE + 1, ' ');
+	if (error_code) {
+		return FAILURE;
+	}
+	error_code = read_from_tcp_socket(sock_tcp, protocol, STATUS_SIZE   + 1, ' ');
+	if (error_code) {
+		return FAILURE;
+	}
+	error_code = read_from_tcp_socket(sock_tcp, NULL, 0, '\n');
+	if (error_code) {
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
 static void send_ANS_request(int sock_tcp, char *protocol, char* user_id, char *topic, char *question, char *asize, char *apath, char *aimg, char *iext, char *isize, char *ipath) {
 	write_to_tcp_socket(sock_tcp, protocol, ' ');
 	write_to_tcp_socket(sock_tcp, user_id, ' ');
@@ -236,9 +257,28 @@ static void send_ANS_request(int sock_tcp, char *protocol, char* user_id, char *
 	write_to_tcp_socket(sock_tcp, "\0", '\n');
 }
 
+static int recv_ANS_request(int sock_tcp, user_t *user, char *status) {
+	int  error_code;
+	char protocol[PROTOCOL_SIZE + 1];
+
+	error_code = read_from_tcp_socket(sock_tcp, protocol, PROTOCOL_SIZE + 1, ' ');
+	if (error_code) {
+		return FAILURE;
+	}
+	error_code = read_from_tcp_socket(sock_tcp, protocol, STATUS_SIZE   + 1, ' ');
+	if (error_code) {
+		return FAILURE;
+	}
+	error_code = read_from_tcp_socket(sock_tcp, NULL, 0, '\n');
+	if (error_code) {
+		return FAILURE;
+	}
+	return SUCCESS;
+}	
+
 void client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_L], int num_args) {
 	int   error_code, server_sock_tcp;
-	char *request, *size, *data, *img, *iext, *isize, *idata;
+	char *request, *size, *data, *img, *iext, *isize, *idata, status[STATUS_SIZE];;
 	
 	/* Socket TCP creation */
 	server_sock_tcp = socket(get_user_tcp_addrinfo(user)->ai_family, get_user_tcp_addrinfo(user)->ai_socktype, get_user_tcp_addrinfo(user)->ai_protocol);
@@ -274,12 +314,39 @@ void client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_
 				if (size) {
 					if (num_args == 3) {
 						send_QUS_request(server_sock_tcp, protocol, get_user_id(user), get_user_topic(user), args[1], size, args[2], "0", "", "", "");
+						error_code = recv_QUS_request(server_sock_tcp, user, status);
+						if (error_code == SUCCESS) {
+							if (!strcmp(status, "OK")) {
+								printf("%s\n", QUESTION_SUBMITION_SUCCEDED);
+							}
+							else if (!strcmp(status, "DUP")) {
+								printf("%s\n", QUESTION_LIST_IS_FULL);
+							}
+							else if (!strcmp(status, "FUL")) {
+								printf("%s\n", ANSWER_LIST_IS_FULL);
+							}
+							else {
+								printf("%s\n", ANSWER_SUBMITION_FAILED);
+							}
+						}
 					}
 					else {
 						isize = get_file_size(args[3], "r");
 						iext  = get_file_ext(args[3]);
 						if (isize && iext) {
 							send_QUS_request(server_sock_tcp, protocol, get_user_id(user), get_user_topic(user), args[1], size, args[2], "1", iext, isize, args[3]);
+							error_code = recv_ANS_request(server_sock_tcp, user, status);
+							if (error_code == SUCCESS) {
+								if (!strcmp(status, "OK")) {
+									printf("%s\n", ANSWER_SUBMITION_SUCCEDED);
+								}
+								else if (!strcmp(status, "FUL")) {
+									printf("%s\n", ANSWER_LIST_IS_FULL);
+								}
+								else {
+									printf("%s\n", ANSWER_SUBMITION_FAILED);
+								}
+							}
 						}
 						if (iext) {
 							free(iext);

@@ -13,10 +13,12 @@
 
 #define REQUEST_IS_NOT_CORRECTLY_FORMULATED "Sorry, your request is not correctly formulated"
 
+#define QUESTION_SUBMITION_SUCCEDED   "question submited"
+#define QUESTION_SUBMITION_FAILED     "question not submited"
 #define QUESTION_ALREADY_EXISTS "Sorry, that question already exists!"
 #define QUESTION_LIST_IS_FULL   "Sorry, the question list is actually full!" 
 
-#define ANSWER_LIST_IS_FULL "Sorry, the answer list is actually full!" 
-#define CANNOT_ANSWER       "Sorry, you answer cannot be submited!"
-
+#define ANSWER_SUBMITION_SUCCEDED   "Answer submited"
+#define ANSWER_SUBMITION_FAILED     "Answer not submited"
+#define ANSWER_LIST_IS_FULL 		"Sorry, the answer list is actually full!" 
 #endif
