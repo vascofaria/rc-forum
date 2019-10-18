@@ -1,7 +1,7 @@
 #ifndef __CLIENT_UDP_MANAGER_H__
 #define __CLIENT_UDP_MANAGER_H__
 
-#include "../user/user.h"
+#include "../entities/user.h"
 
 #define MAX_ARGS_N   3
 #define MAX_ARGS_L   128

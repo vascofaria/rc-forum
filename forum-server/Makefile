@@ -11,7 +11,7 @@
 # «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
 
 # FLAGS= ANSI
-NAME= server
+NAME= FS
 Object= udp-manager/udp-manager.o udp-manager/register-io.o udp-manager/list-topics-io.o udp-manager/propose-topic-io.o udp-manager/list-questions-io.o tcp-manager/tcp-manager.o tcp-manager/question-get-io.o tcp-manager/question-submit-io.o tcp-manager/answer-submit-io.o file-manager/file-manager.o file-manager/topic-file-manager.o file-manager/question-file-manager.o file-manager/answer-file-manager.o entities/answer.o entities/question.o usecases/usecases.o
 CC= gcc
 

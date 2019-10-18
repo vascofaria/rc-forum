@@ -1,9 +1,9 @@
 #ifndef __USER_H__
 #define __USER_H__
 
-#include "../topic/topic.h"
-#include "../vector/vector.h"
-#include "../question/question.h"
+#include "topic.h"
+#include "vector.h"
+#include "question.h"
 
 typedef struct user {
 	vector_t 	*topics;

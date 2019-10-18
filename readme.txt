@@ -1,5 +1,3 @@
-# RC-FORUM
-
 1. About rc-forum 
 
     Rc-forum is a simple online discussion forum about Redes de Computadores.

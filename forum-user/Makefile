@@ -10,8 +10,8 @@
 #
 # «««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
 
-NAME= client
-Object= protocol-manager/client-manager.o protocol-manager/client-tcp-manager.o protocol-manager/client-udp-manager.o user/user.o topic/topic.o question/question.o vector/vector.o file-manager/file-manager.o
+NAME= user
+Object= protocol-manager/client-manager.o protocol-manager/client-tcp-manager.o protocol-manager/client-udp-manager.o entities/user.o entities/topic.o entities/question.o entities/vector.o file-manager/file-manager.o
 CC= gcc
 
 all: $(Object)
@@ -21,33 +21,31 @@ all: $(Object)
 file-manager.o: file-manager/file-manager.c file-manager/file-manager.h
 	$(CC) -c file-manager/file-manager.c
 
-client-manager.o: protocol-manager/client-manager.c protocol-manager/client-manager.h user/user.h
+client-manager.o: protocol-manager/client-manager.c protocol-manager/client-manager.h entities/user.h
 	$(CC) -c protocol-manager/client-manager.c
 
-client-tcp-manager.o: protocol-manager/client-tcp-manager.c protocol-manager/client-tcp-manager.h user/user.h
+client-tcp-manager.o: protocol-manager/client-tcp-manager.c protocol-manager/client-tcp-manager.h entities/user.h
 	$(CC) -c protocol-manager/client-tcp-manager.c
 
-client-udp-manager.o: protocol-manager/client-udp-manager.c protocol-manager/client-udp-manager.h user/user.h
+client-udp-manager.o: protocol-manager/client-udp-manager.c protocol-manager/client-udp-manager.h entities/user.h
 	$(CC) -c protocol-manager/client-udp-manager.c
 
-user.o: user/user.c user/user.h
-	$(CC) -c user/user.c
+user.o: entities/user.c entities/user.h
+	$(CC) -c entities/user.c
 
-topic.o: topic/topic.c topic/topic.h
-	$(CC) -c topic/topic.c
+topic.o: entities/topic.c entities/topic.h
+	$(CC) -c entities/topic.c
 
-question.o: question/question.c question/question.h
-	$(CC) -c question/question.c
+question.o: entities/question.c entities/question.h
+	$(CC) -c entities/question.c
 
-vector.o: vector/vector.c vector/vector.h
-	$(CC) -c vector/vector.c
+vector.o: entities/vector.c entities/vector.h
+	$(CC) -c entities/vector.c
 
 clean:
 	@echo Cleaning Client...
 	(rm -f file-manager/*.o;)
 	(rm -f protocol-manager/*.o;)
-	(rm -f user/*.o;)
-	(rm -f vector/*.o;)
-	(rm -f topic/*.o;)
+	(rm -f entities/*.o;)
 	(rm -f *.o;)
 	(rm -f $(NAME);)

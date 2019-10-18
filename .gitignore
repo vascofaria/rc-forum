@@ -9,13 +9,11 @@ forum-server/usecases/*.o
 forum-server/file-manager/*.o
 forum-server/udp-manager/*.o
 forum-server/tcp-manager/*.o
-forum-server/server
+forum-server/FS
 forum-server/tmp/*
 forum-server/topics/*
 
 forum-user/file-manager/*.o
 forum-user/protocol-manager/*.o
-forum-user/topic/*.o
-forum-user/user/*.o
-forum-user/vector/*.o
-forum-user/client
+forum-user/entities/*.o
+forum-user/user

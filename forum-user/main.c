@@ -12,7 +12,7 @@
 #include <netinet/in.h>
 
 #include "protocol-manager/client-manager.h"
-#include "user/user.h"
+#include "entities/user.h"
 
 #define PORT 		 "58001"
 #define BUFFER_SIZE  128

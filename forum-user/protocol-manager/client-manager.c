@@ -12,11 +12,11 @@
 #include "client-manager.h"
 #include "client-udp-manager.h"
 #include "client-tcp-manager.h"
-#include "../user/user.h"
+#include "../entities/user.h"
 #include "../constants.h"
 #include "../exceptions.h"
-#include "../topic/topic.h"
-#include "../question/question.h"
+#include "../entities/topic.h"
+#include "../entities/question.h"
 #include "../error-messages/input-error-messages.h"
 
 int count_white_spaces(char *buffer) {

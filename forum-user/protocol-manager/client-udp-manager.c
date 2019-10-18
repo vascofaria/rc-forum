@@ -7,11 +7,11 @@
 #include <sys/socket.h>
 
 #include "client-udp-manager.h"
-#include "../user/user.h"
+#include "../entities/user.h"
 #include "../constants.h"
 #include "../exceptions.h"
-#include "../vector/vector.h"
-#include "../question/question.h"
+#include "../entities/vector.h"
+#include "../entities/question.h"
 #include "../error-messages/input-error-messages.h"
 #include "../error-messages/server-error-messages.h"
 

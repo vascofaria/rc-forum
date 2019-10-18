@@ -68,7 +68,7 @@ static int recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 		}
 	}
 
-	printf("Question %s by user %s - files downloaded\n", question, user_id);
+	printf("Question %s by user %s - files downloaded\n", question, q_user_id);
 
 	error_code =  read_from_tcp_socket(sock_tcp, qsize, FILE_SIZE_DIGITS + 1, ' ');
 	if (error_code) {
