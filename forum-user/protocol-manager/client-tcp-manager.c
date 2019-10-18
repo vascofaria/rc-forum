@@ -68,7 +68,7 @@ static int recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 		}
 	}
 
-	printf("Question %s by user %s - files downloaded\n", question, user_id);
+	printf("Question %s by user %s - files downloaded\n", question, q_user_id);
 
 	error_code =  read_from_tcp_socket(sock_tcp, qsize, FILE_SIZE_DIGITS + 1, ' ');
 	if (error_code) {
@@ -168,6 +168,8 @@ static int recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 	answers[MAX_ANSWERS_SIZE_DIGITS] = '\0';
 	answers_n = atoi(answers);
 
+	printf("%s answers found for this question: \n", answers);
+
 	for (ans_counter = 0; ans_counter < answers_n; ans_counter++) {
 		error_code = read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
 		if (error_code) {
@@ -199,6 +201,8 @@ static int recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 				return BAD_INPUT;
 			}
 		}
+
+		printf("\nRetrieving answer %s_%s by user %s\n", question, answers, a_user_id);
 
 		error_code = read_from_tcp_socket(sock_tcp, asize, FILE_SIZE_DIGITS + 1, ' ');
 		if (error_code) {
@@ -235,6 +239,8 @@ static int recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 		}
 
 		if (aimg == '1') {
+
+			printf("Answer %s_%s contains an image\n", question, answers);
 
 			error_code = read_from_tcp_socket(sock_tcp, NULL, 0, ' ');
 			if (error_code) {
@@ -277,6 +283,9 @@ static int recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 	if (error_code) {
 		return error_code;
 	}
+
+	printf("Operation successful. Check files\n");
+
 	return SUCCESS;
 }
 

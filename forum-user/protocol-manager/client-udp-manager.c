@@ -447,6 +447,7 @@ client_udp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_
 					error_code = parse_output_PTP(response, status);
 					if (error_code == SUCCESS) {
 						if (!strcmp(status, "OK")) {
+							set_user_topic(user, args[1]);
 							printf("Topic %s accepted!\n", args[1]);
 						}
 						else if (!strcmp(status, "DUP")) {
