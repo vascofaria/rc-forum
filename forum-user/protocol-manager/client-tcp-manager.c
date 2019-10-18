@@ -51,7 +51,7 @@ static void recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 	}
 
 
-	error_code =  read_from_tcp_socket(sock_tcp, qsize, MAX_QUESTIONS_SIZE_DIGITS + 1, ' ');
+	error_code =  read_from_tcp_socket(sock_tcp, qsize, FILE_SIZE_DIGITS + 1, ' ');
 	printf("%s\n", qsize);
 	if (error_code) {
 		printf("Errro\n");

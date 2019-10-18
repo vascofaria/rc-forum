@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <netdb.h>
 #include <errno.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -78,6 +79,16 @@ int main(int argc, char const *argv[])
 	char				buffer[BUFFER_SIZE], *buffer_ptr, main_params[ASCII_LIMIT][BUFFER_SIZE];
 	ssize_t 			n;
 	user_t 				*user;
+	struct sigaction    act;
+
+	memset(&act, 0, sizeof act);
+
+	act.sa_handler = SIG_IGN;
+
+	if (sigaction(SIGPIPE, &act, NULL) == -1) {
+		fprintf(stderr, "sigaction failed: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
 
 	parse_args (argc, (char** const) argv, main_params);
 

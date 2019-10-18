@@ -11,8 +11,6 @@
 
 #define CANNOT_BE_ANSWERED   "Sorry, your query cannot be answered"
 
-#define REQUEST_IS_NOT_CORRECTLY_FORMULATED "Sorry, your request is not correctly formulated"
-
 #define QUESTION_SUBMITION_SUCCEDED   "question submited"
 #define QUESTION_SUBMITION_FAILED     "question not submited"
 #define QUESTION_ALREADY_EXISTS "Sorry, that question already exists!"

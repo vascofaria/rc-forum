@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
 #include <netdb.h>
@@ -7,12 +8,70 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+
 #include "client-manager.h"
 #include "client-udp-manager.h"
 #include "client-tcp-manager.h"
 #include "../user/user.h"
+#include "../constants.h"
+#include "../exceptions.h"
 #include "../topic/topic.h"
 #include "../question/question.h"
+#include "../error-messages/input-error-messages.h"
+
+int count_white_spaces(char *buffer) {
+	int i, count = 0;
+
+	for (int i = 0; i < strlen(buffer); i++) {
+		if (isspace(buffer[i])) {
+			count++;
+		}
+	}
+
+	return count;
+}
+
+int verify_number(char *buffer) {
+	int i;
+	for (i = 0; i < strlen(buffer); i++) {
+		if (buffer[i] < '0' || buffer[i] > '9') {
+			printf("%s\n", BAD_NUMBER);
+			return FAILURE;
+		}
+	}
+	return SUCCESS;
+}
+
+int verify_user_id(char *buffer) {
+	int i;
+	for (i = 0; i < strlen(buffer); i++) {
+		if (buffer[i] < '0' || buffer[i] > '9') {
+			printf("%s\n", BAD_USER_ID);
+			return FAILURE;
+		}
+	}
+	if (i != USER_ID_SIZE) {
+		printf("%s\n", BAD_USER_ID);
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
+int verify_topic(char *buffer) {
+	if (strlen(buffer) > TOPIC_TITLE_SIZE) {
+		printf("%s\n", BAD_TOPIC_TITLE);
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
+int verify_question(char *buffer) {
+	if (strlen(buffer) > QUESTION_TITLE_SIZE) {
+		printf("%s\n", BAD_QUESTION_TITLE);
+		return FAILURE;
+	}
+	return SUCCESS;
+}
 
 void
 client_manager(user_t *user, char *request) {
@@ -25,7 +84,13 @@ client_manager(user_t *user, char *request) {
 
 	if (!strcmp(args[0], "register")             || 
 		!strcmp(args[0], "reg")) {
-			if (num_tokens == 2) {
+			if (count_white_spaces(request) - 1 != 1) {
+				fprintf(stderr, "%s\n", REQUEST_IS_NOT_CORRECTLY_FORMULATED);
+			}
+			else if (num_tokens == 2) {
+				if (verify_user_id(args[1]) == FAILURE) {
+					return;
+				}
 				client_udp_manager(user, "REG", args);
 			}
 			else {
@@ -34,7 +99,10 @@ client_manager(user_t *user, char *request) {
 	}
 	else if (!strcmp(args[0], "topic_list")      || 
 		     !strcmp(args[0], "tl")) {
-			if (num_tokens == 1) {
+			if (count_white_spaces(request) - 1 != 0) {
+				fprintf(stderr, "%s\n", REQUEST_IS_NOT_CORRECTLY_FORMULATED);
+			}
+			else if (num_tokens == 1) {
 				client_udp_manager(user, "LTP", args);
 			}
 			else {
@@ -42,18 +110,30 @@ client_manager(user_t *user, char *request) {
 			}
 	}
 	else if (!strcmp(args[0], "topic_select")) {
-			if (num_tokens != 2) {
+			if (count_white_spaces(request) - 1 != 1) {
+				fprintf(stderr, "%s\n", REQUEST_IS_NOT_CORRECTLY_FORMULATED);
+			}
+			else if (num_tokens != 2) {
 				fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
 			}
 			else {
+				if (verify_topic(args[1]) == FAILURE) {
+					return;
+				}
 				set_user_topic(user, args[1]);
 			} 
 	}
 	else if (!strcmp(args[0], "ts")) {
-			if (num_tokens != 2) {
+			if (count_white_spaces(request) - 1 != 1) {
+				fprintf(stderr, "%s\n", REQUEST_IS_NOT_CORRECTLY_FORMULATED);
+			}
+			else if (num_tokens != 2) {
 				fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
 			}
 			else {
+				if (verify_number(args[1]) == FAILURE) {
+					return;
+				}
 				if (get_user_topics(user)->size > 0) {
 					topic = get_topic_from_topiclist(user, atoi(args[1]));
 					if (topic) {
@@ -67,7 +147,13 @@ client_manager(user_t *user, char *request) {
 	}
 	else if (!strcmp(args[0], "topic_propose")   || 
 		     !strcmp(args[0], "tp")) {
-			if (num_tokens == 2) {
+			if (count_white_spaces(request) - 1 != 1) {
+				fprintf(stderr, "%s\n", REQUEST_IS_NOT_CORRECTLY_FORMULATED);
+			}
+			else if (num_tokens == 2) {
+				if (verify_topic(args[1]) == FAILURE) {
+					return;
+				}
 				client_udp_manager(user, "PTP", args);
 			}
 			else {
@@ -76,7 +162,10 @@ client_manager(user_t *user, char *request) {
 	}
 	else if (!strcmp(args[0], "question_list")   || 
 		     !strcmp(args[0], "ql")) {
-			if (num_tokens == 1) {
+			if (count_white_spaces(request) - 1 != 0) {
+				fprintf(stderr, "%s\n", REQUEST_IS_NOT_CORRECTLY_FORMULATED);
+			}
+			else if (num_tokens == 1) {
 				client_udp_manager(user, "LQU", args);
 			}
 			else {
@@ -85,9 +174,14 @@ client_manager(user_t *user, char *request) {
 	}
 	else if (!strcmp(args[0], "question_get")    || 
 		     !strcmp(args[0], "qg")) {
-			if (num_tokens == 2) {
+			if (count_white_spaces(request) - 1 != 1) {
+				fprintf(stderr, "%s\n", REQUEST_IS_NOT_CORRECTLY_FORMULATED);
+			}
+			else if (num_tokens == 2) {
 				if (!strcmp(args[0], "qg")) {
-					printf("aaa\n");
+					if (verify_number(args[1]) == FAILURE) {
+						return;
+					}
 					if (get_user_questions(user)->size > 0) {
 						question = get_question_from_questionlist(user, atoi(args[1]));
 						if (question) {
@@ -97,8 +191,15 @@ client_manager(user_t *user, char *request) {
 					}
 					else {
 						printf("Question list not available\n");
+						return;
 					}	
 				}
+				else {
+					if (verify_question(args[1]) == FAILURE) {
+						return;
+					}
+				}
+
 				client_tcp_manager(user, "GQU", args, num_tokens);
 			}
 			else {
@@ -107,8 +208,14 @@ client_manager(user_t *user, char *request) {
 	}
 	else if (!strcmp(args[0], "question_submit") || 
 		     !strcmp(args[0], "qs")) {
-			if (num_tokens == 3 || num_tokens == 4) { 
+			if ((num_tokens == 3 && count_white_spaces(request) - 1 == 2) || (num_tokens == 4 && count_white_spaces(request) - 1 == 3)) { 
+				if (verify_question(args[1]) == FAILURE) {
+					return;
+				}
 				client_tcp_manager(user, "QUS", args, num_tokens);
+			}
+			else if ((num_tokens == 3 && count_white_spaces(request) - 1 != 2) || (num_tokens == 4 && count_white_spaces(request) - 1 != 3)) { 
+				printf("%s\n", REQUEST_IS_NOT_CORRECTLY_FORMULATED);
 			}
 			else {
 				fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
@@ -116,15 +223,21 @@ client_manager(user_t *user, char *request) {
 	}
 	else if (!strcmp(args[0], "answer_submit")   || 
 		     !strcmp(args[0], "as")) {
-			if (num_tokens == 2 || num_tokens == 3) {	
+			if (num_tokens == 2 && count_white_spaces(request) - 1 == 1 || num_tokens == 3 && count_white_spaces(request) - 1 == 2) {	
 				client_tcp_manager(user, "ANS", args, num_tokens);
+			}
+			else if (num_tokens == 2 && count_white_spaces(request) - 1 != 1 || num_tokens == 3 && count_white_spaces(request) - 1 != 2) {	
+				printf("%s\n", REQUEST_IS_NOT_CORRECTLY_FORMULATED);
 			}
 			else {
 				fprintf(stderr, "Invalid number of parameters: %d\n", num_tokens);
 			}
 	}
 	else if (!strcmp(args[0], "?")) {
-			if (num_tokens == 1) {
+			if (count_white_spaces(request) - 1 != 0) {
+				fprintf(stderr, "%s\n", REQUEST_IS_NOT_CORRECTLY_FORMULATED);
+			}
+			else if (num_tokens == 1) {
 				printf( "\tregister\t/reg\t<userId>\n" 
 						"\ttopic_list\t/tl\n"
 						"\ttopic_select\t\t<topic name>\n"
@@ -142,7 +255,10 @@ client_manager(user_t *user, char *request) {
 			}
 	}
 	else if (!strcmp(args[0], "exit")) {
-			if (num_tokens == 1) {
+			if (count_white_spaces(request) - 1 != 0) {
+				fprintf(stderr, "%s\n", REQUEST_IS_NOT_CORRECTLY_FORMULATED);
+			}
+			else if (num_tokens == 1) {
 				error_code = close(get_user_server_sock_udp(user));
 				if (error_code == -1) {
 					fprintf(stderr, "close failed: %s\n", strerror(errno));
