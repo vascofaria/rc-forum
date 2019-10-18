@@ -25,7 +25,7 @@
 #define MAX_QUESTIONS 99
 #define MAX_ANSWERS   10
 
-#define MAX_SIZE_STR   5
+#define MAX_SIZE_STR   7
 #define MAX_TXT_SIZE   256
 #define IMAGE_EXT_SIZE 3
 #define MAX_IMG_SIZE   5120

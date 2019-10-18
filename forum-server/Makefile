@@ -74,6 +74,8 @@ clean:
 	(rm -f entities/*.o)
 	(rm -f usecases/*.o)
 	(rm -f file-manager/*.o)
+	(rm -rf tmp/*)
+	(rm -rf topics/I*)
 	(rm -f tcp-manager/*.o)
 	(rm -f udp-manager/*.o)
 	(rm -f *.o)

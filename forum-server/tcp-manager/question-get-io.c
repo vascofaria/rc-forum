@@ -33,14 +33,10 @@ int parse_input_GQU(int socket_tcp, char *topic, char *question_title) {
 		return BAD_INPUT;
 	}
 
-	printf("%s\n", topic);
-
 	error_code = read_from_tcp_socket(socket_tcp, question_title, MAX_QUESTION_TITLE + 1, '\n');
 	if (error_code) {
 		return BAD_INPUT;
 	}
-
-	printf("%s\n", question_title);
 
 	return SUCCESS;
 }
@@ -83,7 +79,6 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 			return FAILURE;
 		}
 
-		printf("%s\n", question->image_ext);
 		error_code = write_to_tcp_socket(socket_tcp, question->image_ext, ' ');
 		if (error_code) {
 			return FAILURE;
@@ -205,7 +200,6 @@ int parse_output_QGR(int socket_tcp, question_t *question) {
 		return FAILURE;
 	}
 
-	// write response
 	return SUCCESS;
 }
 
@@ -213,8 +207,10 @@ void parse_output_ERROR_QGR(int socket_tcp, int error_code) {
 	/* check wich error and turn it into the respective protocol error */
 	if (error_code == BAD_INPUT || error_code == FAILURE) {
 		write_to_tcp_socket(socket_tcp, "QGR ERR\0", '\n');
+
 	} else if (error_code == TOPIC_DOESNT_EXIST) {
 		write_to_tcp_socket(socket_tcp, "QGR EOF\0", '\n');
+
 	} else if (error_code == QUESTION_DOESNT_EXIST) {
 		write_to_tcp_socket(socket_tcp, "QGR EOF\0", '\n');
 	}

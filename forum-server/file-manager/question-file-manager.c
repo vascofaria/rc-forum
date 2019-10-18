@@ -83,8 +83,6 @@ int get_question(char *topic_name, char *question_title, question_t **question) 
 
 		question_img_ext = get_file_ext(question_img);
 
-		printf("%s - %s\n", question_img_ext, question_image_path);
-
 		*question = new_question(question_title, question_user_id, get_file_size(question_data_path, "r"), question_data_path, get_file_size(question_image_path, "r"), question_img_ext, question_image_path, answers_list);
 		// frees
 		free(question_img_ext);

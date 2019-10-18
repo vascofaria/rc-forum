@@ -86,7 +86,6 @@ int post_topic(char *user_id, char *topic_name) {
 	FILE *fd;
 	strcat(user_id_path, p);
 	strcat(user_id_path, "/\0");
-	//strcat(user_id_path, topic_name);
 	strcat(user_id_path, "uid.txt\0");
 
 	if (topic_exists(p) == TOPIC_ALREADY_EXISTS)
@@ -100,7 +99,6 @@ int post_topic(char *user_id, char *topic_name) {
 	error_code = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if (error_code) {
 		fprintf(stderr, "ERROR: Unable to create directory: %s: %s, %d\n", p, strerror(errno), errno);
-		// exit(error_code);
 		return FAILURE;
 	}
 
@@ -114,7 +112,6 @@ int post_topic(char *user_id, char *topic_name) {
 	error_code = mkdir(p, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if (error_code) {
 		fprintf(stderr, "ERROR: Unable to create directory: %s: %s\n", p, strerror(errno));
-		// exit(error_code);
 		return FAILURE;
 	}
 	return SUCCESS;
