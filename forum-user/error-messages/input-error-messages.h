@@ -10,4 +10,7 @@
 #define BAD_NUMBER 			     			"Wrong number"
 #define REQUEST_IS_NOT_CORRECTLY_FORMULATED "Sorry, your request is not correctly formulated"
 
+#define SERVER_RESPONSE_ERROR "Bad server response!"
+#define SYSTEM_ERROR          "Internal system error, please try again"
+
 #endif
