@@ -102,6 +102,7 @@ int read_from_tcp_socket(int socket_tcp, char *buffer, int size, char final_char
 			return SUCCESS;
 		}
 	} else if (final_char == '\0') {
+		*buffer_ptr = '\0';
 		return SUCCESS;
 	}
 	return FAILURE;

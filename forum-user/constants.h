@@ -13,7 +13,7 @@
 #define TOPIC_TITLE_SIZE          10
 #define QUESTION_TITLE_SIZE       10
 #define USER_ID_SIZE              5
-#define FILE_SIZE_DIGITS          5
+#define FILE_SIZE_DIGITS          7
 #define EXTENSION_SIZE_DIGITS     3
 
 #endif
