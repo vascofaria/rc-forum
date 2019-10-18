@@ -54,6 +54,7 @@ question_t *new_question(char title[MAX_QUESTION_TITLE+1], char user_id[USER_ID_
 		for (; i < MAX_ANSWERS; i++) {
 			q->answers[i] = NULL;
 		}
+		free(answers);
 	} else {
 		for (i = 0; i < MAX_ANSWERS; i++) {
 			q->answers[i] = NULL;

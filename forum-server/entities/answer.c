@@ -61,5 +61,4 @@ void free_answer(answer_t *answer_ptr) {
 	}
 
 	free(answer_ptr);
-	answer_ptr = NULL;
 }

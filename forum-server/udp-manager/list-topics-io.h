@@ -15,6 +15,9 @@
 #define  __LIST_TOPICS_IO_H__
 
 int parse_input_LTP(char* request);
+
 char *parse_output_LTR(char **topics_list);
+
+char *parse_output_ERROR_LTR(int error_code);
 
 #endif

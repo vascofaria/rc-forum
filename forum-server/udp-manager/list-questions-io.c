@@ -66,3 +66,19 @@ char *parse_output_LQR(char* topic, char **questions_list) {
 
 	return response;
 }
+
+char *parse_output_ERROR_LQR(int error_code) {
+	
+	char* response = (char*) malloc(sizeof(char)*(MAX_STATUS_RESPONSE+1));
+
+	if (error_code == BAD_INPUT || error_code == FAILURE) {
+		strcpy(response, "ERR\n\0");
+
+	} else if (error_code == TOPIC_DOESNT_EXIST) {
+		strcpy(response, "ERR\n\0");
+
+	} else {
+		strcpy(response, "ERR\n\0");
+	}
+	return response;
+}

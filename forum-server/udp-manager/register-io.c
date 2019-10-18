@@ -55,3 +55,12 @@ char *parse_output_RGR() {
 	strcat(response, "\n\0");
 	return response;
 }
+
+char *parse_output_ERROR_RGR(int error_code) {
+	
+	char* response = (char*) malloc(sizeof(char)*(MAX_STATUS_RESPONSE+1));
+
+	strcpy(response, "RGR NOK\n\0");
+
+	return response;
+}

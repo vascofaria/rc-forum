@@ -54,3 +54,16 @@ char *parse_output_LTR(char **topics_list) {
 	
 	return response;
 }
+
+char *parse_output_ERROR_LTR(int error_code) {
+	
+	char* response = (char*) malloc(sizeof(char)*(MAX_STATUS_RESPONSE+1));
+
+	if (error_code == BAD_INPUT || error_code == FAILURE) {
+		strcpy(response, "ERR\n\0");
+
+	} else {
+		strcpy(response, "ERR\n\0");
+	}
+	return response;
+}

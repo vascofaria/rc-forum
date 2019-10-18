@@ -33,24 +33,9 @@
 static char *parse_output_ERROR(int error_code) {
 	
 	char* response = (char*) malloc(sizeof(char)*(MAX_STATUS_RESPONSE+1));
-	if (error_code == BAD_INPUT) {
-		strcpy(response, "BAD_INPUT\n\0");
 
-	} else if (error_code == TOPIC_DOESNT_EXIST) {
-		// TODO: change error msg
-		strcpy(response, "TOPIC_DOESNT_EXIST\n\0");
+	strcpy(response, "ERR\n\0");
 
-	} else if (error_code == TOPIC_ALREADY_EXISTS) {
-		strcpy(response, "PTR \0");
-		strcat(response, DUP);
-		strcat(response, "\n\0");
-	} else if (error_code == MAX_TOPICS_REACHED) {
-		strcpy(response, FUL);
-		strcpy(response, "\n\0");
-	} else {
-		strcpy(response, ERR);
-		strcpy(response, "\n\0");
-	}
 	return response;
 }
 
@@ -73,12 +58,12 @@ char *udp_manager(char *request) {
 
 		error_code = parse_input_REG(request, user_id);
 		if (error_code) {
-			return parse_output_ERROR(error_code);
+			return parse_output_ERROR_RGR(error_code);
 		}
 
 		error_code = register_user(user_id);
 		if (error_code) {
-			return parse_output_ERROR(error_code);
+			return parse_output_ERROR_RGR(error_code);
 		}
 
 		return parse_output_RGR();
@@ -87,12 +72,12 @@ char *udp_manager(char *request) {
 
 		error_code = parse_input_LTP(request);
 		if (error_code) {
-			return parse_output_ERROR(error_code);
+			return parse_output_ERROR_LTR(error_code);
 		}
 
 		error_code = topic_list(&topics_list);
 		if (error_code) {
-			return parse_output_ERROR(error_code);
+			return parse_output_ERROR_LTR(error_code);
 		}
 
 		return parse_output_LTR(topics_list);
@@ -101,12 +86,12 @@ char *udp_manager(char *request) {
 
 		error_code = parse_input_PTP(request, user_id, topic);
 		if (error_code) {
-			return parse_output_ERROR(error_code);
+			return parse_output_ERROR_PTR(error_code);
 		}
 
 		error_code = propose_topic(user_id, topic);
 		if (error_code) {
-			return parse_output_ERROR(error_code);
+			return parse_output_ERROR_PTR(error_code);
 		}
 
 		return parse_output_PTR();
@@ -115,12 +100,12 @@ char *udp_manager(char *request) {
 
 		error_code = parse_input_LQU(request, topic);
 		if (error_code) {
-			return parse_output_ERROR(error_code);
+			return parse_output_ERROR_LQR(error_code);
 		}
 
 		error_code = list_questions(topic, &questions_list);
 		if (error_code) {
-			return parse_output_ERROR(error_code);
+			return parse_output_ERROR_LQR(error_code);
 		}
 
 		return parse_output_LQR(topic, questions_list);

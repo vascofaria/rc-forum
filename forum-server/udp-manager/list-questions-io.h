@@ -18,4 +18,6 @@ int parse_input_LQU(char* request, char* topic);
 
 char *parse_output_LQR(char* topic, char **questions_list);
 
+char *parse_output_ERROR_LQR(int error_code);
+
 #endif

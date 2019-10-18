@@ -60,3 +60,22 @@ char *parse_output_PTR() {
 	strcat(response, "\n\0");
 	return response;
 }
+
+char *parse_output_ERROR_PTR(int error_code) {
+	
+	char* response = (char*) malloc(sizeof(char)*(MAX_STATUS_RESPONSE+1));
+	if (error_code == BAD_INPUT || error_code == FAILURE) {
+		strcpy(response, "PTR NOK\n\0");
+
+	} else if (error_code == TOPIC_ALREADY_EXISTS) {
+		strcpy(response, "PTR DUP\n\0");
+
+	} else if (error_code == MAX_TOPICS_REACHED) {
+		strcpy(response, "PTR FUL\n\0");
+
+	} else {
+		strcpy(response, ERR);
+		strcpy(response, "PTR NOK\n\0");
+	}
+	return response;
+}

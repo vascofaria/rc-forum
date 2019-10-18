@@ -146,13 +146,14 @@ void tcp_manager(int socket_tcp) {
 			printf("search_question Usecase successful\n\n");
 		}
 
-		error_code = parse_output_QGR(socket_tcp, question); // -> free_question
+		error_code = parse_output_QGR(socket_tcp, question);
 		if (error_code) {
 			printf("ERROR on QGR\n\n");
 			parse_output_ERROR_QGR(socket_tcp, error_code);
 		} else {
 			printf("QGR parse successful\n\n");
 		}
+		free(question);
 
 	} else if (!strcmp(protocol, QUS)) {
 

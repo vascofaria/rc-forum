@@ -18,4 +18,6 @@ int parse_input_REG(char* request, char* user_id);
 
 char *parse_output_RGR();
 
+char *parse_output_ERROR_RGR(int error_code);
+
 #endif
