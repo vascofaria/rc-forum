@@ -52,6 +52,9 @@ static int recv_GQU_request(user_t *user, char *question, int sock_tcp) {
 		return error_code;
 	}
 
+	if (strcmp(protocol, "QGR")) {
+		return BAD_INPUT;
+	}
 
 	error_code = read_from_tcp_socket(sock_tcp, q_user_id, USER_ID_SIZE + 1, ' ');
 	if (error_code) {
@@ -358,6 +361,10 @@ static int recv_QUS_request(int sock_tcp, user_t *user, char *status) {
 		return error_code;
 	}
 
+	if (strcmp(protocol, "QUR")) {
+		return BAD_INPUT;
+	}
+
 	error_code = read_from_tcp_socket(sock_tcp, status, STATUS_SIZE, '\n');
 	if (error_code) {
 		return error_code;
@@ -435,6 +442,10 @@ static int recv_ANS_request(int sock_tcp, user_t *user, char *status) {
 	error_code = read_from_tcp_socket(sock_tcp, protocol, PROTOCOL_SIZE + 1, ' ');
 	if (error_code) {
 		return error_code;
+	}
+
+	if (strcmp(protocol, "ANR")) {
+		return BAD_INPUT;
 	}
 
 	error_code = read_from_tcp_socket(sock_tcp, status, STATUS_SIZE + 1, '\n');

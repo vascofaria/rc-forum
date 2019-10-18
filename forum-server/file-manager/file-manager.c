@@ -74,6 +74,11 @@ int move_file(char *old_path, char *new_path) {
 
 	close(new_fd);
 	close(old_fd);
+
+	n = remove(old_path);
+	if (n) {
+		return FAILURE;
+	}
 	return SUCCESS;
 }
 

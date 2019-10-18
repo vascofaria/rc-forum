@@ -138,6 +138,7 @@ client_manager(user_t *user, char *request) {
 					topic = get_topic_from_topiclist(user, atoi(args[1]));
 					if (topic) {
 						set_user_topic(user, get_topic_name(topic));
+						printf("Topic %s selected!\n", get_topic_name(topic));
 					}
 				}
 				else {

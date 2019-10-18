@@ -1,1 +1,0 @@
-http://tejo.ist.utl.pt:58000/index.html?IP=194.210.156.246&PORT=58001&SCRIPT=1

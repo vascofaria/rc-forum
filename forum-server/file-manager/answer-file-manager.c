@@ -35,6 +35,12 @@ int answer_exists(char *answer_path) {
 	return ANSWER_DOESNT_EXIST;
 }
 
+int compar(const void *a, const void *b) {
+	answer_t **aptr = (answer_t**) a;
+	answer_t **bptr = (answer_t**) b;
+	return atoi((*aptr)->number) - atoi((*bptr)->number);
+}
+
 int get_answers(char *topic_name, char *question_name, answer_t ***answers_list) {
 
 	int  i, answers_number = 0, total_answers = 0;
@@ -116,6 +122,10 @@ int get_answers(char *topic_name, char *question_name, answer_t ***answers_list)
 			}
 		}
 		// closedir(d);
+	}
+
+	if (i>1) {
+		qsort((void*) ans_list, i, sizeof(answer_t*), compar);
 	}
 
 	*answers_list = ans_list;

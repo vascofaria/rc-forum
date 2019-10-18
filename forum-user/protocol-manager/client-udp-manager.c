@@ -483,7 +483,7 @@ client_udp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_
 					error_code = parse_output_LQU(response, user);
 					if (error_code == SUCCESS) {
 						for (i = 0; i < user->questions->size; i++) {
-							printf("Question %2d: %-10s by user: %s width %d answers\n", 
+							printf("Question %2d: %-10s by user: %s with %d answers\n", 
 								i + 1,
 								((question_t*) vector_at(user->questions, i))->question_name, 
 								((question_t*) vector_at(user->questions, i))->question_user,
