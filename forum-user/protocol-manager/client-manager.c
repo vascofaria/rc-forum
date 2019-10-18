@@ -86,6 +86,19 @@ client_manager(user_t *user, char *request) {
 	else if (!strcmp(args[0], "question_get")    || 
 		     !strcmp(args[0], "qg")) {
 			if (num_tokens == 2) {
+				if (!strcmp(args[0], "qg")) {
+					printf("aaa\n");
+					if (get_user_questions(user)->size > 0) {
+						question = get_question_from_questionlist(user, atoi(args[1]));
+						if (question) {
+							strcpy(args[1], get_question_name(question));
+							printf("%s\n", args[1]);
+						}
+					}
+					else {
+						printf("Question list not available\n");
+					}	
+				}
 				client_tcp_manager(user, "GQU", args, num_tokens);
 			}
 			else {
@@ -94,7 +107,7 @@ client_manager(user_t *user, char *request) {
 	}
 	else if (!strcmp(args[0], "question_submit") || 
 		     !strcmp(args[0], "qs")) {
-			if (num_tokens == 3 || num_tokens == 4) {
+			if (num_tokens == 3 || num_tokens == 4) { 
 				client_tcp_manager(user, "QUS", args, num_tokens);
 			}
 			else {
