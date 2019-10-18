@@ -223,23 +223,25 @@ static void send_QUS_request(int sock_tcp, char *protocol, char* user_id, char *
 static int recv_QUS_request(int sock_tcp, user_t *user, char *status) {
 	int  error_code;
 	char protocol[PROTOCOL_SIZE + 1];
-
 	error_code = read_from_tcp_socket(sock_tcp, protocol, PROTOCOL_SIZE + 1, ' ');
 	if (error_code) {
+		printf("Erro1\n");
 		return FAILURE;
 	}
-	error_code = read_from_tcp_socket(sock_tcp, protocol, STATUS_SIZE   + 1, ' ');
+	error_code = read_from_tcp_socket(sock_tcp, status, STATUS_SIZE, '\n');
 	if (error_code) {
-		return FAILURE;
-	}
-	error_code = read_from_tcp_socket(sock_tcp, NULL, 0, '\n');
-	if (error_code) {
+		printf("%s\n", status);
+		printf("Erro2\n");
 		return FAILURE;
 	}
 	return SUCCESS;
 }
 
 static void send_ANS_request(int sock_tcp, char *protocol, char* user_id, char *topic, char *question, char *asize, char *apath, char *aimg, char *iext, char *isize, char *ipath) {
+	printf("aaa\n");
+	printf("%s\n", question);
+	printf("%s\n", apath);
+	printf("%s\n", ipath);
 	write_to_tcp_socket(sock_tcp, protocol, ' ');
 	write_to_tcp_socket(sock_tcp, user_id, ' ');
 	write_to_tcp_socket(sock_tcp, topic, ' ');
@@ -265,11 +267,7 @@ static int recv_ANS_request(int sock_tcp, user_t *user, char *status) {
 	if (error_code) {
 		return FAILURE;
 	}
-	error_code = read_from_tcp_socket(sock_tcp, protocol, STATUS_SIZE   + 1, ' ');
-	if (error_code) {
-		return FAILURE;
-	}
-	error_code = read_from_tcp_socket(sock_tcp, NULL, 0, '\n');
+	error_code = read_from_tcp_socket(sock_tcp, status, STATUS_SIZE + 1, '\n');
 	if (error_code) {
 		return FAILURE;
 	}
@@ -278,8 +276,14 @@ static int recv_ANS_request(int sock_tcp, user_t *user, char *status) {
 
 void client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_ARGS_L], int num_args) {
 	int   error_code, server_sock_tcp;
-	char *request, *size, *data, *img, *iext, *isize, *idata, status[STATUS_SIZE];;
+	char *request, *size, *data, *img, *iext, *isize, *idata, *status;
 	
+	status = (char *) malloc (sizeof(char) * (STATUS_SIZE + 1));
+
+	if (status == NULL) {
+		return;
+	}
+
 	/* Socket TCP creation */
 	server_sock_tcp = socket(get_user_tcp_addrinfo(user)->ai_family, get_user_tcp_addrinfo(user)->ai_socktype, get_user_tcp_addrinfo(user)->ai_protocol);
 
@@ -314,39 +318,12 @@ void client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_
 				if (size) {
 					if (num_args == 3) {
 						send_QUS_request(server_sock_tcp, protocol, get_user_id(user), get_user_topic(user), args[1], size, args[2], "0", "", "", "");
-						error_code = recv_QUS_request(server_sock_tcp, user, status);
-						if (error_code == SUCCESS) {
-							if (!strcmp(status, "OK")) {
-								printf("%s\n", QUESTION_SUBMITION_SUCCEDED);
-							}
-							else if (!strcmp(status, "DUP")) {
-								printf("%s\n", QUESTION_LIST_IS_FULL);
-							}
-							else if (!strcmp(status, "FUL")) {
-								printf("%s\n", ANSWER_LIST_IS_FULL);
-							}
-							else {
-								printf("%s\n", ANSWER_SUBMITION_FAILED);
-							}
-						}
 					}
 					else {
 						isize = get_file_size(args[3], "r");
 						iext  = get_file_ext(args[3]);
 						if (isize && iext) {
 							send_QUS_request(server_sock_tcp, protocol, get_user_id(user), get_user_topic(user), args[1], size, args[2], "1", iext, isize, args[3]);
-							error_code = recv_ANS_request(server_sock_tcp, user, status);
-							if (error_code == SUCCESS) {
-								if (!strcmp(status, "OK")) {
-									printf("%s\n", ANSWER_SUBMITION_SUCCEDED);
-								}
-								else if (!strcmp(status, "FUL")) {
-									printf("%s\n", ANSWER_LIST_IS_FULL);
-								}
-								else {
-									printf("%s\n", ANSWER_SUBMITION_FAILED);
-								}
-							}
 						}
 						if (iext) {
 							free(iext);
@@ -358,6 +335,23 @@ void client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_
 							isize = NULL;
 						}
 					}
+
+					error_code = recv_QUS_request(server_sock_tcp, user, status);
+					if (error_code == SUCCESS) {
+						if (!strcmp(status, "OK")) {
+								printf("%s\n", QUESTION_SUBMITION_SUCCEDED);
+						}
+						else if (!strcmp(status, "DUP")) {
+								printf("%s\n", QUESTION_ALREADY_EXISTS);
+						}
+						else if (!strcmp(status, "FUL")) {
+								printf("%s\n", QUESTION_LIST_IS_FULL);
+						}
+						else {
+							printf("%s\n", QUESTION_SUBMITION_FAILED);
+						}
+					}
+
 					if (size) {
 						free(size);
 						size = NULL;
@@ -383,11 +377,13 @@ void client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_
 							send_ANS_request(server_sock_tcp, protocol, get_user_id(user), get_user_topic(user), get_user_question(user), size, args[1], "0", "", "", "");
 						}
 						else {
-							isize = get_file_size(args[3], "r");
-							iext  = get_file_ext(args[3]);
-							if (isize && idata) {
-								send_ANS_request(server_sock_tcp, protocol, get_user_id(user), get_user_topic(user), get_user_question(user), size, args[2], "1", iext, isize, idata);
+							isize = get_file_size(args[2], "r");
+							iext  = get_file_ext(args[2]);
+
+							if (isize && iext) {
+								send_ANS_request(server_sock_tcp, protocol, get_user_id(user), get_user_topic(user), get_user_question(user), size, args[1], "1", iext, isize, args[2]);
 							}
+
 							if (iext) {
 								free(iext);
 								iext = NULL;
@@ -396,6 +392,19 @@ void client_tcp_manager(user_t *user, char* protocol, char args[MAX_ARGS_N][MAX_
 							if (isize) {
 								free(isize);
 								isize = NULL;
+							}
+						}
+
+						error_code = recv_ANS_request(server_sock_tcp, user, status);
+						if (error_code == SUCCESS) {
+							if (!strcmp(status, "OK")) {
+								printf("%s\n", ANSWER_SUBMITION_SUCCEDED);
+							}
+							else if (!strcmp(status, "FUL")) {
+								printf("%s\n", ANSWER_LIST_IS_FULL);
+							}
+							else {
+								printf("%s\n", ANSWER_SUBMITION_FAILED);
 							}
 						}
 
